@@ -1,4 +1,4 @@
-# Field Constellation 03 · The Living Architecture
+# Field Constellation 04 · Guided Trails
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
@@ -6,7 +6,7 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
-This is an incremental Edition 03 milestone. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
+Edition 04 adds curated, visitor-friendly discovery paths to Edition 03’s source-backed architecture. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
 ## Explore the Living Architecture
 
@@ -23,6 +23,12 @@ Select a project to emphasize its direct neighbors and dim unrelated nodes. **Fi
 The first ledger contains **eight sourced connections across nine public projects**: five source facts and three documented contracts. This is a bounded review, not an exhaustive dependency audit of 177 repositories. The two React manifests in the shared-library relationship use different major versions; compatibility is not implied.
 
 Drag to orbit, scroll/pinch to zoom, and right-drag or Shift-drag to pan. `/` focuses search; `Esc` clears selection/search; arrow keys rotate a focused map and visit projects elsewhere. Use the directory for a full keyboard-accessible list. Reduced-motion preferences are respected.
+
+## Guided Trails · Edition 04
+
+Open **Guided trails** in the map header to follow a five-stop introduction through the public Field. Three routes introduce the Atlas and observatory, making tools and studios, and research and trust projects. Each stop focuses the existing 3D map and inspector; use **Previous**, **Next world**, or **Exit** to navigate. Selecting an unrelated project, clearing the selection, or resetting filters exits the trail without interfering with ordinary search and exploration.
+
+**These routes are editorial introductions, not evidence-backed dependency graphs.** They do not add edges to the Relationships ledger or imply operational integrations. Stops resolve against the validated public inventory; missing or private projects are skipped, and routes with fewer than three public stops do not appear. The application performs no private API lookups and needs no new dependencies. See `src/trails.js` and `tests/trails.test.mjs`.
 
 ## Accurate counts and live destinations
 
