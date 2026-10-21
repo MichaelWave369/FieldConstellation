@@ -8,6 +8,7 @@ import {resolveRelationships,relationshipEdges,neighborhood,relatedProjects,RELA
 import {destinationStatus} from './destinations.js';
 import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.js';
 import {availableTrails} from './trails.js';
+import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
 
 const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
@@ -41,11 +42,14 @@ async function boot(){
     state.atlas=extras[2].status==='fulfilled'?extras[2].value:null;
     bindUI();renderTrails();updateInventoryUI();applyFilters();updateRelationshipUI();
     try{initScene();sceneReady=true;buildField();animate(0);}catch(error){console.error('3D initialization failed',error);$('map').classList.add('webgl-unavailable');$('orbitToggle').disabled=true;$('loading').hidden=true;toast('3D is unavailable here. Every public repo is still in the directory.');}
-    const linked=readProjectLink(location.href,state.repos);
+    const sharedTrail=readTrailLink(location.href,state.repos);
+    if(sharedTrail){state.trail=sharedTrail.trail;state.trailStop=sharedTrail.index;}
+    const linked=sharedTrail?.repo||readProjectLink(location.href,state.repos);
     if(linked)selectRepo(linked.id,true,false);
     else{
       const spotlight=state.repos.find(r=>r.name==='SuperPhiVessel')||state.repos[0];if(spotlight)showInspector(spotlight,true);
-      if(new URL(location.href).searchParams.has('repo'))toast('This shared project is not in the current public inventory.');
+      if(new URL(location.href).searchParams.has('trail'))toast('This shared journey is no longer available in the current public inventory.');
+      else if(new URL(location.href).searchParams.has('repo'))toast('This shared project is not in the current public inventory.');
       if(innerWidth<761)$('inspector').hidden=true;
     }
     setCameraOffset();$('loading').hidden=true;
@@ -75,6 +79,7 @@ function bindUI(){
   $('trailPrev').onclick=()=>moveTrail(-1);
   $('trailNext').onclick=()=>moveTrail(1);
   $('trailExit').onclick=stopTrail;
+  $('trailShare').onclick=copyTrailLink;
   $('directorySort').onchange=renderDirectory;
   $('aboutButton').onclick=()=>$('aboutDialog').showModal();
   document.querySelectorAll('[data-close-dialog]').forEach(button=>button.onclick=()=>button.closest('dialog').close());
@@ -83,7 +88,13 @@ function bindUI(){
   $('architectureToggle').onclick=()=>setArchitecture(!state.architecture);
   $('fitConnections').onclick=fitConnections;
   $('includeThematic').onchange=event=>{state.includeThematic=event.target.checked;if(sceneReady)buildEdges();else edges=relationshipEdges(state.repos,state.relationships,state.includeThematic);refreshNeighborhood();updateRelationshipUI();if(state.selected)showInspector(state.repos.find(r=>r.id===state.selected),false);};
-  window.addEventListener('popstate',()=>{const repo=readProjectLink(location.href,state.repos);if(repo){resetFilters();selectRepo(repo.id,true,false);}else clearSelection();});
+  window.addEventListener('popstate',()=>{
+    const shared=readTrailLink(location.href,state.repos);
+    const repo=shared?.repo||readProjectLink(location.href,state.repos);
+    resetFilters();
+    if(shared){state.trail=shared.trail;state.trailStop=shared.index;}
+    if(repo)selectRepo(repo.id,true,false);
+  });
   $('mobileMenu').onclick=()=>setSidebar(!$('sidebar').classList.contains('open'));
   $('closeMobileMenu').onclick=()=>setSidebar(false);
   $('map').addEventListener('pointerdown',event=>{if(!event.target.closest('#mobileMenu'))setSidebar(false);});
@@ -249,8 +260,8 @@ function fitMatches(){if(!camera||!state.visible.size)return;setOrbit(false);con
 function flyTo(to,toTarget){if(!camera)return;if(reducedMotion){camera.position.copy(to);controls.target.copy(toTarget);controls.update();return;}flight={from:camera.position.clone(),to,fromTarget:controls.target.clone(),toTarget,start:performance.now()};}
 function zoom(factor){if(!camera)return;setOrbit(false);const offset=camera.position.clone().sub(controls.target),distance=THREE.MathUtils.clamp(offset.length()*factor,controls.minDistance,controls.maxDistance);flyTo(controls.target.clone().add(offset.normalize().multiplyScalar(distance)),controls.target.clone());}
 function pickRepo(event){if(!camera)return null;const rect=$('scene').getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;let best=null,distance=14;for(let i=0;i<state.repos.length;i++){const repo=state.repos[i];if(!state.visible.has(repo.id))continue;tempProjection.copy(positions[i]).project(camera);if(tempProjection.z>1||tempProjection.z<-1)continue;const px=(tempProjection.x*.5+.5)*rect.width,py=(-tempProjection.y*.5+.5)*rect.height,d=Math.hypot(x-px,y-py);if(d<distance){distance=d;best=repo;}}return best;}
-function selectRepo(id,focus=true,closeMenu=true){const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',projectLink(location.href,repo));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
-function clearSelection(){stopTrail();state.selected=null;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',projectLink(location.href,null));}catch{}$('inspector').hidden=true;setCameraOffset();if(sceneReady)updateAppearance();renderSidebarIndex();}
+function selectRepo(id,focus=true,closeMenu=true){const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',state.trail?trailLink(location.href,state.trail,state.trailStop):withoutTrail(projectLink(location.href,repo)));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
+function clearSelection(){stopTrail();state.selected=null;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',withoutTrail(projectLink(location.href,null)));}catch{}$('inspector').hidden=true;setCameraOffset();if(sceneReady)updateAppearance();renderSidebarIndex();}
 
 /**
  * Curated trails are visitor tours only. They are deliberately independent of
@@ -267,6 +278,7 @@ function startTrail(id){
   $('trailsDialog').close();
   resetFilters();
   state.trail=trail;state.trailStop=0;
+  try{history.pushState(null,'',trailLink(location.href,trail,0));}catch{}
   selectRepo(trail.stops[0].id,true);
   updateTrailHud();
 }
@@ -274,6 +286,7 @@ function moveTrail(offset){
   if(!state.trail)return;
   const next=state.trailStop+offset;
   if(next<0||next>=state.trail.stops.length)return;
+  try{history.pushState(null,'',trailLink(location.href,state.trail,next));}catch{}
   state.trailStop=next;
   selectRepo(state.trail.stops[next].id,true);
 }
@@ -281,6 +294,21 @@ function stopTrail(){
   state.trail=null;state.trailStop=0;
   document.body.classList.remove('trail-on');
   $('trailHud').hidden=true;
+  $('trailShareFallback').hidden=true;
+  try{
+    const url=new URL(location.href);
+    if(url.searchParams.has('trail')||url.searchParams.has('stop'))history.replaceState(null,'',withoutTrail(location.href));
+  }catch{}
+}
+async function copyTrailLink(){
+  if(!state.trail)return;
+  const href=trailLink(location.href,state.trail,state.trailStop);
+  try{await navigator.clipboard.writeText(href);toast('Journey stop link copied.');}
+  catch{
+    const fallback=$('trailShareFallback');
+    fallback.value=href;fallback.hidden=false;fallback.focus();fallback.select();
+    toast('Copy the selected journey link.');
+  }
 }
 function updateTrailHud(){
   const trail=state.trail;
@@ -291,6 +319,7 @@ function updateTrailHud(){
   $('trailTitle').textContent=trail.title;
   $('trailProgress').textContent=`${state.trailStop+1} of ${trail.stops.length}`;
   $('trailStopName').textContent=stop.name;
+  $('trailShareFallback').hidden=true;
   $('trailPrev').disabled=state.trailStop===0;
   $('trailNext').disabled=state.trailStop===trail.stops.length-1;
 }
@@ -334,7 +363,7 @@ async function refreshPublic(){
     next=parseSnapshot({...state.snapshot,repos,fetchedAt:new Date().toISOString(),scope:'public',complete:true,source:'Fully paginated anonymous public GitHub REST repository listing'});
   }catch(error){toast(`${error.message} Your displayed inventory is preserved.`);button.disabled=false;button.classList.remove('refreshing');updateInventoryUI();return;}
   state.snapshot=next;state.repos=prepareRepos(next.repos);state.publicUpdated=next.fetchedAt;state.activityNow=Date.now();
-  if(state.trail){const latest=availableTrails(state.repos).find(t=>t.id===state.trail.id),index=latest?.stops.findIndex(r=>r.id===state.selected)??-1;if(!latest||index<0)stopTrail();else{state.trail=latest;state.trailStop=index;updateTrailHud();}}
+  if(state.trail){const latest=availableTrails(state.repos).find(t=>t.id===state.trail.id),index=latest?.stops.findIndex(r=>r.id===state.selected)??-1;if(!latest||index<0)stopTrail();else{state.trail=latest;state.trailStop=index;updateTrailHud();try{history.replaceState(null,'',trailLink(location.href,latest,index));}catch{}}}
   renderTrails();
   try{localStorage.setItem(CACHE_KEY,JSON.stringify(next));}catch{}
   state.relationships=state.relationshipLedger?resolveRelationships(state.repos,state.relationshipLedger):[];

@@ -1,5 +1,15 @@
 # Changelog
 
+## Edition 05 · Shareable Journeys — PR milestone
+
+- Restore guided trails from validated `?trail=<id>&stop=<n>` public-only permalinks, optionally paired with the matching stable repository ID.
+- Add a Copy stop link action and text selection fallback for restricted clipboard permissions.
+- Push browser history when navigating tour stops, and restore the correct trail on Back/Forward.
+- Strip tour-specific query parameters on exit or unrelated project selection without breaking ordinary project links.
+- Reject stale, duplicated, inconsistent, missing/private and out-of-range link claims; add deterministic round-trip and privacy tests.
+- Keep curated tours editorial and independent of the evidence-backed Relationships layer.
+
+
 ## Edition 04 · Guided Trails — PR milestone
 
 - Add three curated routes across the public Field: First Light, The Makers’ Workshop, and Research & Receipts.

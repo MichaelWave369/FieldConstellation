@@ -127,3 +127,9 @@ body.lattice-theme{--bg:#0d0f12;--panel:#191815;--panel2:#242017;--accent:#e0b15
   .trail-controls button{min-height:38px}
   .header-actions #trailsButton{padding:7px;min-height:34px}
 }
+
+/* Edition 05: keep the clipboard fallback discoverable when clipboard access is denied. */
+.trail-hud #trailShareFallback{display:block;margin:11px 0 0;font-size:9px;min-height:32px}
+.trail-hud #trailShareFallback[hidden]{display:none}
+.trail-controls #trailShare{background:#2b3c2d;border-color:#638663}
+@media(max-width:760px){.trail-controls{gap:5px}.trail-controls button{font-size:9px;padding:8px 7px}}

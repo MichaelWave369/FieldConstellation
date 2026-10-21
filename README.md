@@ -1,4 +1,4 @@
-# Field Constellation 04 · Guided Trails
+# Field Constellation 05 · Shareable Journeys
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
@@ -6,7 +6,7 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
-Edition 04 adds curated, visitor-friendly discovery paths to Edition 03’s source-backed architecture. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
+Edition 05 adds safe, shareable links and browser history to Edition 04’s curated discovery paths. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
 ## Explore the Living Architecture
 
@@ -29,6 +29,12 @@ Drag to orbit, scroll/pinch to zoom, and right-drag or Shift-drag to pan. `/` fo
 Open **Guided trails** in the map header to follow a five-stop introduction through the public Field. Three routes introduce the Atlas and observatory, making tools and studios, and research and trust projects. Each stop focuses the existing 3D map and inspector; use **Previous**, **Next world**, or **Exit** to navigate. Selecting an unrelated project, clearing the selection, or resetting filters exits the trail without interfering with ordinary search and exploration.
 
 **These routes are editorial introductions, not evidence-backed dependency graphs.** They do not add edges to the Relationships ledger or imply operational integrations. Stops resolve against the validated public inventory; missing or private projects are skipped, and routes with fewer than three public stops do not appear. The application performs no private API lookups and needs no new dependencies. See `src/trails.js` and `tests/trails.test.mjs`.
+
+## Shareable Journeys · Edition 05
+
+A guided trail now has a **Copy stop link** action. Its URL records the reviewed trail ID, a 1-based stop index and the same stable public GitHub repository ID used by the regular inspector. For example, `?trail=first-light&stop=1&repo=github:<id>` (replace `<id>` with the actual numeric public repository ID). A visitor opening that link starts at the intended point of the tour, with the map and inspector focused as usual. Next/Previous stops add browser history entries; Back/Forward restores the stop. Exiting the journey strips tour parameters while retaining the selected ordinary repository link.
+
+Shared journeys are validated against the **current complete public snapshot**. Unknown trails, duplicate/inconsistent parameters, missing or private repositories and out-of-range stops are not restored. Routes are still editorial introductions and are never promoted into technical dependency evidence. No private lookups, runtime dependency, cookie tracking or backend were added. A select-and-copy fallback is available if the browser denies clipboard permission.
 
 ## Accurate counts and live destinations
 
