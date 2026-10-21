@@ -133,3 +133,35 @@ body.lattice-theme{--bg:#0d0f12;--panel:#191815;--panel2:#242017;--accent:#e0b15
 .trail-hud #trailShareFallback[hidden]{display:none}
 .trail-controls #trailShare{background:#2b3c2d;border-color:#638663}
 @media(max-width:760px){.trail-controls{gap:5px}.trail-controls button{font-size:9px;padding:8px 7px}}
+
+
+/* Edition 06: Field Passport is local-only and uses the existing public directory. */
+.passport-count{font-size:9px;font-variant-numeric:tabular-nums;min-width:16px;text-align:center;border:1px solid #596c4c;border-radius:30px;padding:1px 4px;color:var(--accent)}
+.passport-dialog{width:670px;max-width:calc(100% - 24px)}
+.passport-description{font-size:11px;line-height:1.7;color:var(--muted);margin:0 0 12px}
+.passport-summary{font-size:10px;color:var(--accent);margin:0 0 15px}
+.passport-actions{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 20px}
+.passport-actions button,.passport-clear{min-height:36px;border:1px solid #556b4b;border-radius:4px;background:#273424;color:var(--text);padding:8px 11px;font-size:10px}
+.passport-actions button:hover:not(:disabled),.passport-clear:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.passport-actions button:disabled,.passport-clear:disabled{opacity:.4;cursor:default}
+.passport-section{margin:15px 0 0;border-top:1px solid var(--line);padding-top:13px}
+.passport-section-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.passport-section-heading h3{margin:0;font-size:13px;font-weight:500}
+.passport-clear{background:transparent;border-color:#444f3c;font-size:9px;min-height:30px}
+.passport-list{max-height:24dvh;overflow-y:auto;scrollbar-color:#556b4b transparent}
+.passport-row{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;border:0;border-bottom:1px solid #343f31;background:transparent;color:var(--text);text-align:left;padding:8px 5px}
+.passport-row:hover,.passport-row:focus-visible{background:#2b3927}
+.passport-mark{color:var(--accent);font-size:21px}
+.passport-row-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.passport-row-copy strong{font-size:11px;font-weight:550;overflow-wrap:anywhere}
+.passport-row-copy small{font-size:9px;color:var(--muted)}
+.passport-empty{color:var(--muted);font-size:10px;line-height:1.7}
+.lattice-theme .passport-row:hover{background:#29271f}
+.lattice-theme .passport-actions button{background:#29251e;border-color:#736347}
+@media(max-width:760px){
+ .header-actions #passportButton{padding:7px;min-height:34px;gap:3px}
+ .passport-dialog{padding:17px;max-height:90dvh}
+ .passport-section{margin-top:10px;padding-top:10px}
+ .passport-list{max-height:20dvh}
+ .passport-actions button{flex:1;min-width:115px}
+}
