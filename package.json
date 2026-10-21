@@ -1,0 +1,21 @@
+{
+  "name": "field-constellation",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "An interactive 3D atlas of MichaelWave369\u2019s public GitHub repositories.",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "refresh": "node scripts/refresh-public.mjs",
+    "preview": "node scripts/serve.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  }
+}
