@@ -1,5 +1,14 @@
 # Changelog
 
+## Edition 04 · Guided Trails — PR milestone
+
+- Add three curated routes across the public Field: First Light, The Makers’ Workshop, and Research & Receipts.
+- Provide a keyboard-accessible trail chooser and compact previous/next/exit controls that focus each public stop in the existing map and inspector.
+- Resolve stops only against the validated public snapshot; missing or private items are skipped, and unusable routes are hidden.
+- Explicitly label routes as editorial, independent of evidence-backed relationships; retain the five layouts, themes, rendering fallbacks, Atlas bridge, and deployment gates.
+- Add deterministic public-scope tests for trail curation without fetching private repository data or introducing dependencies.
+
+
 ## Edition 03 · The Living Architecture — PR milestone
 
 - Add optional Relationships across all five existing layouts, direct-neighbor emphasis, fit-connections and per-project evidence cards.
