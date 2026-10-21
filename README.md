@@ -1,4 +1,4 @@
-# Field Constellation 05 · Shareable Journeys
+# Field Constellation 06 · Field Passport
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
@@ -6,7 +6,7 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
-Edition 05 adds safe, shareable links and browser history to Edition 04’s curated discovery paths. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
+Edition 06 introduces the local-first Field Passport on top of shareable journeys and Edition 03's evidence-backed architecture. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
 ## Explore the Living Architecture
 
@@ -35,6 +35,16 @@ Open **Guided trails** in the map header to follow a five-stop introduction thro
 A guided trail now has a **Copy stop link** action. Its URL records the reviewed trail ID, a 1-based stop index and the same stable public GitHub repository ID used by the regular inspector. For example, `?trail=first-light&stop=1&repo=github:<id>` (replace `<id>` with the actual numeric public repository ID). A visitor opening that link starts at the intended point of the tour, with the map and inspector focused as usual. Next/Previous stops add browser history entries; Back/Forward restores the stop. Exiting the journey strips tour parameters while retaining the selected ordinary repository link.
 
 Shared journeys are validated against the **current complete public snapshot**. Unknown trails, duplicate/inconsistent parameters, missing or private repositories and out-of-range stops are not restored. Routes are still editorial introductions and are never promoted into technical dependency evidence. No private lookups, runtime dependency, cookie tracking or backend were added. A select-and-copy fallback is available if the browser denies clipboard permission.
+
+## Field Passport · Edition 06
+
+Open **Passport** in the map header to see saved and recently explored public projects. Use **Save to Passport** in any project inspector to toggle a favorite. Selecting a saved or recent project uses the existing map and inspector.
+
+Passport data lives **only in your browser's localStorage** under a dedicated versioned key. It stores `github:<numeric-id>` values, not project descriptions, links, private inventory, or user details. Recent history contains at most 20 unique public IDs. Favorites are bounded to 200 entries. Refreshing the public inventory removes saved IDs that are no longer part of the validated public dataset; nothing attempts to fetch private repositories.
+
+**Export favorites JSON** creates a small local file containing only favorite IDs. **Import favorites JSON** merges known public favorites with current saves, skipping unknown or now-private IDs. It never imports/export recent history, never sends data to a server, and requires no account. Browser local-storage restrictions may cause bookmarks not to persist after refresh; the UI warns users when a write fails. Clear commands require confirmation.
+
+This feature does not sync between devices or with Field Atlas, and it does not imply a dependency between saved projects. Existing repository links, tours and evidence remain separate.
 
 ## Accurate counts and live destinations
 
