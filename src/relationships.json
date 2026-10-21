@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "owner": "MichaelWave369",
+  "reviewedAt": "2026-10-21T21:59:23.337460+00:00",
+  "coverage": "A bounded review of public creative, navigation and runtime contracts. Absence of an edge means not recorded, not no relationship.",
+  "relationships": [
+    {
+      "id": "domistika-auralith",
+      "from": "github:1314480408",
+      "to": "github:1224942971",
+      "status": "verified",
+      "kind": "code-bridge",
+      "direction": "directed",
+      "summary": "Domistika writes Creative Bridge v2 artwork; Auralith mounts a receiver for the same browser-local bridge.",
+      "scope": "Source inspection confirms sender/receiver code and the shared bridge key. Transfer integrity, user approval and matching deployed versions still govern actual imports. This is not an npm dependency or a reproduced runtime session.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/Domistika/blob/98682ac403ebc56cf393f85137dc3b68b19dc980/src/v093/auralithBridge.js#L8-L30",
+          "claim": "The sender targets the public Auralith app and writes the v2 bridge key."
+        },
+        {
+          "url": "https://github.com/MichaelWave369/Auralith369/blob/e21a0eb85172daf1ae02b0bb1913973e85963617/src/DomistikaBridgeReceiver.jsx#L1-L20",
+          "claim": "The receiver reads the same v2 bridge key and validates the protocol."
+        },
+        {
+          "url": "https://github.com/MichaelWave369/Auralith369/blob/e21a0eb85172daf1ae02b0bb1913973e85963617/src/App.jsx#L1-L19",
+          "claim": "The application imports and mounts DomistikaBridgeReceiver."
+        }
+      ],
+      "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
+    },
+    {
+      "id": "silicon-domistika",
+      "from": "github:1410755196",
+      "to": "github:1314480408",
+      "status": "verified",
+      "kind": "code-bridge",
+      "direction": "directed",
+      "summary": "Silicon Louvre and Domistika implement a matching, short-lived SVG handoff.",
+      "scope": "Source inspection confirms matching key, schema and target. Same-origin conditions and explicit visitor approval apply. No artwork is transferred by this map and no end-to-end run is claimed.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/SiliconLouvre/blob/73e1336525ca53846961acb5477e749be425e864/src/lib/domistikaBridge.js#L1-L15",
+          "claim": "The sender declares the Domistika destination, schema, key and same-origin guard."
+        },
+        {
+          "url": "https://github.com/MichaelWave369/Domistika/blob/98682ac403ebc56cf393f85137dc3b68b19dc980/src/v0943/siliconLouvreBridge.js#L1-L21",
+          "claim": "The receiver declares the matching schema/key and validates the handoff."
+        }
+      ],
+      "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
+    },
+    {
+      "id": "atlas-future-archive",
+      "from": "github:1411237134",
+      "to": "github:1422794573",
+      "status": "verified",
+      "kind": "navigation",
+      "direction": "directed",
+      "summary": "The Atlas provides a permanent link to the independent Future Archive gallery.",
+      "scope": "Verified source-level navigation link. The gallery remains independently hosted; no shared runtime or copied artwork is implied.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/FieldAtlas/blob/b07cfde3ecb2429611bea1598d3f332490e5523c/src/future-archive.js#L1-L8",
+          "claim": "Defines the public gallery destination."
+        },
+        {
+          "url": "https://github.com/MichaelWave369/FieldAtlas/blob/b07cfde3ecb2429611bea1598d3f332490e5523c/src/main.jsx#L507-L513",
+          "claim": "Renders the permanent Future Archive navigation link."
+        }
+      ],
+      "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
+    },
+    {
+      "id": "future-archive-atlas",
+      "from": "github:1422794573",
+      "to": "github:1411237134",
+      "status": "verified",
+      "kind": "navigation",
+      "direction": "directed",
+      "summary": "Future Archive builds Atlas chapter links for its known starter chapters and otherwise opens the Atlas entrance.",
+      "scope": "Verified URL-building code, not evidence that every gallery print has a chapter or that a returning visitor has retained that chapter.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/FutureArchive/blob/c2e9c029b9b560a6248dd744fdbbd9fa90ccee11/src/site-paths.mjs#L31-L45",
+          "claim": "Defines the Atlas destination and bounded chapter allowlist."
+        },
+        {
+          "url": "https://github.com/MichaelWave369/FutureArchive/blob/c2e9c029b9b560a6248dd744fdbbd9fa90ccee11/src/App.jsx#L64-L69",
+          "claim": "The print viewer renders the Atlas link using the URL builder."
+        }
+      ],
+      "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
+    },
+    {
+      "id": "auralith-future-react",
+      "from": "github:1224942971",
+      "to": "github:1422794573",
+      "status": "verified",
+      "kind": "shared-library",
+      "direction": "undirected",
+      "summary": "Both manifests declare React and react-dom; their pinned version ranges differ.",
+      "scope": "A shared library declaration only. Auralith declares React 18; Future Archive declares React 19. No shared package instance, interoperability or direct repository dependency is inferred.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/Auralith369/blob/e21a0eb85172daf1ae02b0bb1913973e85963617/package.json#L26-L29",
+          "claim": "Declares React and react-dom ^18.3.1."
+        },
+        {
+          "url": "https://github.com/MichaelWave369/FutureArchive/blob/c2e9c029b9b560a6248dd744fdbbd9fa90ccee11/package.json#L16-L17",
+          "claim": "Declares React and react-dom 19.3.1."
+        }
+      ],
+      "reviewedAt": "2026-10-21T21:59:23.337460+00:00",
+      "library": "React / react-dom"
+    },
+    {
+      "id": "phicade-pixelforge",
+      "from": "github:1402495144",
+      "to": "github:1272850362",
+      "status": "documented",
+      "kind": "documented-integration",
+      "direction": "directed",
+      "summary": "PhiCade documents a pinned PixelForge Runtime Bridge v1 JSONL adapter and qualification target.",
+      "scope": "The public document describes a local runtime contract and records a qualification target. This milestone does not reproduce its qualification or claim that the public browser apps are connected.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/PhiCade/blob/821e5526d4a6ad9cd1a60d2bb57236f042b5bfbf/docs/PIXELFORGE_RUNTIME_ADAPTER.md#L1-L45",
+          "claim": "Describes the transport seam, separate responsibilities and exact source pin."
+        }
+      ],
+      "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
+    },
+    {
+      "id": "auralith-paracut-profile",
+      "from": "github:1224942971",
+      "to": "github:1274843775",
+      "status": "documented",
+      "kind": "documented-integration",
+      "direction": "directed",
+      "summary": "Auralith documents a candidate creative interoperability profile with ParaCut as the next stage.",
+      "scope": "Candidate profile only, explicitly marked candidate in the source. Receiver behavior and deployment compatibility are not verified by this map.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/Auralith369/blob/e21a0eb85172daf1ae02b0bb1913973e85963617/README.md#L21-L40",
+          "claim": "Names the candidate Domistika \u2192 Auralith \u2192 ParaCut \u2192 WaveForge chain and profile hash."
+        }
+      ],
+      "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
+    },
+    {
+      "id": "paracut-waveforge-profile",
+      "from": "github:1274843775",
+      "to": "github:1227529048",
+      "status": "documented",
+      "kind": "documented-integration",
+      "direction": "directed",
+      "summary": "The same public candidate profile names ParaCut and WaveForgeStudio as consecutive stages.",
+      "scope": "Documented candidate chain, not an asserted operational pipeline. Evidence is a published statement in Auralith; no receiver-side acceptance is claimed.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/Auralith369/blob/e21a0eb85172daf1ae02b0bb1913973e85963617/README.md#L21-L40",
+          "claim": "Names ParaCut and WaveForgeStudio in the candidate chain."
+        }
+      ],
+      "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
+    }
+  ]
+}
