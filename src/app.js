@@ -7,12 +7,13 @@ import {parseSnapshot,newerPublicCache,fetchPublicInventory,CACHE_KEY} from './i
 import {resolveRelationships,relationshipEdges,neighborhood,relatedProjects,RELATIONSHIP_STYLES,RELATIONSHIP_KINDS} from './relationships.js';
 import {destinationStatus} from './destinations.js';
 import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.js';
+import {availableTrails} from './trails.js';
 
 const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,neighbors:new Set()};
+const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,neighbors:new Set(),trail:null,trailStop:0};
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new THREE.Color(),tempProjection=new THREE.Vector3();
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
@@ -38,7 +39,7 @@ async function boot(){
     try{state.relationshipLedger=extras[0].status==='fulfilled'?extras[0].value:null;state.relationships=resolveRelationships(state.repos,state.relationshipLedger);}catch{state.relationshipLedger=null;}
     state.deployments=extras[1].status==='fulfilled'?extras[1].value:null;
     state.atlas=extras[2].status==='fulfilled'?extras[2].value:null;
-    bindUI();updateInventoryUI();applyFilters();updateRelationshipUI();
+    bindUI();renderTrails();updateInventoryUI();applyFilters();updateRelationshipUI();
     try{initScene();sceneReady=true;buildField();animate(0);}catch(error){console.error('3D initialization failed',error);$('map').classList.add('webgl-unavailable');$('orbitToggle').disabled=true;$('loading').hidden=true;toast('3D is unavailable here. Every public repo is still in the directory.');}
     const linked=readProjectLink(location.href,state.repos);
     if(linked)selectRepo(linked.id,true,false);
@@ -70,6 +71,10 @@ function bindUI(){
   $('resetView').onclick=()=>fitField(true);$('zoomIn').onclick=()=>zoom(.78);$('zoomOut').onclick=()=>zoom(1.26);
   $('closeInspector').onclick=clearSelection;
   $('directoryButton').onclick=()=>{renderDirectory();$('directoryDialog').showModal();};
+  $('trailsButton').onclick=()=>{renderTrails();$('trailsDialog').showModal();};
+  $('trailPrev').onclick=()=>moveTrail(-1);
+  $('trailNext').onclick=()=>moveTrail(1);
+  $('trailExit').onclick=stopTrail;
   $('directorySort').onchange=renderDirectory;
   $('aboutButton').onclick=()=>$('aboutDialog').showModal();
   document.querySelectorAll('[data-close-dialog]').forEach(button=>button.onclick=()=>button.closest('dialog').close());
@@ -244,8 +249,52 @@ function fitMatches(){if(!camera||!state.visible.size)return;setOrbit(false);con
 function flyTo(to,toTarget){if(!camera)return;if(reducedMotion){camera.position.copy(to);controls.target.copy(toTarget);controls.update();return;}flight={from:camera.position.clone(),to,fromTarget:controls.target.clone(),toTarget,start:performance.now()};}
 function zoom(factor){if(!camera)return;setOrbit(false);const offset=camera.position.clone().sub(controls.target),distance=THREE.MathUtils.clamp(offset.length()*factor,controls.minDistance,controls.maxDistance);flyTo(controls.target.clone().add(offset.normalize().multiplyScalar(distance)),controls.target.clone());}
 function pickRepo(event){if(!camera)return null;const rect=$('scene').getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;let best=null,distance=14;for(let i=0;i<state.repos.length;i++){const repo=state.repos[i];if(!state.visible.has(repo.id))continue;tempProjection.copy(positions[i]).project(camera);if(tempProjection.z>1||tempProjection.z<-1)continue;const px=(tempProjection.x*.5+.5)*rect.width,py=(-tempProjection.y*.5+.5)*rect.height,d=Math.hypot(x-px,y-py);if(d<distance){distance=d;best=repo;}}return best;}
-function selectRepo(id,focus=true,closeMenu=true){const repo=state.repos.find(r=>r.id===id);if(!repo)return;state.selected=id;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',projectLink(location.href,repo));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
-function clearSelection(){state.selected=null;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',projectLink(location.href,null));}catch{}$('inspector').hidden=true;setCameraOffset();if(sceneReady)updateAppearance();renderSidebarIndex();}
+function selectRepo(id,focus=true,closeMenu=true){const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',projectLink(location.href,repo));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
+function clearSelection(){stopTrail();state.selected=null;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',projectLink(location.href,null));}catch{}$('inspector').hidden=true;setCameraOffset();if(sceneReady)updateAppearance();renderSidebarIndex();}
+
+/**
+ * Curated trails are visitor tours only. They are deliberately independent of
+ * the sourced Relationships layer and never imply code dependencies.
+ */
+function renderTrails(){
+  const trails=availableTrails(state.repos);
+  $('trailChoices').innerHTML=trails.length?trails.map(t=>`<button class="trail-choice" data-trail="${escape(t.id)}"><strong>${escape(t.title)}</strong><span>${escape(t.description)}</span><small>${t.stops.length} public stops · ${escape(t.stops.map(r=>r.name).join(' → '))}</small></button>`).join(''):'<p>No curated trails are available in the current public snapshot. The regular directory is still usable.</p>';
+  document.querySelectorAll('[data-trail]').forEach(button=>button.onclick=()=>startTrail(button.dataset.trail));
+}
+function startTrail(id){
+  const trail=availableTrails(state.repos).find(t=>t.id===id);
+  if(!trail)return;
+  $('trailsDialog').close();
+  resetFilters();
+  state.trail=trail;state.trailStop=0;
+  selectRepo(trail.stops[0].id,true);
+  updateTrailHud();
+}
+function moveTrail(offset){
+  if(!state.trail)return;
+  const next=state.trailStop+offset;
+  if(next<0||next>=state.trail.stops.length)return;
+  state.trailStop=next;
+  selectRepo(state.trail.stops[next].id,true);
+}
+function stopTrail(){
+  state.trail=null;state.trailStop=0;
+  document.body.classList.remove('trail-on');
+  $('trailHud').hidden=true;
+}
+function updateTrailHud(){
+  const trail=state.trail;
+  $('trailHud').hidden=!trail;
+  document.body.classList.toggle('trail-on',!!trail);
+  if(!trail)return;
+  const stop=trail.stops[state.trailStop];
+  $('trailTitle').textContent=trail.title;
+  $('trailProgress').textContent=`${state.trailStop+1} of ${trail.stops.length}`;
+  $('trailStopName').textContent=stop.name;
+  $('trailPrev').disabled=state.trailStop===0;
+  $('trailNext').disabled=state.trailStop===trail.stops.length-1;
+}
+
 function relationshipCards(repo){
   if(!state.relationshipLedger)return '<section class="related-projects"><h3>Related worlds</h3><p class="discovery-note">Relationship evidence could not load. Reload the page to review sourced connections; the public repository directory remains available.</p></section>';
   const related=relatedProjects(repo,state.relationships);
@@ -285,6 +334,8 @@ async function refreshPublic(){
     next=parseSnapshot({...state.snapshot,repos,fetchedAt:new Date().toISOString(),scope:'public',complete:true,source:'Fully paginated anonymous public GitHub REST repository listing'});
   }catch(error){toast(`${error.message} Your displayed inventory is preserved.`);button.disabled=false;button.classList.remove('refreshing');updateInventoryUI();return;}
   state.snapshot=next;state.repos=prepareRepos(next.repos);state.publicUpdated=next.fetchedAt;state.activityNow=Date.now();
+  if(state.trail){const latest=availableTrails(state.repos).find(t=>t.id===state.trail.id),index=latest?.stops.findIndex(r=>r.id===state.selected)??-1;if(!latest||index<0)stopTrail();else{state.trail=latest;state.trailStop=index;updateTrailHud();}}
+  renderTrails();
   try{localStorage.setItem(CACHE_KEY,JSON.stringify(next));}catch{}
   state.relationships=state.relationshipLedger?resolveRelationships(state.repos,state.relationshipLedger):[];
   if(state.selected&&!state.repos.some(r=>r.id===state.selected))clearSelection();
