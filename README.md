@@ -1,60 +1,93 @@
-# Field Constellation · Edition 02
+# Field Constellation 03 · The Living Architecture
 
-An interactive 3D atlas of [MichaelWave369’s public GitHub repositories](https://github.com/MichaelWave369?tab=repositories), combining Field Constellation with the user-supplied Grok Field Lattice.
+An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
-**[Explore the constellation](https://michaelwave369.github.io/FieldConstellation/)** · [Deployment status](https://github.com/MichaelWave369/FieldConstellation/actions)
+[Open the production map](https://michaelwave369.github.io/FieldConstellation/) · [Build and deployment status](https://github.com/MichaelWave369/FieldConstellation/actions) · [Read the Field Atlas](https://michaelwave369.github.io/FieldAtlas/)
 
-## Explore
+![Edition 03 relationship view](docs/images/edition03.jpg)
 
-- Five layouts: thematic constellation, Fibonacci sphere, chronological helix, language orbits, and golden-angle chronological spiral.
-- Three color lenses: world, programming language, and recent code activity.
-- Field green and Lattice gold themes; search, a quick repository index, a sortable directory, Pages-only and fork filters.
-- Repository details with live-site and GitHub links, dates, stars, forks, license, branch, and Pages status.
-- WebGL rendering with a perspective-correct Canvas fallback that shares the camera, layouts, selection, and OrbitControls.
-- Responsive navigation, keyboard controls, reduced-motion support, and locally bundled fonts and rendering code.
+This is an incremental Edition 03 milestone. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
-Drag to orbit, scroll or pinch to zoom, and right-drag or Shift-drag to pan. Press `/` to search and `Esc` to clear a selection. Arrow keys rotate a focused map; outside the map, up/down arrows visit projects.
+## Explore the Living Architecture
 
-## Repository data
+The five original layouts remain: thematic constellation, Fibonacci sphere, chronological helix, language orbits, and golden-angle spiral. World/language/activity colors, Field green, Lattice gold, search, the index, directory, Pages/fork filters, random discovery and both rendering paths are preserved.
 
-The checked-in snapshot contains **177 public repositories**, fetched on 21 October 2026, including FieldConstellation. It works immediately without a GitHub token. The refresh button checks every page of the anonymous public GitHub API and keeps the saved inventory if a refresh fails. GitHub rate limits can temporarily prevent refreshes.
+**Relationships** is an optional layer on those same layouts:
 
-The public build only loads public repository records. Positions, world categories, and association links are an artistic navigation aid. They are **not verified dependency relationships**. Helix/spiral links follow creation order; language links join peers. Activity colors use the last code push, not an inferred measure of project quality. Pages status means GitHub’s `has_pages` flag, which does not guarantee the linked site is currently reachable.
+- **Verified in source · mint:** inspected bridge code, navigation links, or shared library declarations. This does not prove a live integration or an inter-repository import.
+- **Documented contract · gold:** an explicit public integration claim or candidate contract, with its limits retained.
+- **Thematic association · lavender:** optional editorial neighbors in the same curated world. Off by default; never represented as code dependencies.
 
-## Run locally
+Select a project to emphasize its direct neighbors and dim unrelated nodes. **Fit connections** frames the relevant group. The inspector lists incoming/outgoing/shared relationships, commit-pinned evidence, review dates and scope. Missing links mean **not recorded**, rather than proof that no relationship exists.
 
-Requires Node.js 22 or later.
+The first ledger contains **eight sourced connections across nine public projects**: five source facts and three documented contracts. This is a bounded review, not an exhaustive dependency audit of 177 repositories. The two React manifests in the shared-library relationship use different major versions; compatibility is not implied.
+
+Drag to orbit, scroll/pinch to zoom, and right-drag or Shift-drag to pan. `/` focuses search; `Esc` clears selection/search; arrow keys rotate a focused map and visit projects elsewhere. Use the directory for a full keyboard-accessible list. Reduced-motion preferences are respected.
+
+## Accurate counts and live destinations
+
+The bundled snapshot contains **177 public repositories**, fetched on 21 October 2026. The current public listing was fully paginated and compared with Edition 02: no added or removed repositories; ten records had metadata changes.
+
+The earlier owner-only hosted snapshot had **212 records: 176 public and 36 private**. The later public export included FieldConstellation itself, bringing its public total to 177. These are different scopes and capture times. This public application contains no private repository records, names, IDs or URLs taken from that private inventory. See the [audit](docs/EDITION_03_AUDIT.md) for the exact reconciliation and its limits.
+
+**Pages enabled is not the same as a working application.** The bundled observation checks 127 eligible HTTPS destinations: **126 returned an HTML document and one returned 404**. The header counts recent HTML observations, separately from the 126 Pages flags. Each inspector shows its own check date and status.
+
+**Explore This World** appears only for a matching destination checked within seven days. The check requires a 2xx `text/html` response and an HTML document marker within the first 8 KiB. It does not test every application feature, iframe support, authenticity or continuous uptime. Restricted/time-limited requests are inconclusive. Stale, unavailable, unchecked and undeclared destinations have explicit explanations; declared unverified URLs remain separately labeled.
+
+## The Atlas bridge
+
+The public [Field Atlas entrance](https://michaelwave369.github.io/FieldAtlas/) was read from public repository metadata and checked over HTTPS. Constellation links to that entrance globally and to **124 reviewed public chapters** where the shared Atlas manifest supports them. Other projects open the entrance without promising a chapter. Browser-customized Atlas shelves may differ.
+
+Shareable Constellation links use the stable GitHub repository ID:
+
+```text
+?repo=github:1428952721
+```
+
+Only records in the currently loaded public inventory resolve. An unknown ID never triggers a private lookup or an external redirect. The Atlas continues to use its existing `?chapter=RepoName` interface. No FieldAtlas files are changed; the [bridge proposal](docs/ATLAS_BRIDGE.md) describes future ID alignment.
+
+## Run, test and build
+
+Requires Node.js 22 or later. No account, paid API, server secret or new runtime dependency is needed.
 
 ```sh
 npm ci
 npm run check
 npm test
 npm run build
+npm run build:verify
 npm run preview
 ```
 
-Open `http://localhost:4173/FieldConstellation/`. The preview server accepts both the root and GitHub Pages subpath. All deployed assets use relative paths.
+Open `http://localhost:4173/FieldConstellation/`. Assets and modules use relative paths, including fonts and rendering code. The preview server also accepts `/`.
+
+## Refresh public data
 
 ```sh
 npm run refresh
+npm run destinations:check
+npm run atlas:refresh
+npm test
+npm run build
+npm run build:verify
 ```
 
-This replaces `src/repos.json` only after the complete public inventory is fetched successfully. Commit that file to update the bundled snapshot. Browser refreshes are saved locally in that browser and do not change the repository.
+Review the JSON diff and submit a PR. These commands update separate checked-in observations:
 
-## GitHub Pages
+- `refresh`: validates every page of the anonymous GitHub public inventory and atomically replaces `src/repos.json`. An incomplete, duplicated, invalid or non-public response leaves the saved file unchanged.
+- `destinations:check`: bounded HTTPS checks of public homepage/Pages candidates, with six workers and no app actions. Review failures and redirects. Re-run at least weekly if fresh availability buttons are desired.
+- `atlas:refresh`: maps the Atlas’s public shared manifest to IDs already in Constellation’s public inventory. Empty or invalid results preserve the chapter map.
 
-The workflow validates source, runs model tests, builds `dist/`, and deploys it on pushes to `main`. In **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions** once. Then run the workflow or push a commit. The live address is `https://michaelwave369.github.io/FieldConstellation/`.
+Browser refresh updates only that browser’s public cache. It preserves the displayed dataset on failure and handles GitHub rate limits with a useful message. It does **not** silently reset destination/evidence check dates. The snapshot remains usable without refreshing.
 
-Pull requests run validation and build without deploying. No GitHub token, environment secret, or external backend is required by the app. The workflow uses GitHub’s built-in deployment token.
+To add a relationship, review public source, add a typed record and commit-pinned evidence to `src/relationships.json`, and run the tests. Both endpoint IDs and evidence repositories must belong to the public inventory. Do not auto-promote thematic similarity or a README claim into a proven dependency.
 
-## Project structure
+## Deployment and architecture
 
-- `src/`: application, renderer fallback, model, public snapshot, and local fonts.
-- `scripts/`: reproducible build, checks, public refresh, and local preview.
-- `tests/`: layout, ordering, filtering, metadata, and public-snapshot checks.
-- `.github/workflows/pages.yml`: validation and Pages deployment.
-- `dist/`: generated output, excluded from git. Three.js is pinned to `0.180.0` in the lockfile and copied into the build.
+The existing GitHub Actions workflow validates, tests, builds, audits `/FieldConstellation/` assets and uploads the Pages artifact. Only `main` deploys. Pull requests cannot deploy to production. Pages uses GitHub Actions as its configured source.
 
-## Provenance and license
+See [architecture](docs/ARCHITECTURE.md), [milestone/requirements](docs/EDITION_03_MILESTONE.md), [validation](VALIDATION.md), [changelog](CHANGELOG.md) and [Grok provenance](GROK-INTEGRATION.md).
 
-See [GROK-INTEGRATION.md](GROK-INTEGRATION.md) for the combined design and [VALIDATION.md](VALIDATION.md) for verification and limits. App code is MIT licensed; Three.js is MIT licensed, and DM Sans uses the SIL Open Font License. Their license texts are included with the built assets.
+App code remains MIT licensed. Three.js is pinned to `0.180.0` and MIT licensed; DM Sans retains the SIL Open Font License. The build preserves both vendor notices. Hardware WebGL verification and a complete ecosystem relationship review remain open work.
+
+**Ledger Above Ego.**

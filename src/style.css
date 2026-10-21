@@ -13,3 +13,85 @@ body.lattice-theme{--bg:#0d0f12;--panel:#191815;--panel2:#242017;--accent:#e0b15
 @media(min-width:1600px){.intro{margin-top:35px}h1{font-size:45px}.category{padding-top:10px;padding-bottom:10px}.map-caption .caption-title{font-size:25px}.repo-index{height:280px;max-height:320px}.inspector{width:270px}.lattice-theme h1{font-size:46px}}
 @media(max-width:1150px) and (min-width:761px){.map-footer{gap:10px}.layout-switch button{padding:10px 10px}.lens-legend{max-width:100%;gap:7px}.legend-language span{display:none}.map-caption .caption-title{font-size:18px}.map-caption p.view-description{max-width:280px;font-size:8px}.header-actions{gap:5px}.look-label{display:none}}
 @media(max-width:760px){.intro{margin-top:26px}h1{font-size:36px}.color-control{margin-top:12px}.sidebar-tabs{margin-top:12px}.repo-index{height:250px;max-height:35dvh}.index-row{min-height:36px;font-size:11px}.map-caption .caption-title{font-size:19px}.map-caption p.view-description{font-size:8px;line-height:1.6;max-width:300px;margin-top:6px}.layout-switch button{padding:11px 9px;font-size:9px}.layout-switch button svg{width:11px}.layout-switch{justify-content:space-evenly}.lens-legend{max-width:100%;gap:8px;top:calc(100% + 11px);font-size:7px}.legend-language span{display:none}.legend-language{padding:3px 4px}.lens-legend i{width:6px;height:6px}.map-coordinate{display:none}.look-label{display:none}.header-actions{gap:6px}.header-actions #themeToggle{padding:8px}.map-title{gap:6px;letter-spacing:.7px}.inspector{max-height:55dvh}.repo-meta{row-gap:9px}.repo-facts{margin-bottom:12px;padding-top:9px}.repo-facts dl{gap:10px}.scene-toggles{gap:18px}.lattice-theme h1{font-size:38px}.map-help{bottom:74px}}
+
+/* Edition 03: source-backed discovery, layered onto the existing observatory. */
+[hidden]{display:none!important}
+.header-actions .atlas-nav{font-size:10px;white-space:nowrap}
+.header-actions #architectureToggle{font-size:10px;white-space:nowrap}
+.header-actions #architectureToggle[aria-pressed=true]{border-color:#82d9bd;color:#a4e6ce;background:#1b3028}
+.architecture-panel{margin-top:12px;max-width:365px;border-left:2px solid #5e9c86;padding:1px 0 0 12px;text-align:left;pointer-events:auto}
+.architecture-panel>p{font-size:9px;line-height:1.6;margin:0 0 8px;color:#aab9a1;letter-spacing:0}
+.architecture-panel>label{display:flex;align-items:center;gap:7px;font-size:9px;color:var(--text);cursor:pointer;margin:8px 0}
+.architecture-panel input{accent-color:var(--accent);width:14px;height:14px}
+.architecture-panel .relationship-coverage{color:var(--muted);font-size:8px;max-width:320px}
+.relationship-legend{display:flex;gap:6px 13px;flex-wrap:wrap;max-width:360px;font-size:8px;line-height:1.5;color:#c0cab7}
+.relationship-legend>span{display:inline-flex;align-items:center;gap:5px}
+.relationship-legend i{width:13px;height:2px;display:inline-block}
+.relationship-legend b{font-weight:450;color:var(--text)}
+.context-muted{opacity:.38}
+.repo-topics{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 17px}
+.repo-topics span{font-size:8px;line-height:1.5;color:#abb9a0;background:#d0f29b0a;border:1px solid var(--line);padding:3px 5px;border-radius:3px;overflow-wrap:anywhere}
+.repo-tags .archived-badge{color:#e7bc78;border-color:#756343}
+.destination-state{padding:11px;border:1px solid #454d3a;background:#161d16;border-radius:4px;margin:0 0 13px;font-size:9px;line-height:1.65;color:var(--muted)}
+.destination-state b{display:block;font-size:9px;font-weight:550;color:#c5d1ba}
+.destination-state p{margin:5px 0;font-size:9px;line-height:1.65}
+.destination-state small{display:block;font-size:7px;color:#a1ae96}
+.destination-state.reachable{border-color:#486b57}
+.destination-state.reachable b{color:#a0d8b7}
+.destination-state.unavailable{border-color:#74564a}
+.destination-state.unavailable b{color:#dfab8e}
+.unverified-link{display:block;font-size:8px;line-height:1.6;color:#cdb583;margin:-4px 0 17px;text-decoration:underline;text-underline-offset:3px}
+.repo-links button.secondary{border:1px solid #435039;background:transparent;border-radius:4px;display:flex;align-items:center;justify-content:space-between;gap:9px;padding:11px 12px;font-size:9px;color:#b5c4a8;min-height:38px;width:100%;text-align:left}
+.repo-links button.secondary:hover{border-color:var(--accent);color:var(--accent)}
+.share-fallback{border:1px solid var(--accent);width:100%;padding:9px 7px;background:var(--panel);color:var(--text);border-radius:3px;font-size:9px}
+.repo-facts a{display:block;color:var(--accent);font-size:9px;margin:14px 0 9px;line-height:1.6}
+.repo-facts small{display:block;font-size:8px;line-height:1.6;color:var(--muted)}
+.project-identity{font:8px/1.6 monospace;overflow-wrap:anywhere;color:#a2b393;margin:8px 0}
+.related-projects{border-top:1px solid var(--line);padding-top:15px;margin-top:17px}
+.related-projects h3{font-size:11px;font-weight:500;display:flex;justify-content:space-between;align-items:center;gap:5px;margin:0 0 13px}
+.related-projects h3>span{font-size:8px;color:var(--muted);font-weight:400}
+.discovery-note{font-size:9px;color:var(--muted);line-height:1.75;margin:0}
+.relation-card{border:1px solid #354635;background:#121b1577;border-radius:4px;padding:10px;margin:0 0 10px;overflow-wrap:anywhere}
+.relation-heading{display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap;margin:0 0 6px}
+.relation-card button{display:block;text-align:left;border:0;background:none;color:#ccdfbc;font-size:10px;padding:3px 0;line-height:1.6}
+.relation-card button:hover{text-decoration:underline;text-underline-offset:3px}
+.relation-status{display:inline-block;border-radius:2px;background:#82d9bd12;color:#a3dfcc;padding:2px 4px;font-size:7px;line-height:1.7}
+.relation-status.documented{background:#e6bc7814;color:#e6bc78}
+.relation-status.conceptual{background:#b7a0db17;color:#c7b3e5}
+.relation-card>small,.relation-card details>small{display:block;font-size:7px;line-height:1.65;color:#a2af98}
+.relation-card p{font-size:9px;line-height:1.7;color:#aebfa4;margin:8px 0}
+.relation-card details{border-top:1px solid #33402f;margin-top:10px;padding-top:7px}
+.relation-card summary{cursor:pointer;font-size:9px;line-height:1.7;color:#c5d4b9}
+.relation-card details a{display:block;font-size:8px;line-height:1.6;color:#b3dca0;margin:8px 0;text-decoration:underline;text-underline-offset:3px}
+.lattice-theme .destination-state,.lattice-theme .relation-card{background:#16181d;border-color:#3d4247}
+.lattice-theme .relation-card button,.lattice-theme .repo-facts a{color:#ead3a8}
+.lattice-theme .repo-topics span{border-color:#424445;color:#c5beaf}
+.lattice-theme .architecture-panel{border-left-color:#bda06d}
+.lattice-theme .repo-links button.secondary{border-color:#514a3a;color:#d9c4a0}
+@media(max-width:1180px) and (min-width:761px){.header-actions .button-label{display:none}.header-actions .outlined-button{padding:8px}.map-header{padding-right:20px;gap:8px}}
+@media(max-width:760px){
+  .map-header{padding:0 12px;gap:5px}
+  .map-wordmark,.map-title .divider{display:none}
+  .map-title{gap:5px;font-size:8px}
+  .map-title #visibleCount{font-size:8px}
+  .header-actions{gap:4px}
+  .header-actions .button-label,.header-actions .look-label{display:none}
+  .header-actions .outlined-button,.header-actions #architectureToggle,.header-actions .atlas-nav{padding:7px;min-height:34px}
+  .header-actions .icon-button{width:27px}
+  .architecture-panel{max-width:calc(100vw - 65px);margin-top:9px;padding-left:9px}
+  .architecture-panel>p{font-size:8px;margin-bottom:5px}
+  .relationship-legend{font-size:7px;gap:5px 11px}
+  .architecture-panel>label{font-size:8px;min-height:29px;margin:2px 0}
+  .architecture-panel .relationship-coverage{font-size:7px;line-height:1.5;margin-bottom:0}
+  .inspector{max-height:57dvh}
+  .relation-card button,.repo-links button.secondary{min-height:36px}
+  .relation-card summary{min-height:32px;padding-top:7px}
+}
+.trace-project{display:block;width:100%;text-align:left;border:1px solid #4d7761;background:#18312488;color:#a7ddbb;border-radius:4px;padding:10px;font-size:9px;line-height:1.6;margin:0 0 17px;min-height:36px}
+.trace-project:hover{background:#284632;color:#d3f5d6}
+.lattice-theme .trace-project{border-color:#776348;background:#2b2418;color:#e5cb9f}
+@media(max-width:760px){
+  .architecture-on .map-caption .eyebrow,.architecture-on .map-caption .caption-title,.architecture-on .map-caption .view-description,.architecture-on .map-caption>.tiny-cross{display:none}
+  .architecture-on .architecture-panel{margin-top:0}
+  .architecture-on .inspector{left:80px;right:14px;width:auto;max-height:40dvh}
+}
