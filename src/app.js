@@ -357,6 +357,59 @@ function showInspector(repo,spotlight){
   setCameraOffset();
 }
 
+
+/** Visitor-owned, local-first favorites; only known public GitHub IDs are stored. */
+function savePassport(notify=true){
+  try{localStorage.setItem(PASSPORT_KEY,JSON.stringify(state.passport));return true;}
+  catch{if(notify)toast('Browser storage is unavailable. Passport changes last only until this page closes.');return false;}
+}
+function updatePassportCount(){
+  $('passportCount').textContent=String(state.passport.favoriteIds.length);
+  $('passportButton').setAttribute('aria-label','Open Field Passport: '+state.passport.favoriteIds.length+' saved worlds');
+}
+function passportRows(ids,emptyText){
+  const repos=passportRepos(ids,state.repos);
+  if(!repos.length)return '<p class="passport-empty">'+escape(emptyText)+'</p>';
+  return repos.map(repo=>'<button class="passport-row" data-passport-repo="'+escape(repo.id)+'"><span class="passport-mark">✳</span><span class="passport-row-copy"><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public world')+'</small></span><span aria-hidden="true">↗</span></button>').join('');
+}
+function renderPassport(){
+  $('passportFavorites').innerHTML=passportRows(state.passport.favoriteIds,'No favorites yet. Open a project and save it to your Passport.');
+  $('passportRecent').innerHTML=passportRows(state.passport.recentIds,'Your recently explored worlds will appear here.');
+  $('passportSummary').textContent=state.passport.favoriteIds.length+' saved worlds · '+state.passport.recentIds.length+' recently visited';
+  $('passportExport').disabled=state.passport.favoriteIds.length===0;
+  $('passportClearFavorites').disabled=state.passport.favoriteIds.length===0;
+  $('passportClearRecent').disabled=state.passport.recentIds.length===0;
+  document.querySelectorAll('[data-passport-repo]').forEach(button=>button.onclick=()=>{
+    $('passportDialog').close();resetFilters();selectRepo(button.dataset.passportRepo,true);
+  });
+}
+function clearPassport(section){
+  const label=section==='favoriteIds'?'saved worlds':'recent history';
+  if(!confirm('Clear all '+label+' from this browser?'))return;
+  state.passport=clearPassportSection(state.passport,section,state.repos);
+  savePassport();updatePassportCount();renderPassport();
+  if(!$('inspector').hidden){const repo=state.repos.find(r=>r.id===$('inspector').dataset.repo);if(repo)showInspector(repo,!state.selected);}
+}
+function downloadPassport(){
+  const content=exportFavorites(state.passport,state.repos);
+  const blob=new Blob([content],{type:'application/json'});
+  const url=URL.createObjectURL(blob),anchor=document.createElement('a');
+  anchor.href=url;anchor.download='field-passport-favorites.json';
+  document.body.append(anchor);anchor.click();anchor.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+async function importPassportFile(event){
+  const file=event.target.files?.[0];if(!file)return;
+  try{
+    if(file.size>32000)throw Error('File is too large for Field Passport.');
+    const result=importFavorites(state.passport,await file.text(),state.repos);
+    state.passport=result.passport;savePassport();updatePassportCount();renderPassport();
+    if(!$('inspector').hidden){const repo=state.repos.find(r=>r.id===$('inspector').dataset.repo);if(repo)showInspector(repo,!state.selected);}
+    toast('Imported '+result.imported+' public favorites'+(result.omitted?' · '+result.omitted+' unavailable IDs skipped':'')+'. Existing favorites kept.');
+  }catch(error){toast('Passport import failed: '+error.message);}
+  finally{event.target.value='';}
+}
+
 function renderDirectory(){
   const sort=$('directorySort').value,visible=state.repos.filter(r=>state.visible.has(r.id)).sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):String(b[sort]||'').localeCompare(String(a[sort]||'')));
   $('directoryCount').textContent=`${visible.length} of ${state.repos.length} repositories`;
