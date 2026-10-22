@@ -1,4 +1,4 @@
-# Field Constellation 07 · Atlas Lens
+# Field Constellation 08 · Atlas Pulse
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
@@ -6,7 +6,7 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
-Edition 07 adds a reviewed Atlas Lens on top of Edition 06's local-first Field Passport, shareable journeys and source-backed architecture. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
+Edition 08 adds a distinct dated published-site lens to Edition 07's reviewed Atlas chapters, local-first Passport, shareable journeys and source-backed architecture. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
 ## Explore the Living Architecture
 
@@ -53,6 +53,17 @@ This feature does not sync between devices or with Field Atlas, and it does not 
 The checked-in Atlas map contains **124 reviewed public chapter identities as of October 21, 2026**. The live Atlas was observed later with more chapters. **This is not a live completeness claim:** projects added or removed since the review do not automatically change the map. The lens is unavailable if its manifest is invalid or no longer resolves to current public repos. It never fetches unknown or private repository identifiers.
 
 The Atlas remains an independent book; this change only modifies FieldConstellation. A [separate Atlas-side two-way link proposal](docs/ATLAS_TWO_WAY_BRIDGE_PROPOSAL.md) specifies how to support stable `github:<id>` return links without changing the Atlas until separately authorized.
+
+## Atlas Pulse · Edition 08
+
+**Two provenance levels, clearly separated:**
+
+- **Reviewed chapters** is the unchanged `atlas.json` crosswalk, reviewed October 21, 2026, with **124** public chapter identities in the older Constellation inventory. These link using Atlas's original `?chapter=RepoName` deep links.
+- **Atlas published sites** uses a new immutable, dated `atlas-published.json` copy of Field Atlas's **public Pages verification manifest** from **October 22, 2026 at 02:54 UTC**. The Atlas snapshot verified **126** public HTML destinations from an owner listing of **179** public repos. The Constellation repository snapshot currently contains **177** public repos; **125 of those 126** published-site IDs match. One verified Atlas project, `PhiOS-XR`, is absent from Constellation's earlier snapshot and is not invented as a star.
+
+This does **not** mean there are only 126 Atlas chapters. The live book was separately observed showing **141 available chapters**, including seed, published and publication entries. A public-site verification is not a curator review, a guarantee the application functions, or a guarantee that a particular visitor's customized Atlas shelf contains the chapter. Dates and provenance appear directly in the UI. The two filters are mutually exclusive but work with normal search, categories, and directory filters. Both filters fail closed against invalid source data or a non-public/missing project.
+
+A project in the published-site crosswalk can open an Atlas `?project=github:<numeric-id>` deep link, which Field Atlas now validates against its own current verified public manifest. No cross-origin browser fetch, private repository lookup, account, visitor passport sharing or dependency claim is involved. The data changes only through a reviewed commit, **not live on every page load**.
 
 ## Accurate counts and live destinations
 
