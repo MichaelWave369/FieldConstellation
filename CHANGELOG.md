@@ -1,5 +1,14 @@
 # Changelog
 
+## Edition 08 · Atlas Pulse — PR milestone
+
+- Keep the existing curator-reviewed Atlas chapter filter and add a separate dated, public Pages-verified-site filter.
+- Record Atlas's published public Pages inventory with 126 verified sites at 2026-10-22 02:54 UTC. Resolve 125 against Constellation's existing 177 public repositories; do not invent the missing site.
+- Show exact source date, count and provenance in sidebar and About without confusing published sites with the Atlas's larger living book.
+- Offer canonical `?project=github:<numeric-id>` chapter navigation for matched published projects using the Atlas's newly deployed public-ID bridge.
+- Validate snapshot source, unique identities, public scope and Pages build output; keep all filters local-first with no new runtime dependencies.
+
+
 ## Edition 07 · Atlas Lens — PR milestone
 
 - Filter the existing Constellation and directory to reviewed public projects that have a chapter in the independently dated Atlas map.
