@@ -12,6 +12,7 @@ import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
 import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite,recordVisit,clearPassportSection,passportRepos,exportFavorites,importFavorites} from './passport.js';
 import {reviewedAtlasIds,atlasManifestLabel} from './atlas-lens.js';
 import {publishedAtlasIds,publishedAtlasLabel,publishedAtlasLink} from './atlas-published.js';
+import {atlasCoverageAudit,atlasCoverageReceipt} from './atlas-audit.js';
 
 const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
@@ -74,6 +75,9 @@ function bindUI(){
   $('pagesOnly').onclick=()=>{state.pagesOnly=!state.pagesOnly;applyFilters();};$('hideForks').onclick=()=>{state.hideForks=!state.hideForks;applyFilters();};
   $('atlasOnly').onclick=()=>{if(!reviewedAtlasIds(state.atlas,state.repos).size)return;state.atlasOnly=!state.atlasOnly;if(state.atlasOnly)state.atlasPublishedOnly=false;applyFilters();if(sceneReady)fitMatches();};
   $('atlasPublishedOnly').onclick=()=>{if(!publishedAtlasIds(state.atlasPublished,state.repos).size)return;state.atlasPublishedOnly=!state.atlasPublishedOnly;if(state.atlasPublishedOnly)state.atlasOnly=false;applyFilters();if(sceneReady)fitMatches();};
+  $('atlasAuditButton').onclick=()=>{renderAtlasAudit();$('atlasAuditDialog').showModal();};
+  $('atlasAuditExport').onclick=downloadAtlasAudit;
+  $('atlasAuditRefresh').onclick=async()=>{const button=$('atlasAuditRefresh');button.disabled=true;try{await refreshPublic();renderAtlasAudit();}finally{button.disabled=false;}};
   $('fitMatches').onclick=fitMatches;
   document.querySelectorAll('[data-layout]').forEach(button=>button.onclick=()=>setLayout(button.dataset.layout));
   $('linksToggle').onchange=event=>{state.links=event.target.checked;if(lineMesh)lineMesh.visible=state.links;};
@@ -144,6 +148,7 @@ function updateInventoryUI(){
   $('atlasPublishedOnly').title=publishedIds.size?'Show sites in the separate dated verified Atlas public Pages inventory':'Published Atlas inventory unavailable';
   $('atlasPublishedCount').textContent=String(publishedIds.size);
   $('aboutAtlasPublished').textContent=publishedIds.size?publishedAtlasLabel(state.atlasPublished,state.repos)+'. This is a public Pages manifest, not an audited chapter list or proof a website works today. The Constellation public repository snapshot may be older.':'No usable dated public Atlas Pages inventory is available.';
+  if($('atlasAuditDialog').open)renderAtlasAudit();
   $('aboutAtlasLens').textContent=atlasIds.size?'Atlas Lens shows '+atlasIds.size+' public projects in this independently dated reviewed chapter map. It does not claim the live Atlas is complete or up-to-date. Only reviewed public chapter links are opened.':'Atlas Lens is unavailable because its reviewed public chapter map could not be validated.';
 
   $('categories').innerHTML=GROUPS.map(g=>`<button class="category${state.group===g.id?' selected':''}" style="--category:${g.color}" data-group="${g.id}" aria-pressed="${state.group===g.id}"><span class="category-dot"></span><span>${g.name}</span><span class="category-count">${state.repos.filter(r=>r.group===g.id).length}</span></button>`).join('');
@@ -425,6 +430,36 @@ async function importPassportFile(event){
     toast('Imported '+result.imported+' public favorites'+(result.omitted?' · '+result.omitted+' unavailable IDs skipped':'')+'. Existing favorites kept.');
   }catch(error){toast('Passport import failed: '+error.message);}
   finally{event.target.value='';}
+}
+
+
+/** The audit describes independently dated public observations, not today's site health. */
+function renderAtlasAudit(){
+  const report=atlasCoverageAudit(state.repos,state.snapshot,state.atlas,state.atlasPublished);
+  $('auditPublic').textContent=String(report.publicInventory.repositoryCount);
+  $('auditReviewed').textContent=report.reviewed.valid?String(report.reviewed.matchedCount):'Unavailable';
+  $('auditPublished').textContent=report.published.valid?String(report.published.matchedCount):'Unavailable';
+  $('auditMissing').textContent=report.published.valid?String(report.published.unmatchedCount):'Unavailable';
+  $('auditPublicDate').textContent=report.publicInventory.fetchedAt?
+    'Public repository listing: '+new Date(report.publicInventory.fetchedAt).toLocaleString():'Public repository date unavailable';
+  $('auditReviewedDate').textContent=report.reviewed.valid?
+    'Reviewed chapter map: '+new Date(report.reviewed.checkedAt).toLocaleString():'Reviewed chapter map unavailable or invalid';
+  $('auditPublishedDate').textContent=report.published.valid?
+    'Published public HTML snapshot: '+new Date(report.published.sourceGeneratedAt).toLocaleString():'Published public HTML snapshot unavailable or invalid';
+  $('auditMissingList').innerHTML=!report.published.valid?
+    '<li>Published snapshot unavailable. No coverage inference is made.</li>':
+    report.published.unmatched.length?report.published.unmatched.map(item=>
+      '<li><strong>'+escape(item.repo)+'</strong><small>'+escape(item.projectId)+' · '+escape(item.reason)+'</small></li>'
+    ).join(''):'<li>All published snapshot records match a project in the displayed public listing.</li>';
+  $('atlasAuditExport').disabled=!report.reviewed.valid||!report.published.valid;
+}
+function downloadAtlasAudit(){
+  const content=atlasCoverageReceipt(state.repos,state.snapshot,state.atlas,state.atlasPublished);
+  const blob=new Blob([content],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='atlas-constellation-coverage-receipt.json';
+  document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 function renderDirectory(){
