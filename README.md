@@ -1,4 +1,4 @@
-# Field Constellation 06 · Field Passport
+# Field Constellation 07 · Atlas Lens
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
@@ -6,7 +6,7 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
-Edition 06 introduces the local-first Field Passport on top of shareable journeys and Edition 03's evidence-backed architecture. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
+Edition 07 adds a reviewed Atlas Lens on top of Edition 06's local-first Field Passport, shareable journeys and source-backed architecture. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
 ## Explore the Living Architecture
 
@@ -45,6 +45,14 @@ Passport data lives **only in your browser's localStorage** under a dedicated ve
 **Export favorites JSON** creates a small local file containing only favorite IDs. **Import favorites JSON** merges known public favorites with current saves, skipping unknown or now-private IDs. It never imports/export recent history, never sends data to a server, and requires no account. Browser local-storage restrictions may cause bookmarks not to persist after refresh; the UI warns users when a write fails. Clear commands require confirmation.
 
 This feature does not sync between devices or with Field Atlas, and it does not imply a dependency between saved projects. Existing repository links, tours and evidence remain separate.
+
+## Atlas Lens · Edition 07
+
+**Atlas chapters** in the sidebar filters the existing 3D layouts, searchable index and repository directory to projects represented by the **reviewed, public-only Atlas chapter map** (`src/atlas.json`). Switch it off to show all public worlds again. A dated label explains exactly which chapter map the filter uses. The selected project inspector marks reviewed Atlas chapters and offers **Read in Field Atlas**, preserving the book's existing `?chapter=<RepoName>` navigation.
+
+The checked-in Atlas map contains **124 reviewed public chapter identities as of October 21, 2026**. The live Atlas was observed later with more chapters. **This is not a live completeness claim:** projects added or removed since the review do not automatically change the map. The lens is unavailable if its manifest is invalid or no longer resolves to current public repos. It never fetches unknown or private repository identifiers.
+
+The Atlas remains an independent book; this change only modifies FieldConstellation. A [separate Atlas-side two-way link proposal](docs/ATLAS_TWO_WAY_BRIDGE_PROPOSAL.md) specifies how to support stable `github:<id>` return links without changing the Atlas until separately authorized.
 
 ## Accurate counts and live destinations
 
