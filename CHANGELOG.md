@@ -1,5 +1,14 @@
 # Changelog
 
+## Edition 11 · Browser-Proven Journeys — PR milestone
+
+- Add a blocking Chromium browser acceptance test before the GitHub Pages artifact is deployed.
+- Cover real Passport save/reload, Postcard share and clipboard fallback, anonymous recipient preview, explicit save and project selection.
+- Include mobile touch viewport and a forced WebGL2-unavailable public-directory fallback.
+- Upload screenshot evidence to workflow artifacts; report test failures instead of presenting static unit checks as browser approval.
+- Keep the visitor website static and local-first with no new shipped runtime dependencies.
+
+
 ## Edition 10 · Field Postcards — PR milestone
 
 - Share a deliberate collection of up to eight public repository worlds from existing browser-local Passport favorites.

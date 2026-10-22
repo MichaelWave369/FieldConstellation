@@ -1,4 +1,4 @@
-# Field Constellation 10 · Field Postcards
+# Field Constellation 11 · Browser-Proven Journeys
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
@@ -6,7 +6,7 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
-Edition 10 adds shareable public Field Postcards to Edition 09's coverage ledger, local Passport and Atlas bridges. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
+Edition 11 adds real-browser visitor acceptance gates to Edition 10's shareable Postcards, local Passport, Coverage Ledger and Atlas bridges. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
 ## Explore the Living Architecture
 
@@ -82,6 +82,30 @@ A **Field Postcard** is a visitor-chosen collection of **1–8 currently public 
 The link uses a bounded, validated `?postcard=github:<id>,github:<id>` query parameter. Creating a share link does not include the visitor's Passport backup, previously viewed projects, local names, timestamps, history, cookies, or credentials. It also strips unrelated `repo` and curated trail parameters from the shared URL so the recipient sees a postcard, not an accidental tour.
 
 **Opening someone else's postcard never imports it.** Visitors can preview currently public worlds, open one in the 3D map, or explicitly click **Save these worlds to my Passport**. An invalid, duplicated, oversized, or fully unavailable postcard is rejected; unknown or now-unavailable IDs in an otherwise valid link are omitted without revealing private metadata. The Passport only changes after explicit selection, and its existing local-first storage limits are respected. No backend, authenticated GitHub lookup, live destination certification, cross-origin browser storage or analytics service is involved.
+
+## Browser-Proven Journeys · Edition 11
+
+Every pull request and `main` push now has a **blocking Chromium acceptance gate** after the existing public data, JavaScript syntax, unit-test, production build and Pages audit checks. Deployment depends on the successful completion of this real-browser verification.
+
+The gate exercises the actual built static site served locally under its canonical `/FieldConstellation/` GitHub Pages subpath. It tests:
+- Desktop project deep links, inspector and opt-in Passport saving across reloads.
+- Choosing two saved worlds, creating a postcard and the selectable copy fallback when clipboard access is unavailable.
+- A separate anonymous browser opening the postcard without automatically importing favorites, explicitly saving the public collection, and navigating to the selected project's star.
+- A touch-enabled mobile viewport with accessible postcard preview and Escape dismissal.
+- A forced **no-WebGL2** environment with a usable public repository directory.
+- Checks for uncaught JavaScript errors, public inventory rendering, correct URL cleanup, and no inadvertent history export.
+
+The workflow uploads a small screenshot packet to the workflow artifacts for visual review. The browser tool is **CI-only**, installed temporarily in GitHub Actions after `npm ci`; it is not a new browser/runtime app dependency. To run locally:
+
+```bash
+npm ci
+npm run build
+npm install --no-save --package-lock=false playwright@1.56.1
+npx playwright install --with-deps chromium
+npm run acceptance:browser
+```
+
+The acceptance gate verifies concrete scripted journeys. It does **not** claim exhaustive accessibility, production network availability, content correctness or general human sign-off.
 
 ## Accurate counts and live destinations
 

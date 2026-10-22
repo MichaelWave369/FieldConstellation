@@ -1,6 +1,6 @@
 {
   "name": "field-constellation",
-  "version": "10.0.0",
+  "version": "11.0.0",
   "private": true,
   "type": "module",
   "description": "An interactive 3D atlas of MichaelWave369\u2019s public GitHub repositories.",
@@ -11,6 +11,7 @@
     "test": "node --test tests/*.test.mjs",
     "refresh": "node scripts/refresh-public.mjs",
     "preview": "node scripts/serve.mjs",
+    "acceptance:browser": "node scripts/browser-acceptance.mjs",
     "destinations:check": "node scripts/check-deployments.mjs",
     "atlas:refresh": "node scripts/refresh-atlas.mjs",
     "build:verify": "node scripts/verify-build.mjs"
