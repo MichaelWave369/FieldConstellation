@@ -224,7 +224,7 @@ body.lattice-theme{--bg:#0d0f12;--panel:#191815;--panel2:#242017;--accent:#e0b15
 .postcard-world{display:flex;align-items:center;gap:13px;width:100%;min-height:56px;padding:10px 8px;border:0;border-bottom:1px solid #354232;background:transparent;text-align:left;color:var(--text)}
 button.postcard-world{cursor:pointer}
 button.postcard-world:hover,button.postcard-world:focus-visible{background:#2d3c2b}
-.postcard-world>span:nth-last-child(2){display:flex;min-width:0;flex:1;flex-direction:column;gap:5px}
+.postcard-row-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:5px}
 .postcard-world strong{font-size:11px;font-weight:550;overflow-wrap:anywhere}
 .postcard-world small{font-size:9px;color:var(--muted)}
 .postcard-symbol{font-size:21px;color:var(--accent)}
