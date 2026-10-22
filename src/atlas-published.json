@@ -1,0 +1,640 @@
+{
+  "schemaVersion": 1,
+  "owner": "MichaelWave369",
+  "sourceUrl": "https://michaelwave369.github.io/FieldAtlas/pages-discovered.json",
+  "sourceGeneratedAt": "2026-10-22T02:54:08.049Z",
+  "verifiedCount": 126,
+  "publiclyListedRepos": 179,
+  "pages": [
+    {
+      "projectId": "github:1312447255",
+      "repo": "12fold",
+      "url": "https://michaelwave369.github.io/12fold/"
+    },
+    {
+      "projectId": "github:1265628609",
+      "repo": "aqlen-quantum-ledger",
+      "url": "https://michaelwave369.github.io/aqlen-quantum-ledger/"
+    },
+    {
+      "projectId": "github:1282612528",
+      "repo": "AquaCymatics369",
+      "url": "https://michaelwave369.github.io/AquaCymatics369/"
+    },
+    {
+      "projectId": "github:1423857253",
+      "repo": "AquaPhi",
+      "url": "https://michaelwave369.github.io/AquaPhi/"
+    },
+    {
+      "projectId": "github:1224942971",
+      "repo": "Auralith369",
+      "url": "https://michaelwave369.github.io/Auralith369/"
+    },
+    {
+      "projectId": "github:1265506538",
+      "repo": "axiomforge-ledger",
+      "url": "https://michaelwave369.github.io/axiomforge-ledger/"
+    },
+    {
+      "projectId": "github:1422755721",
+      "repo": "BeyondtheBuzz",
+      "url": "https://michaelwave369.github.io/BeyondtheBuzz/"
+    },
+    {
+      "projectId": "github:1359602521",
+      "repo": "BounceDeck",
+      "url": "https://michaelwave369.github.io/BounceDeck/"
+    },
+    {
+      "projectId": "github:1404893803",
+      "repo": "brainsweatstudios",
+      "url": "https://michaelwave369.github.io/brainsweatstudios/"
+    },
+    {
+      "projectId": "github:1370765625",
+      "repo": "Browsallax",
+      "url": "https://michaelwave369.github.io/Browsallax/"
+    },
+    {
+      "projectId": "github:1412285897",
+      "repo": "bubblenest",
+      "url": "https://michaelwave369.github.io/bubblenest/"
+    },
+    {
+      "projectId": "github:1251667873",
+      "repo": "cannabis-as-sacred-medicine",
+      "url": "https://michaelwave369.github.io/cannabis-as-sacred-medicine/"
+    },
+    {
+      "projectId": "github:1384421588",
+      "repo": "Cannabiverse",
+      "url": "https://michaelwave369.github.io/Cannabiverse/"
+    },
+    {
+      "projectId": "github:1420218682",
+      "repo": "CFD",
+      "url": "https://michaelwave369.github.io/CFD/"
+    },
+    {
+      "projectId": "github:1423597635",
+      "repo": "ChippyDip",
+      "url": "https://michaelwave369.github.io/ChippyDip/"
+    },
+    {
+      "projectId": "github:1220492153",
+      "repo": "chronolattice",
+      "url": "https://michaelwave369.github.io/chronolattice/"
+    },
+    {
+      "projectId": "github:1427737439",
+      "repo": "Codedex",
+      "url": "https://michaelwave369.github.io/Codedex/"
+    },
+    {
+      "projectId": "github:1281718782",
+      "repo": "codeveil369",
+      "url": "https://michaelwave369.github.io/codeveil369/"
+    },
+    {
+      "projectId": "github:1416044747",
+      "repo": "CollaborationJunction",
+      "url": "https://michaelwave369.github.io/CollaborationJunction/"
+    },
+    {
+      "projectId": "github:1425023827",
+      "repo": "CommonTable",
+      "url": "https://michaelwave369.github.io/CommonTable/"
+    },
+    {
+      "projectId": "github:1330495355",
+      "repo": "concrete-atlas",
+      "url": "https://michaelwave369.github.io/concrete-atlas/"
+    },
+    {
+      "projectId": "github:1255308313",
+      "repo": "consent_mirror_369",
+      "url": "https://michaelwave369.github.io/consent_mirror_369/"
+    },
+    {
+      "projectId": "github:1268484552",
+      "repo": "datacenter-ledger-explorer",
+      "url": "https://michaelwave369.github.io/datacenter-ledger-explorer/"
+    },
+    {
+      "projectId": "github:1221330106",
+      "repo": "DCL",
+      "url": "https://michaelwave369.github.io/DCL/"
+    },
+    {
+      "projectId": "github:1314480408",
+      "repo": "Domistika",
+      "url": "https://michaelwave369.github.io/Domistika/"
+    },
+    {
+      "projectId": "github:1412608460",
+      "repo": "DropZone",
+      "url": "https://michaelwave369.github.io/DropZone/"
+    },
+    {
+      "projectId": "github:1270643899",
+      "repo": "EmberFlow369",
+      "url": "https://michaelwave369.github.io/EmberFlow369/"
+    },
+    {
+      "projectId": "github:1376546411",
+      "repo": "enter-the-field-research",
+      "url": "https://michaelwave369.github.io/enter-the-field-research/"
+    },
+    {
+      "projectId": "github:1375538174",
+      "repo": "EVIE",
+      "url": "https://michaelwave369.github.io/EVIE/"
+    },
+    {
+      "projectId": "github:1167195050",
+      "repo": "FamilyVault",
+      "url": "https://michaelwave369.github.io/FamilyVault/"
+    },
+    {
+      "projectId": "github:1409586106",
+      "repo": "FieldAccord",
+      "url": "https://michaelwave369.github.io/FieldAccord/"
+    },
+    {
+      "projectId": "github:1411237134",
+      "repo": "FieldAtlas",
+      "url": "https://michaelwave369.github.io/FieldAtlas/"
+    },
+    {
+      "projectId": "github:1410951871",
+      "repo": "FieldCloudWorker",
+      "url": "https://michaelwave369.github.io/FieldCloudWorker/"
+    },
+    {
+      "projectId": "github:1428952721",
+      "repo": "FieldConstellation",
+      "url": "https://michaelwave369.github.io/FieldConstellation/"
+    },
+    {
+      "projectId": "github:1409528631",
+      "repo": "FieldDeck",
+      "url": "https://michaelwave369.github.io/FieldDeck/"
+    },
+    {
+      "projectId": "github:1414860981",
+      "repo": "FieldManual369",
+      "url": "https://michaelwave369.github.io/FieldManual369/"
+    },
+    {
+      "projectId": "github:1268591600",
+      "repo": "flow-covenant-runtime",
+      "url": "https://michaelwave369.github.io/flow-covenant-runtime/"
+    },
+    {
+      "projectId": "github:1264350480",
+      "repo": "focusbridge21",
+      "url": "https://michaelwave369.github.io/focusbridge21/"
+    },
+    {
+      "projectId": "github:1425003390",
+      "repo": "FramefieldStudio",
+      "url": "https://michaelwave369.github.io/FramefieldStudio/"
+    },
+    {
+      "projectId": "github:1254082870",
+      "repo": "FrontPorchAI",
+      "url": "https://michaelwave369.github.io/FrontPorchAI/"
+    },
+    {
+      "projectId": "github:1422794573",
+      "repo": "FutureArchive",
+      "url": "https://michaelwave369.github.io/FutureArchive/"
+    },
+    {
+      "projectId": "github:1411014272",
+      "repo": "GiltHouse",
+      "url": "https://michaelwave369.github.io/GiltHouse/"
+    },
+    {
+      "projectId": "github:1425891258",
+      "repo": "GitPorch",
+      "url": "https://michaelwave369.github.io/GitPorch/"
+    },
+    {
+      "projectId": "github:1413669277",
+      "repo": "GLO",
+      "url": "https://michaelwave369.github.io/GLO/"
+    },
+    {
+      "projectId": "github:1254723124",
+      "repo": "goldenjoy369",
+      "url": "https://michaelwave369.github.io/goldenjoy369/"
+    },
+    {
+      "projectId": "github:1254545767",
+      "repo": "governance-drift-rsdc",
+      "url": "https://michaelwave369.github.io/governance-drift-rsdc/"
+    },
+    {
+      "projectId": "github:1254869900",
+      "repo": "hidden-equations-of-feeling",
+      "url": "https://michaelwave369.github.io/hidden-equations-of-feeling/"
+    },
+    {
+      "projectId": "github:1425017414",
+      "repo": "HueHatch",
+      "url": "https://michaelwave369.github.io/HueHatch/"
+    },
+    {
+      "projectId": "github:1188481881",
+      "repo": "Infinite-Commons",
+      "url": "https://michaelwave369.github.io/Infinite-Commons/"
+    },
+    {
+      "projectId": "github:1188495091",
+      "repo": "Infinite-Porch",
+      "url": "https://michaelwave369.github.io/Infinite-Porch/"
+    },
+    {
+      "projectId": "github:1422903170",
+      "repo": "InfiniteAfterHours",
+      "url": "https://michaelwave369.github.io/InfiniteAfterHours/"
+    },
+    {
+      "projectId": "github:1423581699",
+      "repo": "InfiniteInterconnects",
+      "url": "https://michaelwave369.github.io/InfiniteInterconnects/"
+    },
+    {
+      "projectId": "github:1273955240",
+      "repo": "infinitylens369",
+      "url": "https://michaelwave369.github.io/infinitylens369/"
+    },
+    {
+      "projectId": "github:1301223368",
+      "repo": "inspection-closeout-pilot",
+      "url": "https://michaelwave369.github.io/inspection-closeout-pilot/"
+    },
+    {
+      "projectId": "github:1404039931",
+      "repo": "JukeBot",
+      "url": "https://michaelwave369.github.io/JukeBot/"
+    },
+    {
+      "projectId": "github:1273659494",
+      "repo": "kindbridge369",
+      "url": "https://michaelwave369.github.io/kindbridge369/"
+    },
+    {
+      "projectId": "github:1284325375",
+      "repo": "langarian-math",
+      "url": "https://michaelwave369.github.io/langarian-math/"
+    },
+    {
+      "projectId": "github:1425067826",
+      "repo": "LAU",
+      "url": "https://michaelwave369.github.io/LAU/"
+    },
+    {
+      "projectId": "github:1416187370",
+      "repo": "LightBridge",
+      "url": "https://michaelwave369.github.io/LightBridge/"
+    },
+    {
+      "projectId": "github:1255416069",
+      "repo": "lumen_sword_369",
+      "url": "https://michaelwave369.github.io/lumen_sword_369/"
+    },
+    {
+      "projectId": "github:1346788021",
+      "repo": "MemeForge",
+      "url": "https://michaelwave369.github.io/MemeForge/"
+    },
+    {
+      "projectId": "github:1253134776",
+      "repo": "michaelwhughes-portfolio",
+      "url": "https://michaelwave369.github.io/michaelwhughes-portfolio/"
+    },
+    {
+      "projectId": "github:1409466715",
+      "repo": "mictek-house",
+      "url": "https://michaelwave369.github.io/mictek-house/"
+    },
+    {
+      "projectId": "github:1409520813",
+      "repo": "MoreBounceLabs",
+      "url": "https://michaelwave369.github.io/MoreBounceLabs/"
+    },
+    {
+      "projectId": "github:1422420981",
+      "repo": "MoreBounceMethod",
+      "url": "https://michaelwave369.github.io/MoreBounceMethod/"
+    },
+    {
+      "projectId": "github:1427663556",
+      "repo": "MRIPHI",
+      "url": "https://michaelwave369.github.io/MRIPHI/"
+    },
+    {
+      "projectId": "github:1414572789",
+      "repo": "MuseVault",
+      "url": "https://michaelwave369.github.io/MuseVault/"
+    },
+    {
+      "projectId": "github:1416593498",
+      "repo": "MythSplicer",
+      "url": "https://michaelwave369.github.io/MythSplicer/"
+    },
+    {
+      "projectId": "github:1418188341",
+      "repo": "NBGPocketMesh",
+      "url": "https://michaelwave369.github.io/NBGPocketMesh/"
+    },
+    {
+      "projectId": "github:1402596344",
+      "repo": "NestedBubbleGear",
+      "url": "https://michaelwave369.github.io/NestedBubbleGear/"
+    },
+    {
+      "projectId": "github:1257450741",
+      "repo": "nevora-codex",
+      "url": "https://michaelwave369.github.io/nevora-codex/"
+    },
+    {
+      "projectId": "github:1412342800",
+      "repo": "OpenBlueprintStudio",
+      "url": "https://michaelwave369.github.io/OpenBlueprintStudio/"
+    },
+    {
+      "projectId": "github:1251756692",
+      "repo": "pain-joy-continuum",
+      "url": "https://michaelwave369.github.io/pain-joy-continuum/"
+    },
+    {
+      "projectId": "github:1281889784",
+      "repo": "ParaCalc369",
+      "url": "https://michaelwave369.github.io/ParaCalc369/"
+    },
+    {
+      "projectId": "github:1274843775",
+      "repo": "paracut",
+      "url": "https://michaelwave369.github.io/paracut/"
+    },
+    {
+      "projectId": "github:1321245612",
+      "repo": "parallax-369-public-primer",
+      "url": "https://michaelwave369.github.io/parallax-369-public-primer/"
+    },
+    {
+      "projectId": "github:1290351497",
+      "repo": "parallax-arc",
+      "url": "https://michaelwave369.github.io/parallax-arc/"
+    },
+    {
+      "projectId": "github:1327467904",
+      "repo": "parallax-gran-prix",
+      "url": "https://michaelwave369.github.io/parallax-gran-prix/"
+    },
+    {
+      "projectId": "github:1272850362",
+      "repo": "parallax-pixelforge",
+      "url": "https://michaelwave369.github.io/parallax-pixelforge/"
+    },
+    {
+      "projectId": "github:1281900867",
+      "repo": "parallax-watchtower",
+      "url": "https://michaelwave369.github.io/parallax-watchtower/"
+    },
+    {
+      "projectId": "github:1285351825",
+      "repo": "particleforge369",
+      "url": "https://michaelwave369.github.io/particleforge369/"
+    },
+    {
+      "projectId": "github:1358437661",
+      "repo": "Peekaboo",
+      "url": "https://michaelwave369.github.io/Peekaboo/"
+    },
+    {
+      "projectId": "github:1255465993",
+      "repo": "personamirror369",
+      "url": "https://michaelwave369.github.io/personamirror369/"
+    },
+    {
+      "projectId": "github:1413468783",
+      "repo": "Phi-Morph",
+      "url": "https://michaelwave369.github.io/Phi-Morph/"
+    },
+    {
+      "projectId": "github:1234192033",
+      "repo": "phi369-element-spiral-atlas",
+      "url": "https://michaelwave369.github.io/phi369-element-spiral-atlas/"
+    },
+    {
+      "projectId": "github:1420133410",
+      "repo": "Phi5",
+      "url": "https://michaelwave369.github.io/Phi5/"
+    },
+    {
+      "projectId": "github:1400739196",
+      "repo": "phibot",
+      "url": "https://michaelwave369.github.io/phibot/"
+    },
+    {
+      "projectId": "github:1422333763",
+      "repo": "PhiCleanroom",
+      "url": "https://michaelwave369.github.io/PhiCleanroom/"
+    },
+    {
+      "projectId": "github:1423508898",
+      "repo": "PhiCompile",
+      "url": "https://michaelwave369.github.io/PhiCompile/"
+    },
+    {
+      "projectId": "github:1422888779",
+      "repo": "PhiFieldLab",
+      "url": "https://michaelwave369.github.io/PhiFieldLab/"
+    },
+    {
+      "projectId": "github:1407893510",
+      "repo": "Phiform",
+      "url": "https://michaelwave369.github.io/Phiform/"
+    },
+    {
+      "projectId": "github:1428608714",
+      "repo": "PhiLearn",
+      "url": "https://michaelwave369.github.io/PhiLearn/"
+    },
+    {
+      "projectId": "github:1410759854",
+      "repo": "PhiMirrorHex",
+      "url": "https://michaelwave369.github.io/PhiMirrorHex/"
+    },
+    {
+      "projectId": "github:1254586221",
+      "repo": "phioffice369",
+      "url": "https://michaelwave369.github.io/phioffice369/"
+    },
+    {
+      "projectId": "github:1173855223",
+      "repo": "PhiOS",
+      "url": "https://michaelwave369.github.io/PhiOS/"
+    },
+    {
+      "projectId": "github:1429113142",
+      "repo": "PhiOS-XR",
+      "url": "https://michaelwave369.github.io/PhiOS-XR/"
+    },
+    {
+      "projectId": "github:1400829359",
+      "repo": "PhiPie",
+      "url": "https://michaelwave369.github.io/PhiPie/"
+    },
+    {
+      "projectId": "github:1420126665",
+      "repo": "PhiPortal",
+      "url": "https://michaelwave369.github.io/PhiPortal/"
+    },
+    {
+      "projectId": "github:1414511907",
+      "repo": "PhiScribe",
+      "url": "https://michaelwave369.github.io/PhiScribe/"
+    },
+    {
+      "projectId": "github:1413871777",
+      "repo": "PhiSkrit",
+      "url": "https://michaelwave369.github.io/PhiSkrit/"
+    },
+    {
+      "projectId": "github:1413805853",
+      "repo": "PhiStream",
+      "url": "https://michaelwave369.github.io/PhiStream/"
+    },
+    {
+      "projectId": "github:1428533299",
+      "repo": "Phithon",
+      "url": "https://michaelwave369.github.io/Phithon/"
+    },
+    {
+      "projectId": "github:1425016068",
+      "repo": "PockeRec",
+      "url": "https://michaelwave369.github.io/PockeRec/"
+    },
+    {
+      "projectId": "github:1168937895",
+      "repo": "PocketBrain",
+      "url": "https://michaelwave369.github.io/PocketBrain/"
+    },
+    {
+      "projectId": "github:1271890061",
+      "repo": "PorchQuest369",
+      "url": "https://michaelwave369.github.io/PorchQuest369/"
+    },
+    {
+      "projectId": "github:1415995317",
+      "repo": "PorchTalk",
+      "url": "https://michaelwave369.github.io/PorchTalk/"
+    },
+    {
+      "projectId": "github:1408038507",
+      "repo": "ProofArcade",
+      "url": "https://michaelwave369.github.io/ProofArcade/"
+    },
+    {
+      "projectId": "github:1412586358",
+      "repo": "Pulse369",
+      "url": "https://michaelwave369.github.io/Pulse369/"
+    },
+    {
+      "projectId": "github:1426463303",
+      "repo": "PuzzlePen",
+      "url": "https://michaelwave369.github.io/PuzzlePen/"
+    },
+    {
+      "projectId": "github:1426096520",
+      "repo": "RastaPhi",
+      "url": "https://michaelwave369.github.io/RastaPhi/"
+    },
+    {
+      "projectId": "github:1323571602",
+      "repo": "ravedial-archive-explorer",
+      "url": "https://michaelwave369.github.io/ravedial-archive-explorer/"
+    },
+    {
+      "projectId": "github:1424575269",
+      "repo": "ReelCommons",
+      "url": "https://michaelwave369.github.io/ReelCommons/"
+    },
+    {
+      "projectId": "github:1426291521",
+      "repo": "RegenerationAtlas",
+      "url": "https://michaelwave369.github.io/RegenerationAtlas/"
+    },
+    {
+      "projectId": "github:1423896630",
+      "repo": "RepoReady",
+      "url": "https://michaelwave369.github.io/RepoReady/"
+    },
+    {
+      "projectId": "github:1278247651",
+      "repo": "reporider",
+      "url": "https://michaelwave369.github.io/reporider/"
+    },
+    {
+      "projectId": "github:1370938290",
+      "repo": "SCAM-A-LAX",
+      "url": "https://michaelwave369.github.io/SCAM-A-LAX/"
+    },
+    {
+      "projectId": "github:1281889027",
+      "repo": "schumann-live-react",
+      "url": "https://michaelwave369.github.io/schumann-live-react/"
+    },
+    {
+      "projectId": "github:1410755196",
+      "repo": "SiliconLouvre",
+      "url": "https://michaelwave369.github.io/SiliconLouvre/"
+    },
+    {
+      "projectId": "github:1396586926",
+      "repo": "SuperPhiVessel",
+      "url": "https://michaelwave369.github.io/SuperPhiVessel/"
+    },
+    {
+      "projectId": "github:1414638920",
+      "repo": "The-MDF-Files",
+      "url": "https://michaelwave369.github.io/The-MDF-Files/"
+    },
+    {
+      "projectId": "github:1399127492",
+      "repo": "think-tank",
+      "url": "https://michaelwave369.github.io/think-tank/"
+    },
+    {
+      "projectId": "github:1285631147",
+      "repo": "VAL",
+      "url": "https://michaelwave369.github.io/VAL/"
+    },
+    {
+      "projectId": "github:1185626401",
+      "repo": "Vibe",
+      "url": "https://michaelwave369.github.io/Vibe/"
+    },
+    {
+      "projectId": "github:1424907063",
+      "repo": "WastelandWorkshopStudio",
+      "url": "https://michaelwave369.github.io/WastelandWorkshopStudio/"
+    },
+    {
+      "projectId": "github:1227529048",
+      "repo": "WaveForgeStudio",
+      "url": "https://michaelwave369.github.io/WaveForgeStudio/"
+    },
+    {
+      "projectId": "github:1428514482",
+      "repo": "WhiteHatLedger369",
+      "url": "https://michaelwave369.github.io/WhiteHatLedger369/"
+    }
+  ]
+}
