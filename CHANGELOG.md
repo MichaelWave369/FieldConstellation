@@ -1,5 +1,15 @@
 # Changelog
 
+## Edition 06 · Field Passport — PR milestone
+
+- Add a browser-local Field Passport to bookmark and revisit public repository worlds.
+- Track a bounded list of recently selected public projects and keep public numeric IDs only.
+- Add a save toggle in the project inspector and a searchable-by-browsing Passport dialog for favorites and recent discoveries.
+- Add a portable JSON favorites export/import; reject malformed data and drop stale or private IDs, preserving local recent history.
+- Require confirmation to clear either collection, and gracefully degrade when local browser storage is blocked.
+- Preserve the relationship ledger, curated tours, stable links and existing five layouts with no backend or runtime dependency.
+
+
 ## Edition 05 · Shareable Journeys — PR milestone
 
 - Restore guided trails from validated `?trail=<id>&stop=<n>` public-only permalinks, optionally paired with the matching stable repository ID.

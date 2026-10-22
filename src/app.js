@@ -9,12 +9,13 @@ import {destinationStatus} from './destinations.js';
 import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.js';
 import {availableTrails} from './trails.js';
 import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
+import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite,recordVisit,clearPassportSection,passportRepos,exportFavorites,importFavorites} from './passport.js';
 
 const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,neighbors:new Set(),trail:null,trailStop:0};
+const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport()};
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new THREE.Color(),tempProjection=new THREE.Vector3();
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
@@ -36,11 +37,12 @@ async function boot(){
     const cache=newerPublicCache(saved,state.snapshot);
     if(cache){state.snapshot=cache;state.publicUpdated=cache.fetchedAt;}
     state.repos=prepareRepos(state.snapshot.repos);
+    try{state.passport=parsePassport(localStorage.getItem(PASSPORT_KEY),state.repos);}catch{state.passport=emptyPassport();}
     const extras=await Promise.allSettled(['relationships','deployments','atlas'].map(async name=>{const r=await fetch('./'+name+'.json',{signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error(name+' unavailable');return r.json();}));
     try{state.relationshipLedger=extras[0].status==='fulfilled'?extras[0].value:null;state.relationships=resolveRelationships(state.repos,state.relationshipLedger);}catch{state.relationshipLedger=null;}
     state.deployments=extras[1].status==='fulfilled'?extras[1].value:null;
     state.atlas=extras[2].status==='fulfilled'?extras[2].value:null;
-    bindUI();renderTrails();updateInventoryUI();applyFilters();updateRelationshipUI();
+    bindUI();renderTrails();updatePassportCount();updateInventoryUI();applyFilters();updateRelationshipUI();
     try{initScene();sceneReady=true;buildField();animate(0);}catch(error){console.error('3D initialization failed',error);$('map').classList.add('webgl-unavailable');$('orbitToggle').disabled=true;$('loading').hidden=true;toast('3D is unavailable here. Every public repo is still in the directory.');}
     const sharedTrail=readTrailLink(location.href,state.repos);
     if(sharedTrail){state.trail=sharedTrail.trail;state.trailStop=sharedTrail.index;}
@@ -76,6 +78,12 @@ function bindUI(){
   $('closeInspector').onclick=clearSelection;
   $('directoryButton').onclick=()=>{renderDirectory();$('directoryDialog').showModal();};
   $('trailsButton').onclick=()=>{renderTrails();$('trailsDialog').showModal();};
+  $('passportButton').onclick=()=>{renderPassport();$('passportDialog').showModal();};
+  $('passportExport').onclick=downloadPassport;
+  $('passportImportButton').onclick=()=>$('passportImport').click();
+  $('passportImport').onchange=importPassportFile;
+  $('passportClearRecent').onclick=()=>clearPassport('recentIds');
+  $('passportClearFavorites').onclick=()=>clearPassport('favoriteIds');
   $('trailPrev').onclick=()=>moveTrail(-1);
   $('trailNext').onclick=()=>moveTrail(1);
   $('trailExit').onclick=stopTrail;
@@ -260,7 +268,7 @@ function fitMatches(){if(!camera||!state.visible.size)return;setOrbit(false);con
 function flyTo(to,toTarget){if(!camera)return;if(reducedMotion){camera.position.copy(to);controls.target.copy(toTarget);controls.update();return;}flight={from:camera.position.clone(),to,fromTarget:controls.target.clone(),toTarget,start:performance.now()};}
 function zoom(factor){if(!camera)return;setOrbit(false);const offset=camera.position.clone().sub(controls.target),distance=THREE.MathUtils.clamp(offset.length()*factor,controls.minDistance,controls.maxDistance);flyTo(controls.target.clone().add(offset.normalize().multiplyScalar(distance)),controls.target.clone());}
 function pickRepo(event){if(!camera)return null;const rect=$('scene').getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;let best=null,distance=14;for(let i=0;i<state.repos.length;i++){const repo=state.repos[i];if(!state.visible.has(repo.id))continue;tempProjection.copy(positions[i]).project(camera);if(tempProjection.z>1||tempProjection.z<-1)continue;const px=(tempProjection.x*.5+.5)*rect.width,py=(-tempProjection.y*.5+.5)*rect.height,d=Math.hypot(x-px,y-py);if(d<distance){distance=d;best=repo;}}return best;}
-function selectRepo(id,focus=true,closeMenu=true){const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',state.trail?trailLink(location.href,state.trail,state.trailStop):withoutTrail(projectLink(location.href,repo)));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
+function selectRepo(id,focus=true,closeMenu=true){const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;state.passport=recordVisit(state.passport,repo,state.repos);savePassport(false);updatePassportCount();refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',state.trail?trailLink(location.href,state.trail,state.trailStop):withoutTrail(projectLink(location.href,repo)));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
 function clearSelection(){stopTrail();state.selected=null;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',withoutTrail(projectLink(location.href,null)));}catch{}$('inspector').hidden=true;setCameraOffset();if(sceneReady)updateAppearance();renderSidebarIndex();}
 
 /**
@@ -339,13 +347,67 @@ function showInspector(repo,spotlight){
   if(!repo)return;const changed=$('inspector').dataset.repo!==repo.id;$('inspector').dataset.repo=repo.id;
   const g=groupMap.get(repo.group),url=safeUrl(repo.url),destination=destinationStatus(repo,state.deployments),updated=repo.updated?new Date(repo.updated).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'Not available',created=repo.created?new Date(repo.created).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'Not available',size=repo.size<1024?repo.size.toLocaleString()+' KB':(repo.size/1024).toFixed(1)+' MB',days=Math.floor(ageInDays(repo)),atlas=atlasLink(state.atlas,repo),hasChapter=state.atlas?.chapters?.includes(projectId(repo));
   $('inspectorCaption').textContent=spotlight?'IN THE SPOTLIGHT':'A POINT IN THE FIELD';
-  $('inspectorContent').innerHTML=`<div class="inspector-body" style="--repo-color:${repoTint(repo)}"><div class="repo-orb" aria-hidden="true"></div><div class="repo-category"><i></i>${escape(g.name)}</div><h2>${escape(repo.name)}</h2><p class="repo-description" title="${escape(repo.description)}">${escape(repo.description||'No description has been added on GitHub yet. Explore the repository to see what is taking shape.')}</p><div class="repo-tags"><span>${escape(repo.language)}</span><span>Public</span>${repo.pages?'<span>Pages enabled</span>':''}${repo.fork?'<span>Fork</span>':''}${repo.archived?'<span class="archived-badge">Archived</span>':''}</div>${repo.topics.length?`<div class="repo-topics" aria-label="Repository topics">${repo.topics.slice(0,16).map(t=>`<span>${escape(t)}</span>`).join('')}</div>`:''}${relatedProjects(repo,state.relationships).length?'<button id="traceProject" class="trace-project" title="Clears search and filters to show directly connected projects">Trace this world’s connections ↗</button>':''}<dl class="repo-meta"><div><dt>Stars</dt><dd>${repo.stars.toLocaleString()}</dd></div><div><dt>License</dt><dd>${escape(repo.license&&repo.license!=='NOASSERTION'?repo.license:'Not specified')}</dd></div><div><dt>Repository size</dt><dd>${size}</dd></div><div><dt>Forks</dt><dd>${repo.forks.toLocaleString()}</dd></div><div class="wide"><dt>Last code push</dt><dd>${updated} · ${Number.isFinite(days)?days===0?'today':days+'d ago':'date unavailable'}</dd></div></dl><section class="destination-state ${destination.state}"><b>${destination.label}</b><p>${escape(destination.detail)}</p>${destination.check?.checkedAt?`<small>Checked ${new Date(destination.check.checkedAt).toLocaleString()}</small>`:''}</section><div class="repo-links">${destination.url?`<a href="${escape(destination.url)}" target="_blank" rel="noopener noreferrer">Explore This World ${svg('arrow')}</a>`:''}${url?`<a class="secondary" href="${escape(url)}" target="_blank" rel="noopener noreferrer"><span>View on GitHub</span>${svg('github')}</a>`:''}${atlas?`<a class="secondary" href="${escape(atlas)}" target="_blank" rel="noopener noreferrer">${hasChapter?'Read in Field Atlas':'Visit Field Atlas'} ${svg('arrow')}</a>`:''}<button class="secondary" id="shareProject">Copy project link ${svg('arrow')}</button><input id="shareFallback" class="share-fallback" aria-label="Project permalink" readonly hidden value="${escape(projectLink(location.href,repo))}"></div>${destination.candidate&&!destination.url?`<a class="unverified-link" href="${escape(destination.candidate)}" target="_blank" rel="noopener noreferrer">Declared destination · unverified ↗</a>`:''}<details class="repo-facts"><summary>Repository facts & documentation <span>+</span></summary><dl><div><dt>Created</dt><dd>${created}</dd></div><div><dt>Open issues / PRs</dt><dd>${repo.issues==null?'Not available':repo.issues.toLocaleString()}</dd></div><div><dt>GitHub Pages flag</dt><dd>${repo.pages?'Enabled; availability checked separately':'Not enabled'}</dd></div><div><dt>Default branch</dt><dd>${escape(repo.branch)}</dd></div></dl><a href="${escape(repo.url+'#readme')}" target="_blank" rel="noopener noreferrer">Repository README ↗</a><p class="project-identity">${escape(projectId(repo))}</p><small>Repository facts: public GitHub snapshot, ${new Date(state.publicUpdated||state.snapshot.fetchedAt).toLocaleString()}.</small></details>${relationshipCards(repo)}</div><div class="inspector-footer"><span>${spotlight?'ONE OF '+state.repos.length+' PUBLIC WORLDS':'KEEP EXPLORING'}</span><button id="surprise">Another world ↗</button></div>`;
+  $('inspectorContent').innerHTML=`<div class="inspector-body" style="--repo-color:${repoTint(repo)}"><div class="repo-orb" aria-hidden="true"></div><div class="repo-category"><i></i>${escape(g.name)}</div><h2>${escape(repo.name)}</h2><p class="repo-description" title="${escape(repo.description)}">${escape(repo.description||'No description has been added on GitHub yet. Explore the repository to see what is taking shape.')}</p><div class="repo-tags"><span>${escape(repo.language)}</span><span>Public</span>${repo.pages?'<span>Pages enabled</span>':''}${repo.fork?'<span>Fork</span>':''}${repo.archived?'<span class="archived-badge">Archived</span>':''}</div>${repo.topics.length?`<div class="repo-topics" aria-label="Repository topics">${repo.topics.slice(0,16).map(t=>`<span>${escape(t)}</span>`).join('')}</div>`:''}${relatedProjects(repo,state.relationships).length?'<button id="traceProject" class="trace-project" title="Clears search and filters to show directly connected projects">Trace this world’s connections ↗</button>':''}<dl class="repo-meta"><div><dt>Stars</dt><dd>${repo.stars.toLocaleString()}</dd></div><div><dt>License</dt><dd>${escape(repo.license&&repo.license!=='NOASSERTION'?repo.license:'Not specified')}</dd></div><div><dt>Repository size</dt><dd>${size}</dd></div><div><dt>Forks</dt><dd>${repo.forks.toLocaleString()}</dd></div><div class="wide"><dt>Last code push</dt><dd>${updated} · ${Number.isFinite(days)?days===0?'today':days+'d ago':'date unavailable'}</dd></div></dl><section class="destination-state ${destination.state}"><b>${destination.label}</b><p>${escape(destination.detail)}</p>${destination.check?.checkedAt?`<small>Checked ${new Date(destination.check.checkedAt).toLocaleString()}</small>`:''}</section><div class="repo-links">${destination.url?`<a href="${escape(destination.url)}" target="_blank" rel="noopener noreferrer">Explore This World ${svg('arrow')}</a>`:''}${url?`<a class="secondary" href="${escape(url)}" target="_blank" rel="noopener noreferrer"><span>View on GitHub</span>${svg('github')}</a>`:''}${atlas?`<a class="secondary" href="${escape(atlas)}" target="_blank" rel="noopener noreferrer">${hasChapter?'Read in Field Atlas':'Visit Field Atlas'} ${svg('arrow')}</a>`:''}<button class="secondary" id="passportToggle" aria-pressed="${state.passport.favoriteIds.includes(projectId(repo))}">${state.passport.favoriteIds.includes(projectId(repo))?'★ Saved in Passport':'☆ Save to Passport'}</button><button class="secondary" id="shareProject">Copy project link ${svg('arrow')}</button><input id="shareFallback" class="share-fallback" aria-label="Project permalink" readonly hidden value="${escape(projectLink(location.href,repo))}"></div>${destination.candidate&&!destination.url?`<a class="unverified-link" href="${escape(destination.candidate)}" target="_blank" rel="noopener noreferrer">Declared destination · unverified ↗</a>`:''}<details class="repo-facts"><summary>Repository facts & documentation <span>+</span></summary><dl><div><dt>Created</dt><dd>${created}</dd></div><div><dt>Open issues / PRs</dt><dd>${repo.issues==null?'Not available':repo.issues.toLocaleString()}</dd></div><div><dt>GitHub Pages flag</dt><dd>${repo.pages?'Enabled; availability checked separately':'Not enabled'}</dd></div><div><dt>Default branch</dt><dd>${escape(repo.branch)}</dd></div></dl><a href="${escape(repo.url+'#readme')}" target="_blank" rel="noopener noreferrer">Repository README ↗</a><p class="project-identity">${escape(projectId(repo))}</p><small>Repository facts: public GitHub snapshot, ${new Date(state.publicUpdated||state.snapshot.fetchedAt).toLocaleString()}.</small></details>${relationshipCards(repo)}</div><div class="inspector-footer"><span>${spotlight?'ONE OF '+state.repos.length+' PUBLIC WORLDS':'KEEP EXPLORING'}</span><button id="surprise">Another world ↗</button></div>`;
   if(changed)$('inspector').scrollTop=0;
   $('surprise').onclick=()=>{const available=state.repos.filter(r=>state.visible.has(r.id)&&r.id!==repo.id);if(available.length)selectRepo(available[Math.floor(Math.random()*available.length)].id,true);else toast('This is the only world matching your filters.');};
   if($('traceProject'))$('traceProject').onclick=()=>{resetFilters();setArchitecture(true);selectRepo(repo.id,true,false);};
+  $('passportToggle').onclick=()=>{state.passport=toggleFavorite(state.passport,repo,state.repos);savePassport();updatePassportCount();showInspector(repo,spotlight);};
   $('shareProject').onclick=async()=>{try{await navigator.clipboard.writeText(projectLink(location.href,repo));toast('Project link copied.');}catch{$('shareFallback').hidden=false;$('shareFallback').focus();$('shareFallback').select();toast('Copy the selected project link.');}};
   document.querySelectorAll('[data-related]').forEach(button=>button.onclick=()=>{resetFilters();setArchitecture(true);selectRepo(button.dataset.related,true);});
   setCameraOffset();
+}
+
+
+/** Visitor-owned, local-first favorites; only known public GitHub IDs are stored. */
+function savePassport(notify=true){
+  try{localStorage.setItem(PASSPORT_KEY,JSON.stringify(state.passport));return true;}
+  catch{if(notify)toast('Browser storage is unavailable. Passport changes last only until this page closes.');return false;}
+}
+function updatePassportCount(){
+  $('passportCount').textContent=String(state.passport.favoriteIds.length);
+  $('passportButton').setAttribute('aria-label','Open Field Passport: '+state.passport.favoriteIds.length+' saved worlds');
+}
+function passportRows(ids,emptyText){
+  const repos=passportRepos(ids,state.repos);
+  if(!repos.length)return '<p class="passport-empty">'+escape(emptyText)+'</p>';
+  return repos.map(repo=>'<button class="passport-row" data-passport-repo="'+escape(repo.id)+'"><span class="passport-mark">✳</span><span class="passport-row-copy"><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public world')+'</small></span><span aria-hidden="true">↗</span></button>').join('');
+}
+function renderPassport(){
+  $('passportFavorites').innerHTML=passportRows(state.passport.favoriteIds,'No favorites yet. Open a project and save it to your Passport.');
+  $('passportRecent').innerHTML=passportRows(state.passport.recentIds,'Your recently explored worlds will appear here.');
+  $('passportSummary').textContent=state.passport.favoriteIds.length+' saved worlds · '+state.passport.recentIds.length+' recently visited';
+  $('passportExport').disabled=state.passport.favoriteIds.length===0;
+  $('passportClearFavorites').disabled=state.passport.favoriteIds.length===0;
+  $('passportClearRecent').disabled=state.passport.recentIds.length===0;
+  document.querySelectorAll('[data-passport-repo]').forEach(button=>button.onclick=()=>{
+    $('passportDialog').close();resetFilters();selectRepo(button.dataset.passportRepo,true);
+  });
+}
+function clearPassport(section){
+  const label=section==='favoriteIds'?'saved worlds':'recent history';
+  if(!confirm('Clear all '+label+' from this browser?'))return;
+  state.passport=clearPassportSection(state.passport,section,state.repos);
+  savePassport();updatePassportCount();renderPassport();
+  if(!$('inspector').hidden){const repo=state.repos.find(r=>r.id===$('inspector').dataset.repo);if(repo)showInspector(repo,!state.selected);}
+}
+function downloadPassport(){
+  const content=exportFavorites(state.passport,state.repos);
+  const blob=new Blob([content],{type:'application/json'});
+  const url=URL.createObjectURL(blob),anchor=document.createElement('a');
+  anchor.href=url;anchor.download='field-passport-favorites.json';
+  document.body.append(anchor);anchor.click();anchor.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+async function importPassportFile(event){
+  const file=event.target.files?.[0];if(!file)return;
+  try{
+    if(file.size>32000)throw Error('File is too large for Field Passport.');
+    const result=importFavorites(state.passport,await file.text(),state.repos);
+    state.passport=result.passport;savePassport();updatePassportCount();renderPassport();
+    if(!$('inspector').hidden){const repo=state.repos.find(r=>r.id===$('inspector').dataset.repo);if(repo)showInspector(repo,!state.selected);}
+    toast('Imported '+result.imported+' public favorites'+(result.omitted?' · '+result.omitted+' unavailable IDs skipped':'')+'. Existing favorites kept.');
+  }catch(error){toast('Passport import failed: '+error.message);}
+  finally{event.target.value='';}
 }
 
 function renderDirectory(){
@@ -363,6 +425,7 @@ async function refreshPublic(){
     next=parseSnapshot({...state.snapshot,repos,fetchedAt:new Date().toISOString(),scope:'public',complete:true,source:'Fully paginated anonymous public GitHub REST repository listing'});
   }catch(error){toast(`${error.message} Your displayed inventory is preserved.`);button.disabled=false;button.classList.remove('refreshing');updateInventoryUI();return;}
   state.snapshot=next;state.repos=prepareRepos(next.repos);state.publicUpdated=next.fetchedAt;state.activityNow=Date.now();
+  state.passport=sanitizePassport(state.passport,state.repos);savePassport(false);updatePassportCount();if($('passportDialog').open)renderPassport();
   if(state.trail){const latest=availableTrails(state.repos).find(t=>t.id===state.trail.id),index=latest?.stops.findIndex(r=>r.id===state.selected)??-1;if(!latest||index<0)stopTrail();else{state.trail=latest;state.trailStop=index;updateTrailHud();try{history.replaceState(null,'',trailLink(location.href,latest,index));}catch{}}}
   renderTrails();
   try{localStorage.setItem(CACHE_KEY,JSON.stringify(next));}catch{}
