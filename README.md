@@ -1,4 +1,4 @@
-# Field Constellation 08 · Atlas Pulse
+# Field Constellation 09 · Coverage Ledger
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
@@ -6,7 +6,7 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
-Edition 08 adds a distinct dated published-site lens to Edition 07's reviewed Atlas chapters, local-first Passport, shareable journeys and source-backed architecture. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
+Edition 09 adds a read-only Atlas coverage reconciliation ledger and portable JSON receipts to Edition 08's independently dated reviewed-chapter and published-site lenses. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
 ## Explore the Living Architecture
 
@@ -64,6 +64,16 @@ The Atlas remains an independent book; this change only modifies FieldConstellat
 This does **not** mean there are only 126 Atlas chapters. The live book was separately observed showing **141 available chapters**, including seed, published and publication entries. A public-site verification is not a curator review, a guarantee the application functions, or a guarantee that a particular visitor's customized Atlas shelf contains the chapter. Dates and provenance appear directly in the UI. The two filters are mutually exclusive but work with normal search, categories, and directory filters. Both filters fail closed against invalid source data or a non-public/missing project.
 
 A project in the published-site crosswalk can open an Atlas `?project=github:<numeric-id>` deep link, which Field Atlas now validates against its own current verified public manifest. No cross-origin browser fetch, private repository lookup, account, visitor passport sharing or dependency claim is involved. The data changes only through a reviewed commit, **not live on every page load**.
+
+## Coverage Ledger · Edition 09
+
+The **View coverage ledger** control below the Atlas filters opens a transparent, accessible comparison of three **different** public observations: the displayed Constellation repository inventory, the curator-reviewed Atlas chapter map, and Atlas's public Pages-verified published-site snapshot.
+
+The dialog exposes exact public matching counts, each underlying observation date, and a short list of **published-site records that cannot be matched to the currently displayed Constellation repository snapshot**. An unmatched project does **not** mean a private repository, broken site or failed integration. For example, the bundled older public repo inventory lists 177 records while the separately dated published Atlas manifest lists 126 verified HTML sites; 125 match by public numeric repository ID plus name, and PhiOS-XR appears only in the newer published snapshot.
+
+**Refresh public repository listing** reuses Constellation's existing anonymous, fully paginated GitHub public-repository refresh, with all-or-nothing validation and preservation of previous data on failure. It does not change the Atlas source manifests. If a newly published public repository is now in the listing, the ledger reconciles it after refresh.
+
+**Export coverage JSON** creates a reproducible, dated, read-only receipt describing these independently sourced counts and mismatches, with explicit caveats. It contains only public repository IDs and names, never local Passport favorites, history, cookies or visitor identity. If an Atlas source is malformed or unavailable, the ledger says **Unavailable**, not zero coverage. The existing five layouts, Passport, evidence-backed relationships and Atlas navigation remain unchanged.
 
 ## Accurate counts and live destinations
 
