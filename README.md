@@ -1,4 +1,4 @@
-# Field Constellation 09 · Coverage Ledger
+# Field Constellation 10 · Field Postcards
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
@@ -6,7 +6,7 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
-Edition 09 adds a read-only Atlas coverage reconciliation ledger and portable JSON receipts to Edition 08's independently dated reviewed-chapter and published-site lenses. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
+Edition 10 adds shareable public Field Postcards to Edition 09's coverage ledger, local Passport and Atlas bridges. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 
 ## Explore the Living Architecture
 
@@ -74,6 +74,14 @@ The dialog exposes exact public matching counts, each underlying observation dat
 **Refresh public repository listing** reuses Constellation's existing anonymous, fully paginated GitHub public-repository refresh, with all-or-nothing validation and preservation of previous data on failure. It does not change the Atlas source manifests. If a newly published public repository is now in the listing, the ledger reconciles it after refresh.
 
 **Export coverage JSON** creates a reproducible, dated, read-only receipt describing these independently sourced counts and mismatches, with explicit caveats. It contains only public repository IDs and names, never local Passport favorites, history, cookies or visitor identity. If an Atlas source is malformed or unavailable, the ledger says **Unavailable**, not zero coverage. The existing five layouts, Passport, evidence-backed relationships and Atlas navigation remain unchanged.
+
+## Field Postcards · Edition 10
+
+A **Field Postcard** is a visitor-chosen collection of **1–8 currently public GitHub repository IDs** that opens in a preview dialog on another visitor's Constellation. To create one, first save worlds in **Field Passport**, then select **Make Field Postcard**. Choose at most eight saved projects and click **Copy postcard link**. If browser clipboard access is unavailable, an editable-selection fallback shows the exact link for manual copying.
+
+The link uses a bounded, validated `?postcard=github:<id>,github:<id>` query parameter. Creating a share link does not include the visitor's Passport backup, previously viewed projects, local names, timestamps, history, cookies, or credentials. It also strips unrelated `repo` and curated trail parameters from the shared URL so the recipient sees a postcard, not an accidental tour.
+
+**Opening someone else's postcard never imports it.** Visitors can preview currently public worlds, open one in the 3D map, or explicitly click **Save these worlds to my Passport**. An invalid, duplicated, oversized, or fully unavailable postcard is rejected; unknown or now-unavailable IDs in an otherwise valid link are omitted without revealing private metadata. The Passport only changes after explicit selection, and its existing local-first storage limits are respected. No backend, authenticated GitHub lookup, live destination certification, cross-origin browser storage or analytics service is involved.
 
 ## Accurate counts and live destinations
 

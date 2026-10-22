@@ -13,12 +13,13 @@ import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite
 import {reviewedAtlasIds,atlasManifestLabel} from './atlas-lens.js';
 import {publishedAtlasIds,publishedAtlasLabel,publishedAtlasLink} from './atlas-published.js';
 import {atlasCoverageAudit,atlasCoverageReceipt} from './atlas-audit.js';
+import {MAX_POSTCARD_WORLDS,readPostcardLink,buildPostcardLink,withoutPostcard,savePostcardFavorites} from './postcards.js';
 
 const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport()};
+const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),postcardView:null,postcardDraft:[]};
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new THREE.Color(),tempProjection=new THREE.Vector3();
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
@@ -48,6 +49,7 @@ async function boot(){
     state.atlasPublished=extras[3].status==='fulfilled'?extras[3].value:null;
     bindUI();renderTrails();updatePassportCount();updateInventoryUI();applyFilters();updateRelationshipUI();
     try{initScene();sceneReady=true;buildField();animate(0);}catch(error){console.error('3D initialization failed',error);$('map').classList.add('webgl-unavailable');$('orbitToggle').disabled=true;$('loading').hidden=true;toast('3D is unavailable here. Every public repo is still in the directory.');}
+    const sharedPostcard=readPostcardLink(location.href,state.repos);
     const sharedTrail=readTrailLink(location.href,state.repos);
     if(sharedTrail){state.trail=sharedTrail.trail;state.trailStop=sharedTrail.index;}
     const linked=sharedTrail?.repo||readProjectLink(location.href,state.repos);
@@ -59,6 +61,8 @@ async function boot(){
       if(innerWidth<761)$('inspector').hidden=true;
     }
     setCameraOffset();$('loading').hidden=true;
+    if(sharedPostcard){state.postcardView=sharedPostcard;renderPostcard();$('postcardDialog').showModal();}
+    else if(new URL(location.href).searchParams.has('postcard'))toast('This Field Postcard contains no available public worlds.');
     if(!state.relationshipLedger)toast('Relationship evidence is unavailable. The five layouts and directory remain usable.');
   }catch(error){console.error(error);$('loading').innerHTML=`<span class="loader-orbit">✳</span><p>Your public inventory could not load.</p><button class="primary-button" id="retryLoad">Try again</button><a href="https://github.com/MichaelWave369?tab=repositories" target="_blank" rel="noopener noreferrer">Browse on GitHub ↗</a>`;$('retryLoad').onclick=()=>location.reload();}
 }
@@ -88,6 +92,13 @@ function bindUI(){
   $('directoryButton').onclick=()=>{renderDirectory();$('directoryDialog').showModal();};
   $('trailsButton').onclick=()=>{renderTrails();$('trailsDialog').showModal();};
   $('passportButton').onclick=()=>{renderPassport();$('passportDialog').showModal();};
+  $('postcardComposer').onclick=()=>{
+    if(!state.passport.favoriteIds.length)return;
+    state.postcardView=null;state.postcardDraft=state.passport.favoriteIds.slice(0,MAX_POSTCARD_WORLDS);
+    $('passportDialog').close();renderPostcard();$('postcardDialog').showModal();
+  };
+  $('postcardCopy').onclick=copyPostcard;
+  $('postcardSave').onclick=saveReceivedPostcard;
   $('passportExport').onclick=downloadPassport;
   $('passportImportButton').onclick=()=>$('passportImport').click();
   $('passportImport').onchange=importPassportFile;
@@ -290,8 +301,8 @@ function fitMatches(){if(!camera||!state.visible.size)return;setOrbit(false);con
 function flyTo(to,toTarget){if(!camera)return;if(reducedMotion){camera.position.copy(to);controls.target.copy(toTarget);controls.update();return;}flight={from:camera.position.clone(),to,fromTarget:controls.target.clone(),toTarget,start:performance.now()};}
 function zoom(factor){if(!camera)return;setOrbit(false);const offset=camera.position.clone().sub(controls.target),distance=THREE.MathUtils.clamp(offset.length()*factor,controls.minDistance,controls.maxDistance);flyTo(controls.target.clone().add(offset.normalize().multiplyScalar(distance)),controls.target.clone());}
 function pickRepo(event){if(!camera)return null;const rect=$('scene').getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;let best=null,distance=14;for(let i=0;i<state.repos.length;i++){const repo=state.repos[i];if(!state.visible.has(repo.id))continue;tempProjection.copy(positions[i]).project(camera);if(tempProjection.z>1||tempProjection.z<-1)continue;const px=(tempProjection.x*.5+.5)*rect.width,py=(-tempProjection.y*.5+.5)*rect.height,d=Math.hypot(x-px,y-py);if(d<distance){distance=d;best=repo;}}return best;}
-function selectRepo(id,focus=true,closeMenu=true){const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;state.passport=recordVisit(state.passport,repo,state.repos);savePassport(false);updatePassportCount();refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',state.trail?trailLink(location.href,state.trail,state.trailStop):withoutTrail(projectLink(location.href,repo)));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
-function clearSelection(){stopTrail();state.selected=null;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',withoutTrail(projectLink(location.href,null)));}catch{}$('inspector').hidden=true;setCameraOffset();if(sceneReady)updateAppearance();renderSidebarIndex();}
+function selectRepo(id,focus=true,closeMenu=true){const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;state.passport=recordVisit(state.passport,repo,state.repos);savePassport(false);updatePassportCount();refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',withoutPostcard(state.trail?trailLink(location.href,state.trail,state.trailStop):withoutTrail(projectLink(location.href,repo))));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
+function clearSelection(){stopTrail();state.selected=null;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',withoutPostcard(withoutTrail(projectLink(location.href,null))));}catch{}$('inspector').hidden=true;setCameraOffset();if(sceneReady)updateAppearance();renderSidebarIndex();}
 
 /**
  * Curated trails are visitor tours only. They are deliberately independent of
@@ -394,6 +405,72 @@ function passportRows(ids,emptyText){
   if(!repos.length)return '<p class="passport-empty">'+escape(emptyText)+'</p>';
   return repos.map(repo=>'<button class="passport-row" data-passport-repo="'+escape(repo.id)+'"><span class="passport-mark">✳</span><span class="passport-row-copy"><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public world')+'</small></span><span aria-hidden="true">↗</span></button>').join('');
 }
+
+/** Composer selects from already saved public favorites; opening a link never saves. */
+function renderPostcard(){
+  const incoming=state.postcardView;
+  const allFavorites=passportRepos(state.passport.favoriteIds,state.repos);
+  $('postcardHeading').textContent=incoming?'A Field Postcard Arrived':'Make a Field Postcard';
+  $('postcardDescription').textContent=incoming?
+    'Someone shared these public worlds. Explore any one, or choose to save them to your own Passport. Nothing is stored automatically.':
+    'Choose up to eight of your saved public worlds to share. The link contains public repository IDs only, never recent visits.';
+  $('postcardCopy').hidden=!!incoming;
+  $('postcardSave').hidden=!incoming;
+  $('postcardUrlFallback').hidden=true;
+  $('postcardStatus').textContent='';
+  if(incoming){
+    $('postcardCount').textContent=incoming.worlds.length+' public worlds available';
+    $('postcardOmitted').textContent=incoming.omitted?incoming.omitted+' unavailable project ID(s) were omitted. No private details were fetched.':'';
+    $('postcardList').innerHTML=incoming.worlds.map(repo=>'<button class="postcard-world" data-postcard-world="'+escape(repo.id)+'"><span class="postcard-symbol" aria-hidden="true">✳</span><span class="postcard-row-copy"><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public project')+'</small></span><span aria-hidden="true">↗</span></button>').join('');
+    $('postcardSave').disabled=incoming.ids.every(id=>state.passport.favoriteIds.includes(id));
+    document.querySelectorAll('[data-postcard-world]').forEach(button=>button.onclick=()=>{
+      const id=button.dataset.postcardWorld;
+      $('postcardDialog').close();state.postcardView=null;
+      resetFilters();selectRepo(id,true);
+    });
+  }else{
+    $('postcardOmitted').textContent='';
+    $('postcardCount').textContent=state.postcardDraft.length+' of '+MAX_POSTCARD_WORLDS+' worlds selected';
+    $('postcardCopy').disabled=!state.postcardDraft.length;
+    $('postcardList').innerHTML=allFavorites.length?allFavorites.map(repo=>{
+      const id=projectId(repo),checked=state.postcardDraft.includes(id);
+      return '<label class="postcard-world postcard-choice"><input type="checkbox" data-postcard-choice="'+escape(id)+'" '+(checked?'checked':'')+'><span class="postcard-row-copy"><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public project')+'</small></span></label>';
+    }).join(''):'<p class="passport-empty">Save a public world to your Passport first.</p>';
+    document.querySelectorAll('[data-postcard-choice]').forEach(input=>input.onchange=()=>{
+      const id=input.dataset.postcardChoice;
+      if(input.checked){
+        if(state.postcardDraft.length>=MAX_POSTCARD_WORLDS){input.checked=false;toast('A postcard holds up to eight worlds.');return;}
+        if(!state.postcardDraft.includes(id))state.postcardDraft.push(id);
+      }else state.postcardDraft=state.postcardDraft.filter(x=>x!==id);
+      $('postcardCount').textContent=state.postcardDraft.length+' of '+MAX_POSTCARD_WORLDS+' worlds selected';
+      $('postcardCopy').disabled=!state.postcardDraft.length;
+      $('postcardUrlFallback').hidden=true;
+    });
+  }
+}
+async function copyPostcard(){
+  if(!state.postcardDraft.length)return;
+  let href;
+  try{href=buildPostcardLink(location.href,state.postcardDraft,state.repos);}
+  catch(error){toast(error.message);return;}
+  try{
+    if(!navigator.clipboard?.writeText)throw Error('Clipboard unavailable');
+    await navigator.clipboard.writeText(href);
+    $('postcardStatus').textContent='Field Postcard link copied. Ready to share!';
+  }catch{
+    const input=$('postcardUrlFallback');
+    input.value=href;input.hidden=false;input.focus();input.select();
+    $('postcardStatus').textContent='Select and copy the link above.';
+  }
+}
+function saveReceivedPostcard(){
+  if(!state.postcardView)return;
+  const outcome=savePostcardFavorites(state.passport,state.postcardView.ids,state.repos);
+  state.passport=outcome.passport;savePassport();updatePassportCount();
+  renderPostcard();
+  toast(outcome.saved+' world(s) added to your Passport.'+(outcome.skipped?' Passport is full for '+outcome.skipped+' world(s).':''));
+}
+
 function renderPassport(){
   $('passportFavorites').innerHTML=passportRows(state.passport.favoriteIds,'No favorites yet. Open a project and save it to your Passport.');
   $('passportRecent').innerHTML=passportRows(state.passport.recentIds,'Your recently explored worlds will appear here.');
@@ -401,6 +478,7 @@ function renderPassport(){
   $('passportExport').disabled=state.passport.favoriteIds.length===0;
   $('passportClearFavorites').disabled=state.passport.favoriteIds.length===0;
   $('passportClearRecent').disabled=state.passport.recentIds.length===0;
+  $('postcardComposer').disabled=state.passport.favoriteIds.length===0;
   document.querySelectorAll('[data-passport-repo]').forEach(button=>button.onclick=()=>{
     $('passportDialog').close();resetFilters();selectRepo(button.dataset.passportRepo,true);
   });
@@ -478,6 +556,14 @@ async function refreshPublic(){
   }catch(error){toast(`${error.message} Your displayed inventory is preserved.`);button.disabled=false;button.classList.remove('refreshing');updateInventoryUI();return;}
   state.snapshot=next;state.repos=prepareRepos(next.repos);state.publicUpdated=next.fetchedAt;state.activityNow=Date.now();
   state.passport=sanitizePassport(state.passport,state.repos);savePassport(false);updatePassportCount();if($('passportDialog').open)renderPassport();
+  if($('postcardDialog').open){
+    if(state.postcardView){
+      const latest=readPostcardLink(location.href,state.repos);
+      if(latest)state.postcardView=latest;
+      else{state.postcardView=null;state.postcardDraft=[];}
+    }else state.postcardDraft=state.postcardDraft.filter(id=>state.passport.favoriteIds.includes(id));
+    renderPostcard();
+  }
   if(state.trail){const latest=availableTrails(state.repos).find(t=>t.id===state.trail.id),index=latest?.stops.findIndex(r=>r.id===state.selected)??-1;if(!latest||index<0)stopTrail();else{state.trail=latest;state.trailStop=index;updateTrailHud();try{history.replaceState(null,'',trailLink(location.href,latest,index));}catch{}}}
   renderTrails();
   if(state.atlasOnly&&!reviewedAtlasIds(state.atlas,state.repos).size)state.atlasOnly=false;

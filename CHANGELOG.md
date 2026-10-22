@@ -1,5 +1,15 @@
 # Changelog
 
+## Edition 10 · Field Postcards — PR milestone
+
+- Share a deliberate collection of up to eight public repository worlds from existing browser-local Passport favorites.
+- Preview incoming links as public-only discovery collections; never silently import shared favorites.
+- Allow visitors to explore a world or explicitly add an available postcard collection to local favorites.
+- Reject malformed, duplicate and oversized share claims; omit unavailable records without leaking private data.
+- Use clean public-ID permalinks with clipboard fallback; never expose recent visit history or Passport backups.
+- Preserve verified Atlas navigation, dated Coverage Ledger, evidence-backed relationships and five 3D layouts.
+
+
 ## Edition 09 · Coverage Ledger — PR milestone
 
 - Add a read-only, separately dated Atlas ↔ Constellation public coverage ledger accessible from sidebar filters.
