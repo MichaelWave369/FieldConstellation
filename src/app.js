@@ -10,12 +10,13 @@ import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.j
 import {availableTrails} from './trails.js';
 import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
 import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite,recordVisit,clearPassportSection,passportRepos,exportFavorites,importFavorites} from './passport.js';
+import {reviewedAtlasIds,atlasLensRepos,atlasManifestLabel} from './atlas-lens.js';
 
 const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport()};
+const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport()};
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new THREE.Color(),tempProjection=new THREE.Vector3();
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
@@ -69,6 +70,7 @@ function bindUI(){
   $('colorLens').onchange=event=>setLens(event.target.value);
   $('themeToggle').onclick=()=>setTheme(state.theme==='field'?'lattice':'field');
   $('pagesOnly').onclick=()=>{state.pagesOnly=!state.pagesOnly;applyFilters();};$('hideForks').onclick=()=>{state.hideForks=!state.hideForks;applyFilters();};
+  $('atlasOnly').onclick=()=>{if(!reviewedAtlasIds(state.atlas,state.repos).size)return;state.atlasOnly=!state.atlasOnly;applyFilters();if(sceneReady)fitMatches();};
   $('fitMatches').onclick=fitMatches;
   document.querySelectorAll('[data-layout]').forEach(button=>button.onclick=()=>setLayout(button.dataset.layout));
   $('linksToggle').onchange=event=>{state.links=event.target.checked;if(lineMesh)lineMesh.visible=state.links;};
@@ -129,6 +131,12 @@ function updateInventoryUI(){
   const checked=state.deployments?.checkedAt;
   $('aboutDestinations').textContent=checked?`Destination checks: ${new Date(checked).toLocaleString()}. “HTML checked” counts eligible HTTPS destinations that returned 2xx text/html within seven days. It does not certify application features or iframe support. Timeouts and access restrictions are inconclusive; old checks become stale.`:'Destination checks could not load. Homepage and Pages metadata are unverified.';
   const atlas=atlasLink(state.atlas);$('atlasNav').hidden=!atlas;if(atlas)$('atlasNav').href=atlas;
+  const atlasIds=reviewedAtlasIds(state.atlas,state.repos);
+  $('atlasOnly').disabled=atlasIds.size===0;
+  $('atlasOnly').title=atlasIds.size?'Show only public repos in the reviewed, dated Atlas map':'Reviewed Atlas chapter map unavailable';
+  $('atlasCount').textContent=String(atlasIds.size);
+  $('atlasCoverage').textContent=atlasManifestLabel(state.atlas,state.repos)+'. The live Atlas may have newer chapters.';
+  $('aboutAtlasLens').textContent=atlasIds.size?'Atlas Lens shows '+atlasIds.size+' public projects in this independently dated reviewed chapter map. It does not claim the live Atlas is complete or up-to-date. Only reviewed public chapter links are opened.':'Atlas Lens is unavailable because its reviewed public chapter map could not be validated.';
 
   $('categories').innerHTML=GROUPS.map(g=>`<button class="category${state.group===g.id?' selected':''}" style="--category:${g.color}" data-group="${g.id}" aria-pressed="${state.group===g.id}"><span class="category-dot"></span><span>${g.name}</span><span class="category-count">${state.repos.filter(r=>r.group===g.id).length}</span></button>`).join('');
   document.querySelectorAll('[data-group]').forEach(button=>button.onclick=()=>{state.group=state.group===button.dataset.group?null:button.dataset.group;applyFilters();});
@@ -136,7 +144,8 @@ function updateInventoryUI(){
 }
 
 function applyFilters(){
-  state.visible=new Set(filterRepos(state.repos,state).map(r=>r.id));
+  const atlasIds=state.atlasOnly?reviewedAtlasIds(state.atlas,state.repos):null;
+  state.visible=new Set(filterRepos(state.repos,state).filter(r=>!atlasIds||atlasIds.has(projectId(r))).map(r=>r.id));
   $('visibleCount').textContent=`${state.visible.size} / ${state.repos.length} worlds`;
   $('emptyState').hidden=state.visible.size!==0;
   document.querySelectorAll('[data-group]').forEach(b=>{const selected=state.group===b.dataset.group;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
@@ -145,10 +154,10 @@ function applyFilters(){
   if(state.query&&state.visible.size===1&&state.selected!==[...state.visible][0])selectRepo([...state.visible][0],true,false);
   if(sceneReady)updateAppearance();
   if($('directoryDialog').open)renderDirectory();
-  $('pagesOnly').setAttribute('aria-pressed',String(state.pagesOnly));$('hideForks').setAttribute('aria-pressed',String(state.hideForks));renderSidebarIndex();renderLensLegend();
+  $('pagesOnly').setAttribute('aria-pressed',String(state.pagesOnly));$('hideForks').setAttribute('aria-pressed',String(state.hideForks));$('atlasOnly').setAttribute('aria-pressed',String(state.atlasOnly));renderSidebarIndex();renderLensLegend();
   $('tooltip').hidden=true;updateRelationshipUI();
 }
-function resetFilters(){state.query='';state.group=null;state.language='';state.visibility='';state.pagesOnly=false;state.hideForks=false;$('search').value='';$('language').value='';$('visibility').value='';clearSelection();applyFilters();if(sceneReady)fitField(true);}
+function resetFilters(){state.query='';state.group=null;state.language='';state.visibility='';state.pagesOnly=false;state.hideForks=false;state.atlasOnly=false;$('search').value='';$('language').value='';$('visibility').value='';clearSelection();applyFilters();if(sceneReady)fitField(true);}
 function setSidebarMode(mode){state.sidebarMode=mode;$('worldPanel').hidden=mode!=='worlds';$('repoPanel').hidden=mode!=='repos';$('worldsTab').setAttribute('aria-selected',String(mode==='worlds'));$('reposTab').setAttribute('aria-selected',String(mode==='repos'));$('worldsTab').tabIndex=mode==='worlds'?0:-1;$('reposTab').tabIndex=mode==='repos'?0:-1;$('browseHeading').textContent=mode==='worlds'?'CONSTELLATIONS':'REPOSITORIES';if(mode==='repos')renderSidebarIndex();}
 function renderSidebarIndex(){
   const previousScroll=$('repoIndex').scrollTop;
@@ -428,6 +437,7 @@ async function refreshPublic(){
   state.passport=sanitizePassport(state.passport,state.repos);savePassport(false);updatePassportCount();if($('passportDialog').open)renderPassport();
   if(state.trail){const latest=availableTrails(state.repos).find(t=>t.id===state.trail.id),index=latest?.stops.findIndex(r=>r.id===state.selected)??-1;if(!latest||index<0)stopTrail();else{state.trail=latest;state.trailStop=index;updateTrailHud();try{history.replaceState(null,'',trailLink(location.href,latest,index));}catch{}}}
   renderTrails();
+  if(state.atlasOnly&&!reviewedAtlasIds(state.atlas,state.repos).size)state.atlasOnly=false;
   try{localStorage.setItem(CACHE_KEY,JSON.stringify(next));}catch{}
   state.relationships=state.relationshipLedger?resolveRelationships(state.repos,state.relationshipLedger):[];
   if(state.selected&&!state.repos.some(r=>r.id===state.selected))clearSelection();
