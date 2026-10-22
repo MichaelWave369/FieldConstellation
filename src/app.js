@@ -13,12 +13,13 @@ import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite
 import {reviewedAtlasIds,atlasManifestLabel} from './atlas-lens.js';
 import {publishedAtlasIds,publishedAtlasLabel,publishedAtlasLink} from './atlas-published.js';
 import {atlasCoverageAudit,atlasCoverageReceipt} from './atlas-audit.js';
+import {MAX_POSTCARD_WORLDS,readPostcardLink,buildPostcardLink,withoutPostcard,savePostcardFavorites} from './postcards.js';
 
 const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport()};
+const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),postcardView:null,postcardDraft:[]};
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new THREE.Color(),tempProjection=new THREE.Vector3();
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
@@ -48,6 +49,7 @@ async function boot(){
     state.atlasPublished=extras[3].status==='fulfilled'?extras[3].value:null;
     bindUI();renderTrails();updatePassportCount();updateInventoryUI();applyFilters();updateRelationshipUI();
     try{initScene();sceneReady=true;buildField();animate(0);}catch(error){console.error('3D initialization failed',error);$('map').classList.add('webgl-unavailable');$('orbitToggle').disabled=true;$('loading').hidden=true;toast('3D is unavailable here. Every public repo is still in the directory.');}
+    const sharedPostcard=readPostcardLink(location.href,state.repos);
     const sharedTrail=readTrailLink(location.href,state.repos);
     if(sharedTrail){state.trail=sharedTrail.trail;state.trailStop=sharedTrail.index;}
     const linked=sharedTrail?.repo||readProjectLink(location.href,state.repos);
