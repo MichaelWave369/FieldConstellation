@@ -184,3 +184,33 @@ body.lattice-theme{--bg:#0d0f12;--panel:#191815;--panel2:#242017;--accent:#e0b15
 #atlasPublishedCount{color:var(--accent);font-size:9px;font-variant-numeric:tabular-nums}
 .atlas-published-tag{color:#b9d8c7;border-color:#659080}
 .lattice-theme .atlas-published-tag{color:#e2cda8;border-color:#90744a}
+
+
+/* Edition 09 · Coverage Ledger. Audit information is neutral, not a health score. */
+.atlas-audit-button{width:100%;min-height:32px;margin:3px 0 0;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #5d714e;border-radius:4px;color:#c9dfb9;background:#253226;font-size:9px;letter-spacing:.03em;cursor:pointer}
+.atlas-audit-button:hover,.atlas-audit-button:focus-visible{border-color:var(--accent);color:var(--accent)}
+.atlas-audit-button svg{width:13px;height:13px}
+.atlas-audit-dialog{width:670px;max-width:calc(100% - 24px)}
+.atlas-audit-intro{font-size:11px;color:var(--muted);line-height:1.7;margin:0 0 17px}
+.atlas-audit-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.atlas-audit-metrics>div{background:#293428;border:1px solid #485840;border-radius:5px;padding:12px 8px;min-height:82px}
+.atlas-audit-metrics strong{display:block;color:var(--accent);font-size:22px;font-weight:550;line-height:1.4;overflow-wrap:anywhere}
+.atlas-audit-metrics span{display:block;margin:7px 0 0;font-size:9px;line-height:1.5;color:var(--muted)}
+.atlas-audit-dates{border-bottom:1px solid #4a5743;padding:10px 0;margin:8px 0}
+.atlas-audit-dates p{color:var(--muted);font-size:10px;line-height:1.5;margin:5px 0}
+.atlas-audit-actions{display:flex;gap:9px;flex-wrap:wrap}
+.atlas-audit-actions button{border:1px solid #65835a;background:#2b3b2c;color:var(--text);border-radius:4px;padding:10px 12px;font-size:10px;min-height:38px}
+.atlas-audit-actions button:disabled{opacity:.45;cursor:wait}
+.atlas-audit-actions button:hover:not(:disabled){border-color:var(--accent)}
+.atlas-audit-discrepancies{border-top:1px solid #4a5743;margin-top:18px;padding-top:13px}
+.atlas-audit-discrepancies h3{font-weight:500;font-size:13px;margin:0 0 9px}
+.atlas-audit-discrepancies ul{margin:0;padding:0;max-height:24dvh;overflow-y:auto;list-style:none}
+.atlas-audit-discrepancies li{padding:9px 4px;border-bottom:1px solid #34402e;font-size:11px;line-height:1.5}
+.atlas-audit-discrepancies li strong{display:block;font-weight:550}
+.atlas-audit-discrepancies li small{display:block;margin-top:4px;color:var(--muted);overflow-wrap:anywhere}
+.lattice-theme .atlas-audit-metrics>div,.lattice-theme .atlas-audit-button{background:#29251e;border-color:#746249}
+@media(max-width:760px){
+ .atlas-audit-dialog{padding:16px;max-height:90dvh}
+ .atlas-audit-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .atlas-audit-actions button{flex:1 1 120px}
+}

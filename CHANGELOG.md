@@ -1,5 +1,15 @@
 # Changelog
 
+## Edition 09 · Coverage Ledger — PR milestone
+
+- Add a read-only, separately dated Atlas ↔ Constellation public coverage ledger accessible from sidebar filters.
+- Reconcile curator-reviewed chapters and Atlas's verified published HTML inventory against the displayed public repository IDs, with a readable mismatch list.
+- Reuse validated anonymous public GitHub inventory refresh to resolve newer public projects without changing Atlas source manifests.
+- Export a local JSON receipt with source dates, counts, mismatches and explicit caveats, excluding all visitor data.
+- Fail closed on invalid manifests instead of reporting misleading zero coverage; add deterministic tests of 177/124/126/125 counts and PhiOS-XR divergence.
+- Retain all layouts, Passport, tours, Atlas doors and sourced technical relationship classifications.
+
+
 ## Edition 08 · Atlas Pulse — PR milestone
 
 - Keep the existing curator-reviewed Atlas chapter filter and add a separate dated, public Pages-verified-site filter.
