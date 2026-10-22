@@ -37,7 +37,9 @@ export function buildPostcardLink(href,ids,repos){
   const publicIds=publicMap(repos);
   if(ids.some(id=>!publicIds.has(id)))throw Error('Postcards can include only currently public worlds.');
   const url=new URL(href);
-  for(const param of ['postcard','repo','trail','stop'])url.searchParams.delete(param);
+  // A share URL never inherits unrelated query parameters, including any
+  // attribution or temporary state from the composer's browsing session.
+  url.search='';
   url.searchParams.set('postcard',ids.join(','));
   url.hash='';
   return url.href;
