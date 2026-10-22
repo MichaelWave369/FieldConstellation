@@ -421,7 +421,7 @@ function renderPostcard(){
   if(incoming){
     $('postcardCount').textContent=incoming.worlds.length+' public worlds available';
     $('postcardOmitted').textContent=incoming.omitted?incoming.omitted+' unavailable project ID(s) were omitted. No private details were fetched.':'';
-    $('postcardList').innerHTML=incoming.worlds.map(repo=>'<button class="postcard-world" data-postcard-world="'+escape(repo.id)+'"><span class="postcard-symbol" aria-hidden="true">✳</span><span><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public project')+'</small></span><span aria-hidden="true">↗</span></button>').join('');
+    $('postcardList').innerHTML=incoming.worlds.map(repo=>'<button class="postcard-world" data-postcard-world="'+escape(repo.id)+'"><span class="postcard-symbol" aria-hidden="true">✳</span><span class="postcard-row-copy"><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public project')+'</small></span><span aria-hidden="true">↗</span></button>').join('');
     $('postcardSave').disabled=incoming.ids.every(id=>state.passport.favoriteIds.includes(id));
     document.querySelectorAll('[data-postcard-world]').forEach(button=>button.onclick=()=>{
       const id=button.dataset.postcardWorld;
@@ -434,7 +434,7 @@ function renderPostcard(){
     $('postcardCopy').disabled=!state.postcardDraft.length;
     $('postcardList').innerHTML=allFavorites.length?allFavorites.map(repo=>{
       const id=projectId(repo),checked=state.postcardDraft.includes(id);
-      return '<label class="postcard-world postcard-choice"><input type="checkbox" data-postcard-choice="'+escape(id)+'" '+(checked?'checked':'')+'><span><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public project')+'</small></span></label>';
+      return '<label class="postcard-world postcard-choice"><input type="checkbox" data-postcard-choice="'+escape(id)+'" '+(checked?'checked':'')+'><span class="postcard-row-copy"><strong>'+escape(repo.name)+'</strong><small>'+escape(groupMap.get(repo.group)?.name||'Public project')+'</small></span></label>';
     }).join(''):'<p class="passport-empty">Save a public world to your Passport first.</p>';
     document.querySelectorAll('[data-postcard-choice]').forEach(input=>input.onchange=()=>{
       const id=input.dataset.postcardChoice;
