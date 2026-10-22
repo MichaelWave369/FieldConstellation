@@ -165,3 +165,14 @@ body.lattice-theme{--bg:#0d0f12;--panel:#191815;--panel2:#242017;--accent:#e0b15
  .passport-list{max-height:20dvh}
  .passport-actions button{flex:1;min-width:115px}
 }
+
+
+/* Edition 07: show the dated, reviewed Atlas crosswalk without claiming live completeness. */
+.quick-filters{flex-wrap:wrap}
+.quick-filters #atlasOnly{flex-basis:100%;display:flex;align-items:center;justify-content:center;gap:7px}
+.quick-filters #atlasOnly:disabled{opacity:.5;cursor:not-allowed}
+#atlasCount{color:var(--accent);font-size:9px;font-variant-numeric:tabular-nums}
+.atlas-coverage{color:#9fae8b;font-size:8px;line-height:1.55;margin:7px 0 2px}
+.atlas-reviewed-tag{color:#bfddb1;border-color:#5b7952}
+.lattice-theme .atlas-coverage{color:#cfba98}
+.lattice-theme .atlas-reviewed-tag{color:#ebd7ac;border-color:#947c50}
