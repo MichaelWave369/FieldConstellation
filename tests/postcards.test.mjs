@@ -19,7 +19,7 @@ test('public postcards round-trip, maintain ordering, and never include visit hi
   assert.equal(parsed.searchParams.has('repo'),false);
   assert.equal(parsed.searchParams.has('trail'),false);
   assert.equal(parsed.searchParams.has('stop'),false);
-  assert.equal(parsed.searchParams.get('utm_source'),'friend');
+  assert.equal(parsed.searchParams.get('utm_source'),null,'unrelated tracking or attribution query parameters are never shared');
   assert.equal(parsed.hash,'');
   assert.deepEqual(readPostcardLink(link,repos).ids,ids);
   assert.deepEqual(readPostcardLink(link,repos).worlds.map(x=>x.id),[b.id,a.id,c.id]);
