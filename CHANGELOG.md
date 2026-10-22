@@ -1,5 +1,15 @@
 # Changelog
 
+## Edition 07 · Atlas Lens — PR milestone
+
+- Filter the existing Constellation and directory to reviewed public projects that have a chapter in the independently dated Atlas map.
+- Show a reviewed Atlas chapter count and map date; explicitly distinguish the reviewed subset from the live Atlas catalog.
+- Label reviewed project inspector entries and preserve the existing book chapter links.
+- Test that only currently public repository IDs can enter the lens; reject invalid, unknown and private chapter identifiers and malformed maps.
+- Document a separately authorized Atlas-side canonical-ID return link proposal without changing FieldAtlas.
+- Preserve the existing 3D layouts, source-backed relationship ledger, personal Passport, guided tours and safe static deployment.
+
+
 ## Edition 06 · Field Passport — PR milestone
 
 - Add a browser-local Field Passport to bookmark and revisit public repository worlds.
