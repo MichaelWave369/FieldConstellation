@@ -214,3 +214,34 @@ body.lattice-theme{--bg:#0d0f12;--panel:#191815;--panel2:#242017;--accent:#e0b15
  .atlas-audit-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
  .atlas-audit-actions button{flex:1 1 120px}
 }
+
+
+/* Edition 10: share a deliberate collection of public worlds, never visitor history. */
+.postcard-dialog{width:680px;max-width:calc(100% - 24px)}
+.postcard-description{font-size:11px;color:var(--muted);line-height:1.7;margin:0 0 8px}
+.postcard-count{font-size:10px;color:var(--accent);margin:0 0 10px}
+.postcard-list{border-top:1px solid #43533f;max-height:39dvh;overflow-y:auto;scrollbar-color:#667b57 transparent}
+.postcard-world{display:flex;align-items:center;gap:13px;width:100%;min-height:56px;padding:10px 8px;border:0;border-bottom:1px solid #354232;background:transparent;text-align:left;color:var(--text)}
+button.postcard-world{cursor:pointer}
+button.postcard-world:hover,button.postcard-world:focus-visible{background:#2d3c2b}
+.postcard-world>span:nth-last-child(2){display:flex;min-width:0;flex:1;flex-direction:column;gap:5px}
+.postcard-world strong{font-size:11px;font-weight:550;overflow-wrap:anywhere}
+.postcard-world small{font-size:9px;color:var(--muted)}
+.postcard-symbol{font-size:21px;color:var(--accent)}
+.postcard-choice{cursor:pointer}
+.postcard-choice input{width:18px;height:18px;flex:none;accent-color:#a4cd7b}
+.postcard-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}
+.postcard-actions button{border:1px solid #719363;color:var(--text);background:#304530;border-radius:4px;min-height:40px;padding:9px 12px;font-size:10px}
+.postcard-actions button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.postcard-actions button:disabled{cursor:default;opacity:.42}
+.postcard-actions button[hidden]{display:none}
+.postcard-copy-fallback{display:block;width:100%;min-height:38px;padding:8px;font-size:10px;border:1px solid #739468;background:#182319;color:var(--text);border-radius:4px}
+.postcard-copy-fallback[hidden]{display:none}
+.postcard-status,.postcard-omitted{min-height:14px;font-size:10px;line-height:1.5;color:var(--accent);margin:6px 0}
+.postcard-omitted{color:var(--muted)}
+.lattice-theme button.postcard-world:hover{background:#363026}
+@media(max-width:760px){
+  .postcard-dialog{padding:17px;max-height:90dvh}
+  .postcard-list{max-height:36dvh}
+  .postcard-actions button{flex:1;min-width:130px}
+}
