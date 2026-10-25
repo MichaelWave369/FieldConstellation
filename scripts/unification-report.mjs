@@ -46,7 +46,7 @@ export function buildReport(snapshot, audit) {
   };
 }
 
-if (process.argv[1] && /(?:^|[/\\])unification-report\\.mjs$/.test(process.argv[1])) {
+if (process.argv[1] && process.argv[1].includes('unification-report.mjs')) {
   const args = process.argv.slice(2);
   if (args.includes('--help')) {
     console.log('node scripts/unification-report.mjs [--json]  # read-only public seed reconciliation');
@@ -66,7 +66,7 @@ if (process.argv[1] && /(?:^|[/\\])unification-report\\.mjs$/.test(process.argv[
         'Unreviewed in old snapshot: ' + report.seed.unreviewedInSnapshot,
         'Layers represented: ' + Object.keys(report.layers).length,
         'Private repository names: excluded'
-      ].join('\\n'));
+      ].join(String.fromCharCode(10)));
     } catch (error) {
       console.error(error.message);
       process.exitCode = 1;
