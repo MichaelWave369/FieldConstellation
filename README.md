@@ -1,10 +1,23 @@
-# Field Constellation 11 · Browser-Proven Journeys
+# Field Constellation 12 · New Worlds
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
 [Open the production map](https://michaelwave369.github.io/FieldConstellation/) · [Build and deployment status](https://github.com/MichaelWave369/FieldConstellation/actions) · [Read the Field Atlas](https://michaelwave369.github.io/FieldAtlas/)
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
+
+## Edition 12 · New Worlds and refreshed public coverage (October 29, 2026)
+
+The bundled **public-only GitHub listing now includes 199 unique owner repositories**, collected by a complete anonymous three-page REST read on October 29, rather than the previous 177-repo observation. All 22 newly discovered public repositories receive stars, including BTM, SparkTheSubstrate, EchoesOfTheNine, TweedleVerse, LENZ, FieldStoryForge, BackyardProductionCompany, GenEWrist, PhiOS-XR, PhiARK, PhiPress and other new research or creative experiments. The listing is a dated snapshot, not a private-account inventory. Older Edition 01–11 counts below describe their historical observations.
+
+Two **new guided trails** add an editorial introduction to the game worlds and a Studio Circuit for storytelling and creative infrastructure. They remain repository tours rather than claims of interoperability, active installations or deployed demos. New games and studios have reviewed thematic groups in all five existing star layouts; the relationship ledger remains untouched.
+
+The **Atlas published-site lens** was separately refreshed from its live, public deployment manifest generated **2026-10-29T19:41:28.240Z**, showing **148 independently verified HTML destinations** from **199 publicly listed repositories**. Each record was matched against the public numeric GitHub repository ID *and* case-insensitive repository name before being admitted. The reviewed chapter crosswalk now contains **131** IDs, retaining its earlier 124 and adding seven source-reviewed public projects from the Atlas's New Horizons update. These are different evidence classes.
+
+**Known limits:** EchoesOfTheNine has a public repository star but its `/EchoesOfTheNine/` destination returned 404 in the audit. It is not falsely added to the published-site list. An HTML response is not proof that a game starts, that WebXR works, or that a remote site permits framing. The old destination-check snapshot retains its original observation date and is not silently re-labeled as fresh. If a seven-day Constellation site check has expired but the separately dated Atlas manifest contains a verified HTML URL, the inspector now offers **Open Atlas-listed website** as a direct full-tab fallback. It is explicitly labeled and does not renew the independent deployment status. The Atlas itself can offer direct-first launching and safe, explicitly optional iframe previews.
+
+The separate Field Atlas↔Constellation deep links still use public `github:<numeric-id>` identities; unknown and private identities are never fetched or promoted. No cross-origin passport sharing, authenticated API, runtime permission changes, new dependency graph edges or automatic publishing are introduced.
+
 
 Edition 11 adds real-browser visitor acceptance gates to Edition 10's shareable Postcards, local Passport, Coverage Ledger and Atlas bridges. Production serves the last merged `main` deployment; pull requests build and validate without replacing it.
 

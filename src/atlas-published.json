@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "owner": "MichaelWave369",
   "sourceUrl": "https://michaelwave369.github.io/FieldAtlas/pages-discovered.json",
-  "sourceGeneratedAt": "2026-10-22T02:54:08.049Z",
-  "verifiedCount": 126,
-  "publiclyListedRepos": 179,
+  "sourceGeneratedAt": "2026-10-29T19:41:28.240Z",
+  "verifiedCount": 148,
+  "publiclyListedRepos": 199,
   "pages": [
     {
       "projectId": "github:1312447255",
@@ -37,9 +37,19 @@
       "url": "https://michaelwave369.github.io/axiomforge-ledger/"
     },
     {
+      "projectId": "github:1435212691",
+      "repo": "BackyardProductionCompany",
+      "url": "https://michaelwave369.github.io/BackyardProductionCompany/"
+    },
+    {
       "projectId": "github:1422755721",
       "repo": "BeyondtheBuzz",
       "url": "https://michaelwave369.github.io/BeyondtheBuzz/"
+    },
+    {
+      "projectId": "github:1430082609",
+      "repo": "BioPhi369",
+      "url": "https://michaelwave369.github.io/BioPhi369/"
     },
     {
       "projectId": "github:1359602521",
@@ -55,6 +65,11 @@
       "projectId": "github:1370765625",
       "repo": "Browsallax",
       "url": "https://michaelwave369.github.io/Browsallax/"
+    },
+    {
+      "projectId": "github:1436160383",
+      "repo": "BTM",
+      "url": "https://michaelwave369.github.io/BTM/"
     },
     {
       "projectId": "github:1412285897",
@@ -187,6 +202,11 @@
       "url": "https://michaelwave369.github.io/FieldManual369/"
     },
     {
+      "projectId": "github:1438771805",
+      "repo": "FieldStoryForge",
+      "url": "https://michaelwave369.github.io/FieldStoryForge/"
+    },
+    {
       "projectId": "github:1268591600",
       "repo": "flow-covenant-runtime",
       "url": "https://michaelwave369.github.io/flow-covenant-runtime/"
@@ -212,6 +232,16 @@
       "url": "https://michaelwave369.github.io/FutureArchive/"
     },
     {
+      "projectId": "github:1432500773",
+      "repo": "GBRM",
+      "url": "https://michaelwave369.github.io/GBRM/"
+    },
+    {
+      "projectId": "github:1437657810",
+      "repo": "GenEWrist",
+      "url": "https://michaelwave369.github.io/GenEWrist/"
+    },
+    {
       "projectId": "github:1411014272",
       "repo": "GiltHouse",
       "url": "https://michaelwave369.github.io/GiltHouse/"
@@ -235,6 +265,11 @@
       "projectId": "github:1254545767",
       "repo": "governance-drift-rsdc",
       "url": "https://michaelwave369.github.io/governance-drift-rsdc/"
+    },
+    {
+      "projectId": "github:1166236472",
+      "repo": "GypsyAI",
+      "url": "https://michaelwave369.github.io/GypsyAI/"
     },
     {
       "projectId": "github:1254869900",
@@ -295,6 +330,11 @@
       "projectId": "github:1425067826",
       "repo": "LAU",
       "url": "https://michaelwave369.github.io/LAU/"
+    },
+    {
+      "projectId": "github:1436396776",
+      "repo": "LENZ",
+      "url": "https://michaelwave369.github.io/LENZ/"
     },
     {
       "projectId": "github:1416187370",
@@ -437,9 +477,29 @@
       "url": "https://michaelwave369.github.io/Phi5/"
     },
     {
+      "projectId": "github:1431151775",
+      "repo": "PhiARK",
+      "url": "https://michaelwave369.github.io/PhiARK/"
+    },
+    {
+      "projectId": "github:1432529301",
+      "repo": "Phiax",
+      "url": "https://michaelwave369.github.io/Phiax/"
+    },
+    {
       "projectId": "github:1400739196",
       "repo": "phibot",
       "url": "https://michaelwave369.github.io/phibot/"
+    },
+    {
+      "projectId": "github:1432730536",
+      "repo": "PhiBox",
+      "url": "https://michaelwave369.github.io/PhiBox/"
+    },
+    {
+      "projectId": "github:1402495144",
+      "repo": "PhiCade",
+      "url": "https://michaelwave369.github.io/PhiCade/"
     },
     {
       "projectId": "github:1422333763",
@@ -452,6 +512,11 @@
       "url": "https://michaelwave369.github.io/PhiCompile/"
     },
     {
+      "projectId": "github:1433841207",
+      "repo": "PhiField",
+      "url": "https://michaelwave369.github.io/PhiField/"
+    },
+    {
       "projectId": "github:1422888779",
       "repo": "PhiFieldLab",
       "url": "https://michaelwave369.github.io/PhiFieldLab/"
@@ -462,9 +527,24 @@
       "url": "https://michaelwave369.github.io/Phiform/"
     },
     {
+      "projectId": "github:1434034228",
+      "repo": "PhiGrooveDrive",
+      "url": "https://michaelwave369.github.io/PhiGrooveDrive/"
+    },
+    {
       "projectId": "github:1428608714",
       "repo": "PhiLearn",
       "url": "https://michaelwave369.github.io/PhiLearn/"
+    },
+    {
+      "projectId": "github:1429147977",
+      "repo": "PhiMapper369",
+      "url": "https://michaelwave369.github.io/PhiMapper369/"
+    },
+    {
+      "projectId": "github:1432416588",
+      "repo": "PhiMathAtelier",
+      "url": "https://michaelwave369.github.io/PhiMathAtelier/"
     },
     {
       "projectId": "github:1410759854",
@@ -495,6 +575,11 @@
       "projectId": "github:1420126665",
       "repo": "PhiPortal",
       "url": "https://michaelwave369.github.io/PhiPortal/"
+    },
+    {
+      "projectId": "github:1438853188",
+      "repo": "PhiPress",
+      "url": "https://michaelwave369.github.io/PhiPress/"
     },
     {
       "projectId": "github:1414511907",
@@ -597,6 +682,21 @@
       "url": "https://michaelwave369.github.io/SiliconLouvre/"
     },
     {
+      "projectId": "github:1436201364",
+      "repo": "Smergeon",
+      "url": "https://michaelwave369.github.io/Smergeon/"
+    },
+    {
+      "projectId": "github:1433510401",
+      "repo": "SovereignBodyMethod",
+      "url": "https://michaelwave369.github.io/SovereignBodyMethod/"
+    },
+    {
+      "projectId": "github:1408366650",
+      "repo": "SparkTheSubstrate",
+      "url": "https://michaelwave369.github.io/SparkTheSubstrate/"
+    },
+    {
       "projectId": "github:1396586926",
       "repo": "SuperPhiVessel",
       "url": "https://michaelwave369.github.io/SuperPhiVessel/"
@@ -610,6 +710,11 @@
       "projectId": "github:1399127492",
       "repo": "think-tank",
       "url": "https://michaelwave369.github.io/think-tank/"
+    },
+    {
+      "projectId": "github:1437660465",
+      "repo": "TweedleVerse",
+      "url": "https://michaelwave369.github.io/TweedleVerse/"
     },
     {
       "projectId": "github:1285631147",
@@ -635,6 +740,11 @@
       "projectId": "github:1428514482",
       "repo": "WhiteHatLedger369",
       "url": "https://michaelwave369.github.io/WhiteHatLedger369/"
+    },
+    {
+      "projectId": "github:1369029804",
+      "repo": "xi-vessel-bridge",
+      "url": "https://michaelwave369.github.io/xi-vessel-bridge/"
     }
   ]
 }

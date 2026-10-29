@@ -2,11 +2,12 @@
   "schemaVersion": 1,
   "owner": "MichaelWave369",
   "url": "https://michaelwave369.github.io/FieldAtlas/",
-  "checkedAt": "2026-10-21T21:59:23.337460+00:00",
-  "chapterManifestAt": "2026-10-21T21:30:35.029Z",
+  "checkedAt": "2026-10-29T19:50:03.074Z",
+  "chapterManifestAt": "2026-10-29T19:41:28.240Z",
   "sources": [
     "https://michaelwave369.github.io/FieldAtlas/pages-discovered.json",
-    "https://github.com/MichaelWave369/FieldAtlas/blob/b07cfde3ecb2429611bea1598d3f332490e5523c/src/catalog.js#L9-L83"
+    "https://github.com/MichaelWave369/FieldAtlas/blob/b07cfde3ecb2429611bea1598d3f332490e5523c/src/catalog.js#L9-L83",
+    "https://github.com/MichaelWave369/FieldAtlas/pull/36"
   ],
   "chapters": [
     "github:1167195050",
@@ -77,6 +78,7 @@
     "github:1404893803",
     "github:1407893510",
     "github:1408038507",
+    "github:1408366650",
     "github:1409466715",
     "github:1409520813",
     "github:1409528631",
@@ -132,6 +134,12 @@
     "github:1427737439",
     "github:1428514482",
     "github:1428533299",
-    "github:1428608714"
+    "github:1428608714",
+    "github:1435212691",
+    "github:1436160383",
+    "github:1436396776",
+    "github:1437657810",
+    "github:1437660465",
+    "github:1438771805"
   ]
 }

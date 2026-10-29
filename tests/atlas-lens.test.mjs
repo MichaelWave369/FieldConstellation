@@ -13,7 +13,7 @@ test('reviewed Atlas IDs match only public repositories in this checked snapshot
   assert.equal(found.length,ids.size);
   assert(found.every(repo=>repo.visibility==='public'&&ids.has(projectId(repo))));
   assert.match(atlasManifestLabel(atlas,repos),/reviewed public Atlas chapters/);
-  assert.match(atlasManifestLabel(atlas,repos),/2026-10-21/);
+  assert.match(atlasManifestLabel(atlas,repos),/2026-10-29/);
 });
 
 test('private, deleted, duplicate and malformed chapter claims are ignored',()=>{
