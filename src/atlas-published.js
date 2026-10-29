@@ -39,6 +39,11 @@ export function publishedAtlasLabel(snapshot,repos){
   const date=new Date(snapshot.sourceGeneratedAt).toISOString().slice(0,10);
   return items.size+' of '+total+' Atlas-verified published sites in this public repo snapshot · observed '+date;
 }
+/** A dated Atlas-verified HTML destination, not a live app certification. */
+export function publishedAtlasWebsite(snapshot,repos,repo){
+  if(!repo || repo.visibility!=='public')return null;
+  return publishedAtlasRecords(snapshot,repos).get(projectId(repo))?.url || null;
+}
 export function publishedAtlasLink(snapshot,repos,repo){
   const item=publishedAtlasRecords(snapshot,repos).get(projectId(repo));
   if(!item)return null;
