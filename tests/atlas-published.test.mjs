@@ -10,10 +10,10 @@ const snapshot=load('atlas-published'),repos=load('repos').repos,base='https://m
 test('Atlas published provenance is distinct from reviewed Atlas chapter map',()=>{
   const ids=publishedAtlasIds(snapshot,repos);
   assert.equal(snapshot.sourceUrl,ATLAS_PUBLISHED_SOURCE);
-  assert.equal(snapshot.verifiedCount,126);
-  assert.equal(snapshot.pages.length,126);
-  assert.equal(ids.size,125,'One newly published site is not in the older 177-repo Constellation snapshot');
-  assert.match(publishedAtlasLabel(snapshot,repos),/125 of 126 Atlas-verified published sites/);
+  assert.equal(snapshot.verifiedCount,148);
+  assert.equal(snapshot.pages.length,148);
+  assert.equal(ids.size,148,'All current verified Atlas IDs should match the complete public snapshot');
+  assert.match(publishedAtlasLabel(snapshot,repos),/148 of 148 Atlas-verified published sites/);
   for(const id of ids)assert(repos.some(r=>r.visibility==='public'&&projectId(r)===id));
 });
 
@@ -53,9 +53,11 @@ test('tampering, duplicate records, wrong source and invalid URLs fail closed',(
   for(const item of variants)assert.equal(publishedAtlasIds(item,repos).size,0);
 });
 
-test('verified public Pages are not proof of a visitor-curated chapter or live app behavior',()=>{
-  const missing=snapshot.pages.filter(row=>!repos.some(repo=>projectId(repo)===row.projectId));
-  assert.equal(missing.length,1);
-  assert.equal(missing[0].repo,'PhiOS-XR');
-  assert(!publishedAtlasIds(snapshot,repos).has(missing[0].projectId));
+test('a public game repository can be present without a verified Pages destination',()=>{
+  const game=repos.find(repo=>repo.name==='EchoesOfTheNine');
+  const xr=repos.find(repo=>repo.name==='PhiOS-XR');
+  assert(game&&xr);
+  assert(!publishedAtlasIds(snapshot,repos).has(projectId(game)));
+  assert(publishedAtlasIds(snapshot,repos).has(projectId(xr)));
+  assert(snapshot.pages.every(row=>repos.some(repo=>repo.visibility==='public'&&projectId(repo)===row.projectId)));
 });
