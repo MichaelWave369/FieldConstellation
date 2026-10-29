@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {projectId} from '../src/project-links.js';
-import {publishedAtlasRecords,publishedAtlasIds,publishedAtlasLabel,publishedAtlasLink,ATLAS_PUBLISHED_SOURCE} from '../src/atlas-published.js';
+import {publishedAtlasRecords,publishedAtlasIds,publishedAtlasLabel,publishedAtlasLink,publishedAtlasWebsite,ATLAS_PUBLISHED_SOURCE} from '../src/atlas-published.js';
 
 const load=name=>JSON.parse(readFileSync(new URL('../src/'+name+'.json',import.meta.url),'utf8'));
 const snapshot=load('atlas-published'),repos=load('repos').repos,base='https://michaelwave369.github.io/FieldAtlas/';
@@ -60,4 +60,19 @@ test('a public game repository can be present without a verified Pages destinati
   assert(!publishedAtlasIds(snapshot,repos).has(projectId(game)));
   assert(publishedAtlasIds(snapshot,repos).has(projectId(xr)));
   assert(snapshot.pages.every(row=>repos.some(repo=>repo.visibility==='public'&&projectId(repo)===row.projectId)));
+});
+
+test('dated verified website fallback returns canonical URL only for matching public IDs',()=>{
+  const reel=repos.find(r=>r.name==='ReelCommons');
+  assert(reel);
+  assert.equal(publishedAtlasWebsite(snapshot,repos,reel),'https://michaelwave369.github.io/ReelCommons/');
+  const echo=repos.find(r=>r.name==='EchoesOfTheNine');
+  assert(echo);
+  assert.equal(publishedAtlasWebsite(snapshot,repos,echo),null);
+  assert.equal(publishedAtlasWebsite(snapshot,repos,{...reel,visibility:'private'}),null);
+  assert.equal(publishedAtlasWebsite({...snapshot,owner:'Other'},repos,reel),null);
+  assert.equal(publishedAtlasWebsite(snapshot,repos,{...reel,name:'REELCommons'}),'https://michaelwave369.github.io/ReelCommons/');
+  const ui=readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
+  assert.match(ui,/!destination.url&&publishedSite/);
+  assert.match(ui,/Open Atlas-listed website/);
 });
