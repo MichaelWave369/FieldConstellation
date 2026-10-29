@@ -16,6 +16,18 @@ export const TRAILS = [
     names: ['Phithon', 'Vibe', 'GitPorch', 'FramefieldStudio', 'RastaPhi']
   },
   {
+    id: 'new-worlds',
+    title: 'New Worlds · Games & VR',
+    description: 'Explore public game projects; a repository star is not proof of a live playable website.',
+    names: ['BTM', 'SparkTheSubstrate', 'EchoesOfTheNine', 'TweedleVerse', 'LENZ']
+  },
+  {
+    id: 'studio-circuit',
+    title: 'Studio Circuit',
+    description: 'Visit interactive storytelling, production studios and local-first interface tools.',
+    names: ['FieldStoryForge', 'BackyardProductionCompany', 'Domistika', 'GenEWrist', 'ReelCommons']
+  },
+  {
     id: 'research-receipts',
     title: 'Research & Receipts',
     description: 'Visit research and trust projects, from hypotheses to provenance and security.',
