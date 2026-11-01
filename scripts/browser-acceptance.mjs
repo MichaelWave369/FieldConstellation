@@ -130,16 +130,6 @@ try{
   assert.equal(await page.locator('#immersiveHud').isVisible(),false);
   assert.equal(await page.locator('#questDialog').isVisible(),true,'Immersive quest button opens the existing RPG.');
   await page.locator('#questDialog').evaluate(dialog=>dialog.close());
-  await page.locator('#immersiveButton').click();
-  await page.locator('#immersiveNext').click();
-  await page.locator('#immersiveExplore').click();
-  assert.equal(await page.locator('#immersiveHud').isVisible(),false);
-  assert.equal(await page.locator('#inspector').isVisible(),true);
-  assert.match(new URL(page.url()).searchParams.get('repo')||'',/^github:/,
-    'Only explicit Explore should navigate to the chosen public repo.');
-  // Keep the preexisting Passport/Quest acceptance fixture independent of the
-  // immersive explicit-Explore test by returning to a separate fresh context.
-  await ready(page,base+'?repo='+encodeURIComponent(canonical(second)));
 
 
   await page.locator('#passportButton').click();
@@ -284,6 +274,23 @@ try{
 
   assert.deepEqual(errors,[],'Desktop app must have no uncaught JavaScript errors.');
   await desktop.close();
+
+  log('independent immersive visitor: explicit Explore navigates and discovers one public star');
+  const exhibitContext=await browser.newContext({viewport:{width:1300,height:850}});
+  const exhibitPage=await exhibitContext.newPage();
+  await ready(exhibitPage,base);
+  const initialCount=Number(await exhibitPage.locator('#questCount').textContent());
+  await exhibitPage.locator('#immersiveButton').click();
+  await exhibitPage.locator('#immersiveNext').click();
+  assert.equal(await exhibitPage.locator('#immersiveTitle').textContent(),'FieldAtlas');
+  assert.equal(Number(await exhibitPage.locator('#questCount').textContent()),initialCount,'Merely viewing an exhibit must never add XP.');
+  await exhibitPage.locator('#immersiveExplore').click();
+  assert.equal(await exhibitPage.locator('#immersiveHud').isVisible(),false);
+  assert.equal(await exhibitPage.locator('#inspector').isVisible(),true);
+  assert.equal(new URL(exhibitPage.url()).searchParams.get('repo'),canonical(inventory.find(r=>r.name==='FieldAtlas')));
+  assert.equal(Number(await exhibitPage.locator('#questCount').textContent()),initialCount+1,'Explicit Explore records one normal discovery.');
+  await exhibitContext.close();
+
 
   log('anonymous recipient: preview and explicit opt-in without history sharing');
   const recipient=await browser.newContext({viewport:{width:1280,height:900}});
