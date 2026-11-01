@@ -245,3 +245,50 @@ button.postcard-world:hover,button.postcard-world:focus-visible{background:#2d3c
   .postcard-list{max-height:36dvh}
   .postcard-actions button{flex:1;min-width:130px}
 }
+
+/* Edition 13: optional, local-only RPG collection layer. */
+.quest-dialog{width:810px;max-width:calc(100% - 24px);max-height:88dvh;overflow-y:auto}
+.quest-intro,.quest-note{font-size:11px;line-height:1.7;color:var(--muted)}
+.quest-intro{margin:0 0 18px}
+.quest-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:16px}
+.quest-stat{padding:14px 11px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.quest-stat strong{font-size:17px;font-weight:550;line-height:1.2;color:var(--accent);overflow-wrap:anywhere}
+.quest-stat span{font-size:9px;color:var(--muted);line-height:1.4}
+.quest-rank-progress{grid-column:1/-1;border:1px solid var(--line);border-radius:8px;padding:12px;background:#20271f}
+.quest-rank-progress>div{display:flex;justify-content:space-between;gap:12px;font-size:10px;margin-bottom:8px}
+.quest-rank-progress span{color:var(--muted)}
+.quest-rank-progress b{font-weight:500;color:var(--accent)}
+.quest-dialog progress{display:block;width:100%;height:7px;appearance:none;accent-color:var(--accent);border:0;border-radius:8px;overflow:hidden;background:#334033}
+.quest-dialog progress::-webkit-progress-bar{background:#334033;border-radius:8px}
+.quest-dialog progress::-webkit-progress-value{background:var(--accent);border-radius:8px}
+.quest-dialog progress::-moz-progress-bar{background:var(--accent);border-radius:8px}
+.quest-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 19px}
+.quest-toolbar button,.quest-branch button{font-size:10px;border:1px solid #60784e;border-radius:5px;background:#263424;color:var(--text);padding:10px 12px}
+.quest-toolbar button:hover,.quest-branch button:hover{color:var(--accent);border-color:var(--accent)}
+.quest-toolbar #questReset{margin-left:auto;background:transparent;border-color:var(--line);color:var(--muted)}
+.quest-section-heading{font-size:15px;font-weight:500;margin:18px 0 5px}
+.quest-note{margin:0 0 13px}
+.quest-tree{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;position:relative}
+.quest-branch{border:1px solid var(--line);background:var(--panel2);border-left:3px solid var(--quest-color);border-radius:7px;padding:14px;min-width:0;display:flex;flex-direction:column;gap:11px}
+.quest-branch.complete{background:color-mix(in srgb,var(--quest-color) 9%,var(--panel2))}
+.quest-branch-title{display:flex;align-items:center;gap:8px;min-width:0}
+.quest-branch-title i{flex:none;width:9px;height:9px;background:var(--quest-color);border-radius:100%;box-shadow:0 0 13px var(--quest-color)}
+.quest-branch-title strong{font-size:11px;font-weight:550;flex:1}
+.quest-branch-title span{font-size:10px;color:var(--muted);white-space:nowrap}
+.quest-branch progress{accent-color:var(--quest-color)}
+.quest-branch progress::-webkit-progress-value{background:var(--quest-color)}
+.quest-branch progress::-moz-progress-bar{background:var(--quest-color)}
+.quest-branch p{margin:0;font-size:9px;color:var(--muted)}
+.quest-branch button{align-self:flex-start;text-align:left;margin-top:auto;max-width:100%;overflow-wrap:anywhere}
+.quest-complete{font-size:10px;color:var(--accent);margin-top:auto}
+.quest-achievements{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:13px 0 20px}
+.quest-achievement{border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;gap:10px;padding:11px;opacity:.7}
+.quest-achievement.unlocked{border-color:#536d43;background:#243020;opacity:1}
+.quest-achievement>span{font-size:20px;color:var(--accent)}
+.quest-achievement div{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
+.quest-achievement strong{font-size:10px}
+.quest-achievement small{font-size:9px;line-height:1.4;color:var(--muted)}
+.quest-achievement>b{font-size:9px;color:var(--muted);font-weight:500}
+.quest-achievement.unlocked>b{color:var(--accent)}
+@media(max-width:760px){.quest-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.quest-tree,.quest-achievements{grid-template-columns:1fr}.quest-dialog{padding:18px;max-height:90dvh}.header-actions .quest-nav{padding:8px 9px}}
+@media(max-width:480px){.quest-dialog{max-width:calc(100% - 12px)}.quest-toolbar #questReset{margin-left:0}}
