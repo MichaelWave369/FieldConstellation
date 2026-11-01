@@ -251,6 +251,88 @@ function renderLensLegend(){
   else if(state.lens==='activity')$('lensLegend').innerHTML='<span title="Age of the last code push"><i style="background:#f5d68b"></i>≤7d</span><span><i style="background:#d7a866"></i>30d</span><span><i style="background:#8ba58b"></i>90d</span><span><i style="background:#6d7884"></i>Older</span>';
   else $('lensLegend').innerHTML='<span>COLOR: WORLD</span><span class="legend-dots">'+GROUPS.map(g=>`<i style="background:${g.color}" title="${g.name}"></i>`).join('')+'</span>';
 }
+/**
+ * Phitarium Immersive Mode is an opt-in visual visitor walk-through.
+ * Focus/move = read-only projection. Only Explore invokes selectRepo.
+ * This does not create relationships, CI claims or visitor tracking.
+ */
+function enterImmersive(){
+  if(immersiveActive)return;
+  if(showtimeIndex>=0)stopShowtime(false);
+  const options=resolveImmersiveExhibits(state.repos).filter(repo=>state.visible.has(repo.id));
+  if(options.length<2){
+    toast('Immersive Dome needs at least two visible public exhibits. Select Show all first.');
+    return;
+  }
+  immersiveStops=options;
+  immersiveIndex=Math.max(0,options.findIndex(repo=>repo.id===state.selected));
+  immersiveRestore={
+    orbit:state.orbit,
+    inspectorVisible:!$('inspector').hidden,
+    position:camera?.position.clone()||null,
+    target:controls?.target.clone()||null
+  };
+  setSidebar(false);
+  immersiveActive=true;
+  document.body.classList.add('immersive-mode');
+  $('immersiveHud').hidden=false;
+  $('immersiveButton').setAttribute('aria-pressed','true');
+  $('immersiveButton').setAttribute('aria-label','Exit immersive Phitarium dome');
+  $('inspector').hidden=true;
+  setOrbit(false);
+  if(renderer)resize();
+  showImmersiveExhibit();
+  $('immersiveExit').focus({preventScroll:true});
+}
+function exitImmersive(restoreCamera=true){
+  if(!immersiveActive)return;
+  const previous=immersiveRestore;
+  immersiveActive=false;immersiveStops=[];immersiveRestore=null;
+  document.body.classList.remove('immersive-mode');
+  $('immersiveHud').hidden=true;
+  $('immersiveButton').setAttribute('aria-pressed','false');
+  $('immersiveButton').setAttribute('aria-label','Enter immersive Phitarium dome');
+  $('inspector').hidden=!previous?.inspectorVisible;
+  state.hovered=null;
+  if(sceneReady){
+    resize();
+    if(restoreCamera&&previous?.position&&previous?.target)
+      flyTo(previous.position,previous.target);
+    updateAppearance();
+  }
+  setOrbit(previous?.orbit||false);
+  if(restoreCamera)$('immersiveButton').focus({preventScroll:true});
+}
+function moveImmersive(direction){
+  if(!immersiveActive||!immersiveStops.length)return;
+  immersiveIndex=(immersiveIndex+direction+immersiveStops.length)%immersiveStops.length;
+  showImmersiveExhibit();
+}
+function showImmersiveExhibit(){
+  if(!immersiveActive)return;
+  const repo=immersiveStops[immersiveIndex];
+  if(!repo)return;
+  const group=groupMap.get(repo.group);
+  $('immersiveTitle').textContent=repo.name;
+  $('immersiveGroup').textContent=(group?.name||'Public repository')+' · EXHIBIT '+String(immersiveIndex+1).padStart(2,'0');
+  $('immersiveDescription').textContent=repo.description?.trim()||'A public project in the Field Constellation. Read its repository documentation to discover what is currently implemented.';
+  $('immersiveCounter').textContent=(immersiveIndex+1)+' / '+immersiveStops.length;
+  const github=safeUrl(repo.url);
+  $('immersiveReadme').href=github&&new URL(github).hostname.toLowerCase()==='github.com'?github.replace(/\/$/,'')+'#readme':'https://github.com/MichaelWave369';
+  state.hovered=repo.id;
+  if(sceneReady){
+    updateAppearance();
+    const index=state.repos.findIndex(r=>r.id===repo.id);
+    const point=positions[index];
+    if(point){
+      const offset=camera.position.clone().sub(controls.target);
+      if(offset.lengthSq()<.01)offset.set(0,20,110);
+      const distance=innerWidth<761?72:51;
+      flyTo(point.clone().add(offset.normalize().multiplyScalar(distance)),point.clone());
+    }
+  }
+}
+
 /** Optional theater presentation. Public repository data only.
  * It never calls selectRepo until a visitor explicitly requests Explore,
  * so simply watching never awards discovery XP or changes visit history.
