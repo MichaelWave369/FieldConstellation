@@ -511,6 +511,117 @@ function renderMissions(){
     });
   }
 }
+
+/** Read-only fiction with local, whitelisted progress. Never software authority. */
+function saveOuter(notify=true){
+  try{localStorage.setItem(OUTER_KEY,JSON.stringify(state.outerSave));return true;}
+  catch{if(notify)toast('Outer Field progress is session-only because browser storage is unavailable.');return false;}
+}
+function openOuter(fromDialog){
+  $(fromDialog).close();
+  state.outerReview=null;state.outerFeedback='';
+  renderOuter();
+  $('outerDialog').showModal();
+}
+function enterInfiniteSpiral(){
+  $('outerDialog').close();
+  resetFilters();
+  setLayout('spiral');
+  const home=state.repos.find(repo=>repo.name==='FieldConstellation'&&repo.visibility==='public');
+  if(home)selectRepo(home.id,true);
+  const arrival=$('spiralArrival');arrival.hidden=false;
+  setTimeout(()=>{arrival.hidden=true;},2800);
+  toast('The Infinite Spiral awaits. Revisit the stars with everything you learned.');
+}
+function renderOuter(){
+  const p=outerProgress(state.repos,state.missionSave,state.outerSave);
+  const reviewed=p.steps.find(step=>step.id===state.outerReview&&p.completedIds.includes(step.id));
+  const step=reviewed||p.current;
+  const groups=[
+    {name:'Artifact Hunts',ids:['artifact-atlas','artifact-memory','artifact-guild']},
+    {name:'Combination Forge',ids:['combination-bookmap','combination-mind']},
+    {name:'Hidden World',ids:['hidden-wrist']},
+    {name:'The Fracture Warden',ids:['warden-safety','warden-authority','warden-convergence']}
+  ];
+  $('outerLedger').innerHTML='<div><strong>'+p.cleared+'/9</strong><small>Encounters cleared</small></div>'+
+    '<div><strong>'+p.xp+' / '+p.maximum+' XP</strong><small>Adventure XP · game only</small></div>'+
+    '<div><strong>'+p.relics.length+' / 4</strong><small>Collected story artifacts</small></div>'+
+    '<div><strong>'+p.bossHealth+' / 3</strong><small>Warden shields remaining</small></div>';
+  $('outerTrack').innerHTML=groups.map(group=>{
+    const completed=group.ids.filter(id=>p.completedIds.includes(id)).length;
+    return '<div class="outer-track-segment'+(completed===group.ids.length?' cleared':'')+'"><strong>'+escape(group.name)+'</strong><span>'+completed+' / '+group.ids.length+'</span><progress max="'+group.ids.length+'" value="'+completed+'" aria-label="'+escape(group.name)+' progress"></progress></div>';
+  }).join('');
+  $('outerFeedback').textContent=state.outerFeedback;
+  $('outerFeedback').classList.toggle('success',!!reviewed);
+  $('outerNext').hidden=!reviewed;
+  $('outerNext').textContent=p.finished?'Open the Infinite Spiral →':'Continue adventure →';
+  if(!p.unlocked){
+    $('outerNext').hidden=true;
+    $('outerEncounter').innerHTML='<div class="outer-locked"><span class="outer-gate-mark" aria-hidden="true">◇</span><h3>The Outer Field is sealed</h3><p>Finish all nine gates of the original campaign to open this world. No data or progress has been lost.</p><button id="outerBackGates" type="button">Play The Nine Gates →</button></div>';
+    $('outerBackGates').onclick=()=>{$('outerDialog').close();state.missionReview=null;state.missionFeedback='';renderMissions();$('missionDialog').showModal();};
+    return;
+  }
+  if(!p.available){
+    $('outerNext').hidden=true;
+    $('outerEncounter').innerHTML='<div class="outer-locked"><h3>Some public worlds are unavailable</h3><p>This adventure requires a complete public repository catalog. No private or missing repository will be surfaced as a quest choice. Try the public refresh on the map.</p></div>';
+    return;
+  }
+  if(p.finished&&!reviewed){
+    $('outerEncounter').innerHTML='<div class="outer-victory"><p class="outer-chapter">THE INFINITE SPIRAL · UNLOCKED</p><h3>The field was never broken.</h3><p>It was always waiting for someone to see how its pieces fit. The Fracture Warden is defeated, the World Key is yours, and a new route through the living constellation is open.</p><div class="outer-portal-graphic outer-portal-large" aria-hidden="true"><span>Φ</span></div><button id="outerPortal" class="outer-portal-button" type="button">Enter the Infinite Spiral →</button><small>Returns to the existing 3D map in spiral view. No repository integrations or permissions are changed.</small></div>';
+    $('outerPortal').onclick=enterInfiniteSpiral;
+    return;
+  }
+  if(!step){
+    $('outerEncounter').innerHTML='<div class="outer-locked"><h3>Choose your next constellation</h3><p>The current public snapshot cannot resolve an encounter. No new private information is loaded.</p></div>';
+    return;
+  }
+  const solved=p.completedIds.includes(step.id);
+  const phase=step.kind==='boss'?' · SHIELD '+step.phase+' / 3':'';
+  const lore='<p class="outer-chapter">'+escape(step.chapter.toUpperCase())+phase+' · ENCOUNTER '+(p.steps.indexOf(step)+1)+' / 9</p>'+
+    '<h3>'+escape(step.title)+'</h3><p class="outer-scene">'+escape(step.scene)+'</p><strong class="outer-question">'+escape(step.question)+'</strong>';
+  const sources=step.sourceRepos.map(repo=>'<a href="'+escape(repo.url+'#readme')+'" target="_blank" rel="noopener noreferrer">Read '+escape(repo.name)+' README ↗</a>').join('');
+  if(solved){
+    $('outerEncounter').innerHTML=lore+'<div class="outer-reward"><p>ENCOUNTER CLEARED · +'+step.xp+' GAME XP</p><h4>'+escape(step.reward)+'</h4><p>'+escape(step.lesson)+'</p><div class="outer-source-links">'+sources+'</div></div>';
+    return;
+  }
+  const readyToClaim=!!step.visitRepo&&state.outerNeedVisit===step.visit&&state.quest.discoveredIds.includes(projectId(step.visitRepo));
+  const options=step.choices.map(([id,label])=>
+    '<button type="button" data-outer-choice="'+escape(id)+'"><span>'+escape(label)+'</span><span aria-hidden="true">→</span></button>').join('');
+  let visitAction='';
+  if(readyToClaim)visitAction='<button id="outerClaim" type="button" class="outer-claim">Claim '+escape(step.reward)+' from your discovered star →</button>';
+  else if(state.outerNeedVisit===step.visit&&step.visitRepo)visitAction='<button id="outerTravel" type="button" class="outer-travel">Travel to '+escape(step.visitRepo.name)+' on the map →</button>';
+  const clue=step.kind==='artifact'?'Answer the clue, then explore the actual project star before claiming your artifact.':step.kind==='secret'?'This secret can only be claimed after visiting its hidden real-project star.':step.kind==='combination'?'Choose complementary project roles. A pairing is an idea, not proof of a live integration.':'Defeat the phase with what you learned. The battle is fiction.';
+  $('outerEncounter').innerHTML=lore+'<div class="outer-options" role="group" aria-label="Choose how to resolve this encounter">'+options+'</div>'+
+    '<p class="outer-clue">'+escape(clue)+'</p>'+visitAction+
+    (step.visitRepo?'<p class="outer-source-note">A correct discovery will ask you to visit a real public repository star and return here.</p>':'');
+  document.querySelectorAll('[data-outer-choice]').forEach(button=>button.onclick=()=>{
+    const result=attemptOuter(state.repos,state.missionSave,state.outerSave,state.quest,step.id,button.dataset.outerChoice);
+    if(!result.accepted)return;
+    if(result.reason==='wrong'){
+      state.outerFeedback='Not quite. '+step.hint;
+    }else if(result.reason==='visit-required'){
+      state.outerNeedVisit=step.visit;
+      state.outerFeedback='Correct world! Explore '+result.visitRepo.name+' in the constellation to attune the artifact, then return here to claim it.';
+    }else if(result.reason==='cleared'){
+      state.outerSave=result.save;saveOuter();state.outerReview=step.id;state.outerNeedVisit=null;
+      state.outerFeedback='Encounter cleared! '+step.reward+' · +'+step.xp+' adventure XP.';
+    }
+    renderOuter();
+  });
+  if($('outerTravel'))$('outerTravel').onclick=()=>{
+    $('outerDialog').close();resetFilters();selectRepo(step.visitRepo.id,true);
+    toast('Star discovered. Open Quest RPG → The Outer Field to claim your artifact.');
+  };
+  if($('outerClaim'))$('outerClaim').onclick=()=>{
+    const result=attemptOuter(state.repos,state.missionSave,state.outerSave,state.quest,step.id,step.correct);
+    if(result.reason==='cleared'){
+      state.outerSave=result.save;saveOuter();state.outerReview=step.id;state.outerNeedVisit=null;
+      state.outerFeedback='Artifact attuned! '+step.reward+' · +'+step.xp+' adventure XP.';
+      renderOuter();
+    }
+  };
+}
+
 function passportRows(ids,emptyText){
   const repos=passportRepos(ids,state.repos);
   if(!repos.length)return '<p class="passport-empty">'+escape(emptyText)+'</p>';
