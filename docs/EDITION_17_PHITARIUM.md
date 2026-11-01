@@ -12,8 +12,8 @@
 
 ## Controls and privacy
 
-- **Start Dome Show** begins a user-controlled fly-through. A frame lasts eight seconds; after the final frame the show stops. It does not loop indefinitely.
-- **Next star** advances immediately. **Explore this star** intentionally invokes the ordinary repository selection flow, which may update the browser-local discovery history. Simply *watching* does **not** select a project, collect a star, award XP, bookmark anything, or modify the URL/history.
+- **Start Dome Show** begins a user-controlled fly-through of the **currently visible** public stars from the six-star curated set. A frame lasts eight seconds; after the final frame the show stops. It does not loop indefinitely. With filters applied, missing stars are skipped; if fewer than two eligible stars remain, the UI asks the visitor to select **Show all** to enjoy the full tour. Filters and current layout are not changed.
+- **Next star** advances immediately. **Explore this star** intentionally invokes the ordinary repository selection flow, which may update the browser-local discovery history. Simply *watching* does **not** change the current selection, collect a star, award XP, bookmark anything, or modify the URL/history. Ending the show restores the previously visible inspector.
 - Mouse dragging the sky, changing layouts, refreshing the public listing or choosing a star stops the show. **End show** is always available and restores the viewer's earlier orbit preference.
 - When the browser document is hidden, the show stops advancing until the tab is visible again.
 - With **reduced motion**, the show still works but does not auto-advance and camera transitions are immediate. Keyboard and screen readers can operate the existing header and show buttons.
