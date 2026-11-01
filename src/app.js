@@ -226,6 +226,75 @@ function renderLensLegend(){
   else if(state.lens==='activity')$('lensLegend').innerHTML='<span title="Age of the last code push"><i style="background:#f5d68b"></i>≤7d</span><span><i style="background:#d7a866"></i>30d</span><span><i style="background:#8ba58b"></i>90d</span><span><i style="background:#6d7884"></i>Older</span>';
   else $('lensLegend').innerHTML='<span>COLOR: WORLD</span><span class="legend-dots">'+GROUPS.map(g=>`<i style="background:${g.color}" title="${g.name}"></i>`).join('')+'</span>';
 }
+/** Optional theater presentation. Public repository data only.
+ * It never calls selectRepo until a visitor explicitly requests Explore,
+ * so simply watching never awards discovery XP or changes visit history.
+ */
+function startShowtime(){
+  const stops=resolveShowtimeStops(state.repos);
+  if(stops.length<2){toast('The Dome Show needs at least two available public stars.');return;}
+  resetFilters();
+  setLayout('constellation');
+  showtimeStops=stops;
+  showtimeWasOrbit=state.orbit;
+  showtimeInspectorWasVisible=!$('inspector').hidden;
+  $('inspector').hidden=true;
+  setOrbit(false);
+  showtimeIndex=0;
+  $('map').classList.add('showtime-active');
+  $('showtimeHud').hidden=false;
+  $('showtimeButton').setAttribute('aria-pressed','true');
+  $('showtimeButton').setAttribute('aria-label','End planetarium dome show');
+  $('showtimeButton').title='End the Phitarium dome show';
+  updateShowtime();
+}
+function stopShowtime(restoreOrbit=true){
+  if(showtimeIndex<0)return;
+  clearTimeout(showtimeTimer);showtimeTimer=null;
+  showtimeIndex=-1;showtimeStops=[];
+  $('map').classList.remove('showtime-active');
+  $('showtimeHud').hidden=true;
+  $('showtimeButton').setAttribute('aria-pressed','false');
+  $('showtimeButton').setAttribute('aria-label','Start planetarium dome show');
+  $('showtimeButton').title='Start the Phitarium guided dome show';
+  if(showtimeInspectorWasVisible&&state.selected)$('inspector').hidden=false;
+  state.hovered=null;
+  if(sceneReady)updateAppearance();
+  setOrbit(restoreOrbit&&showtimeWasOrbit);
+}
+function scheduleShowtime(){
+  clearTimeout(showtimeTimer);showtimeTimer=null;
+  if(showtimeIndex<0||reducedMotion||document.hidden)return;
+  showtimeTimer=setTimeout(advanceShowtime,SHOWTIME_INTERVAL_MS);
+}
+function advanceShowtime(){
+  if(showtimeIndex<0)return;
+  if(showtimeIndex===showtimeStops.length-1){stopShowtime();return;}
+  showtimeIndex++;
+  updateShowtime();
+}
+function updateShowtime(){
+  if(showtimeIndex<0)return;
+  const repo=showtimeStops[showtimeIndex];
+  $('showtimeName').textContent=repo.name;
+  $('showtimeDescription').textContent=repo.description?.trim()||'Explore this public repository and its story in the living Field.';
+  $('showtimeCount').textContent=(showtimeIndex+1)+' / '+showtimeStops.length;
+  $('showtimeProgress').max=showtimeStops.length;
+  $('showtimeProgress').value=showtimeIndex+1;
+  $('showtimeNext').textContent=showtimeIndex===showtimeStops.length-1?'End show':'Next star';
+  state.hovered=repo.id;
+  if(sceneReady){
+    updateAppearance();
+    const index=state.repos.findIndex(r=>r.id===repo.id),point=positions[index];
+    if(point){
+      const offset=camera.position.clone().sub(controls.target).normalize()
+        .multiplyScalar(innerWidth<761?52:38);
+      flyTo(point.clone().add(offset),point.clone());
+    }
+  }
+  scheduleShowtime();
+}
+
 function setTheme(theme){state.theme=theme;document.body.classList.toggle('lattice-theme',theme==='lattice');$('themeToggle').setAttribute('aria-pressed',String(theme==='lattice'));document.querySelector('meta[name="theme-color"]').content=theme==='lattice'?'#15101c':'#050a15';if(scene){scene.background.set(theme==='lattice'?'#15101c':'#060d1f');scene.fog.color.copy(scene.background);dome?.setPalette(theme==='lattice');for(const child of core.children)if(child.material?.color)child.material.color.set(theme==='lattice'?'#e0b15a':'#a5d9f6');}}
 function setSidebar(open){$('sidebar').classList.toggle('open',open);$('sidebar').inert=innerWidth<761&&!open;$('mobileMenu').setAttribute('aria-expanded',String(open));}
 function setOrbit(value){state.orbit=value;if(controls)controls.autoRotate=value;$('orbitToggle').classList.toggle('active',value);$('orbitToggle').setAttribute('aria-pressed',String(value));}
