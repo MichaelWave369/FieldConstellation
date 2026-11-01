@@ -28,6 +28,12 @@ export const TRAILS = [
     names: ['FieldStoryForge', 'BackyardProductionCompany', 'Domistika', 'GenEWrist', 'ReelCommons']
   },
   {
+    id: 'fresh-stars-2026',
+    title: 'Fresh Stars · New Discoveries',
+    description: 'A twelve-stop collector route through the latest public worlds; exploration is not evidence of integration or deployment.',
+    names: ['PhiServe','PhiOS-Mobile','PhiVine','Opti-Eyes','PhiXRCommons','PieceByPiece','PhiOperator','ReelTheater','LWG','PhiDecisionField','CycleWeave','PhiSafe']
+  },
+  {
     id: 'research-receipts',
     title: 'Research & Receipts',
     description: 'Visit research and trust projects, from hypotheses to provenance and security.',
