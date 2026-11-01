@@ -79,6 +79,8 @@ try{
   assert.equal(await page.locator('.brand b').textContent(),'PHITARIUM');
   const beforeShowQuest=await page.locator('#questCount').textContent();
   const beforeShowPassport=await page.locator('#passportCount').textContent();
+  const beforeShowUrl=page.url();
+  const beforeShowSelected=await page.locator('#inspector h2').textContent();
   await page.locator('#showtimeButton').click();
   assert.equal(await page.locator('#showtimeHud').isVisible(),true);
   assert.equal(await page.locator('#showtimeButton').getAttribute('aria-pressed'),'true');
@@ -93,6 +95,9 @@ try{
   assert.equal(await page.locator('#showtimeButton').getAttribute('aria-pressed'),'false');
   assert.equal(await page.locator('#questCount').textContent(),beforeShowQuest,'Watching a show must not collect new stars.');
   assert.equal(await page.locator('#passportCount').textContent(),beforeShowPassport,'Watching a show must not touch saved bookmarks.');
+  assert.equal(page.url(),beforeShowUrl,'Dome Show must preserve project deep links and navigation history.');
+  assert.equal(await page.locator('#inspector h2').textContent(),beforeShowSelected,'Dome Show must preserve the selected repository.');
+  assert.equal(await page.locator('#inspector').isVisible(),true,'Closing the show restores the previous project inspector.');
   await capture(page,'desktop-phitarium-observatory');
 
   await page.locator('#passportButton').click();
