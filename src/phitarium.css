@@ -278,3 +278,34 @@ body.phitarium.lattice-theme{
 @media(prefers-reduced-motion:reduce){
   .phitarium .dome-overlay,.phitarium .showtime-hud{transition:none!important}
 }
+
+
+/* Keep quest and postgame controls visually inside the same celestial theater. */
+.phitarium .mission-cleared-actions a,
+.phitarium .mission-cleared-actions button,
+.phitarium .mission-actions button,
+.phitarium .outer-source-links a,
+.phitarium .outer-controls button,
+.phitarium .outer-claim,.phitarium .outer-travel,
+.phitarium .outer-portal-button,.phitarium .mission-victory button,
+.phitarium .outer-victory button,.phitarium .outer-locked button,
+.phitarium .quest-toolbar button{
+  background:#1b385a;color:#dff4ff;border:1px solid #5d88b6;border-radius:7px;
+}
+.phitarium .mission-actions #missionNext,
+.phitarium .outer-controls #outerNext,
+.phitarium .outer-portal-button,
+.phitarium .mission-victory .outer-portal-button{
+  background:var(--accent);color:#081d2b;border-color:var(--accent);font-weight:600;
+}
+.phitarium .mission-cleared-actions a:hover,
+.phitarium .mission-cleared-actions button:hover,
+.phitarium .mission-actions button:hover,
+.phitarium .outer-source-links a:hover,
+.phitarium .outer-controls button:hover,
+.phitarium .quest-toolbar button:hover{background:#32577a;border-color:#b5edff;color:#fff}
+.phitarium .mission-actions #missionReset,.phitarium .outer-controls #outerReset,
+.phitarium .quest-toolbar #questReset{background:transparent;border-color:#526e91;color:#b9c7d8}
+.phitarium.lattice-theme .mission-actions #missionNext,
+.phitarium.lattice-theme .outer-controls #outerNext,
+.phitarium.lattice-theme .outer-portal-button{color:#211920}
