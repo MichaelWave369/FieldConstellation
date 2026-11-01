@@ -272,6 +272,14 @@ try{
   await capture(mobilePage,'mobile-postcard-preview');
   await mobilePage.keyboard.press('Escape');
   assert.equal(await mobilePage.locator('#postcardDialog').isVisible(),false);
+  await ready(mobilePage,base);
+  assert.equal(await mobilePage.locator('#showtimeButton').isVisible(),true,'Mobile visitors must be able to start the Dome Show.');
+  await capture(mobilePage,'mobile-phitarium-observatory');
+  await mobilePage.locator('#showtimeButton').click();
+  assert.equal(await mobilePage.locator('#showtimeHud').isVisible(),true,'Mobile Dome Show must display its controls.');
+  await capture(mobilePage,'mobile-phitarium-dome-show');
+  await mobilePage.locator('#showtimeStop').click();
+  assert.equal(await mobilePage.locator('#showtimeHud').isVisible(),false);
   await mobile.close();
 
   log('graphics fallback: canvas renderer and public directory are usable without WebGL2');
