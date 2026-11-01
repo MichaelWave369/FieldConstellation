@@ -31,7 +31,7 @@ const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
 const featured=['BTM','SparkTheSubstrate','EchoesOfTheNine','TweedleVerse','LENZ','FieldStoryForge','BackyardProductionCompany','GenEWrist','SuperPhiVessel','BrainC','PhiLearn','Agentora','Domistika','SiliconLouvre','FramefieldStudio','RastaPhi','PhiCade','GitPorch','FieldAtlas','Pulse369','MoreBounceLabs','NestedBubbleGear','MRIPHI','RegenerationAtlas','Phithon','Vibe','WhiteHatLedger369','PhiOS','CommonTable','FamilyVault','FieldAccord','axiomforge-ledger','Infinite-Commons'];
 const repoTint=repo=>state.lens==='quest'?(state.quest.discoveredIds.includes(projectId(repo))?'#d0f29b':'#66736a'):colorFor(repo,state.lens,state.activityNow);
 const repoGlow=repo=>activityWeight(repo,state.activityNow);
-const nodeActive=id=>state.visible.has(id)&&(!state.architecture||!state.selected||state.neighbors.has(id));
+const nodeActive=id=>state.visible.has(id)&&(!state.architecture||!state.selected||state.neighbors.has(id)||(showtimeIndex>=0&&state.hovered===id));
 const chronological=()=>state.layout==='helix'||state.layout==='spiral';
 
 async function boot(){
@@ -231,10 +231,10 @@ function renderLensLegend(){
  * so simply watching never awards discovery XP or changes visit history.
  */
 function startShowtime(){
-  const stops=resolveShowtimeStops(state.repos);
-  if(stops.length<2){toast('The Dome Show needs at least two available public stars.');return;}
-  resetFilters();
-  setLayout('constellation');
+  // Honor the viewer's active filters, selection, URL and map layout. A
+  // projection is a read-only presentation, not a navigation or history event.
+  const stops=resolveShowtimeStops(state.repos).filter(repo=>state.visible.has(repo.id));
+  if(stops.length<2){toast('Dome Show needs two visible public stars. Choose Show all to see the full tour.');return;}
   showtimeStops=stops;
   showtimeWasOrbit=state.orbit;
   showtimeInspectorWasVisible=!$('inspector').hidden;
