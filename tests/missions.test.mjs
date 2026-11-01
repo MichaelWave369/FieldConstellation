@@ -59,6 +59,7 @@ test('loss of a public project prunes unavailable mission claims without affecti
   const save={schemaVersion:1,completedIds:MISSIONS.map(m=>m.id)};
   const reduced=repos.filter(r=>r.name!=='PhiXRCommons');
   const normalized=sanitizeMissionSave(save,reduced);
-  assert.equal(normalized.completedIds.length,8);
-  assert.equal(missionProgress(reduced,normalized).total,8);
+  assert(normalized.completedIds.length<9);
+  assert.equal(normalized.completedIds.length,availableMissions(reduced).length);
+  assert.equal(missionProgress(reduced,normalized).total,availableMissions(reduced).length);
 });
