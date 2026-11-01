@@ -35,7 +35,7 @@ export function readQuest(raw,repos,passport=emptyQuest()){
 }
 export function discover(quest,repo,repos){
   const base=sanitizeQuest(quest,repos),id=projectId(repo);
-  if(!publicIds(repos).has(id)||base.discoveredIds.includes(id)||base.discoveredIds.length>=MAX_DISCOVERIES)return base;
+  if(repo?.visibility!=='public'||!publicIds(repos).has(id)||base.discoveredIds.includes(id)||base.discoveredIds.length>=MAX_DISCOVERIES)return base;
   return {...base,discoveredIds:[...base.discoveredIds,id]};
 }
 
