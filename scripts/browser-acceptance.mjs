@@ -85,6 +85,31 @@ try{
   assert.equal(shared.searchParams.size,1,'Postcards must strip unrelated query parameters.');
   assert.deepEqual(shared.searchParams.get('postcard').split(','),[canonical(second),canonical(first)]);
   await capture(page,'desktop-postcard-composer');
+
+  log('desktop: RPG star collection, skill-tree navigation and independent reset');
+  await page.locator('#postcardDialog').evaluate(dialog=>dialog.close());
+  await page.locator('#questButton').click();
+  assert.equal(await page.locator('#questDialog').isVisible(),true);
+  assert.match(await page.locator('#questSummary').textContent(),/2 \/ \d+/,'Two earlier project visits count as local discoveries.');
+  assert.equal(await page.locator('.quest-branch').count(),8,'All eight thematic branches must be present.');
+  assert.equal(await page.locator('.quest-achievement').count(),8);
+  await page.locator('#questLensButton').click();
+  assert.equal(await page.locator('#colorLens').inputValue(),'quest','Quest color lens must update the actual map.');
+  await capture(page,'desktop-rpg-quest-tree');
+  await page.locator('[data-quest-repo]').first().click();
+  assert.equal(await page.locator('#questDialog').isVisible(),false,'Selecting a quest star should return to the map.');
+  assert.equal(await page.locator('#questCount').textContent(),'3','Exploring another public star should award a new discovery.');
+  await page.locator('#questButton').click();
+  page.once('dialog',dialog=>dialog.accept());
+  await page.locator('#questReset').click();
+  assert.equal(await page.locator('#questCount').textContent(),'0');
+  assert.match(await page.locator('#passportSummary').textContent(),/2 saved worlds/);
+  await page.locator('#questDialog').evaluate(dialog=>dialog.close());
+  // A repo deep link intentionally discovers that world again. Navigate to the
+  // unselected home view to test persistence without a new visit.
+  await ready(page,base);
+  assert.equal(await page.locator('#questCount').textContent(),'0','Reset must persist without re-seeding from Passport.');
+  assert.equal(await page.locator('#passportCount').textContent(),'2','RPG reset must not erase existing bookmarks.');
   assert.deepEqual(errors,[],'Desktop app must have no uncaught JavaScript errors.');
   await desktop.close();
 
