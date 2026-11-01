@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {IMMERSIVE_STARS,resolveImmersiveExhibits,recentCheckSummary,RECENT_CHECK_WINDOW_MS} from '../src/immersive.js';
 
 const names=[...IMMERSIVE_STARS];
-const repos=names.map((name,i)=>({id:String(i+1),name,visibility:'public'}));
+const repos=names.map((name,i)=>({id:String(i+1),name,visibility:'public',homepage:'https://field.example.net/'+name+'/'}));
 test('immersive exhibition is bounded, stable and public-only',()=>{
   assert.equal(resolveImmersiveExhibits(repos).length,12);
   assert.deepEqual(resolveImmersiveExhibits([...repos].reverse()).map(r=>r.name),names);
@@ -25,12 +25,12 @@ test('fresh verification counts only eligible, unique public HTML observations',
   const now=Date.parse('2026-11-01T20:00:00Z');
   const checkedAt=new Date(now-RECENT_CHECK_WINDOW_MS+60000).toISOString();
   const base={schemaVersion:1,owner:'MichaelWave369',checkedAt,checks:[
-    {projectId:'github:1',checkedAt,status:'reachable',httpStatus:200,contentType:'text/html; charset=utf-8'},
-    {projectId:'github:1',checkedAt,status:'reachable',httpStatus:200,contentType:'text/html'},
-    {projectId:'github:2',checkedAt,status:'unavailable',httpStatus:404,contentType:'text/html'},
-    {projectId:'github:3',checkedAt,status:'reachable',httpStatus:302,contentType:'text/html'},
-    {projectId:'github:4',checkedAt,status:'reachable',httpStatus:200,contentType:'application/json'},
-    {projectId:'github:9999',checkedAt,status:'reachable',httpStatus:200,contentType:'text/html'}
+    {projectId:'github:1',candidateUrl:repos[0].homepage,url:repos[0].homepage,checkedAt,status:'reachable',httpStatus:200,contentType:'text/html; charset=utf-8'},
+    {projectId:'github:1',candidateUrl:repos[0].homepage,url:repos[0].homepage,checkedAt,status:'reachable',httpStatus:200,contentType:'text/html'},
+    {projectId:'github:2',candidateUrl:repos[1].homepage,url:repos[1].homepage,checkedAt,status:'unavailable',httpStatus:404,contentType:'text/html'},
+    {projectId:'github:3',candidateUrl:repos[2].homepage,url:repos[2].homepage,checkedAt,status:'reachable',httpStatus:302,contentType:'text/html'},
+    {projectId:'github:4',candidateUrl:repos[3].homepage,url:repos[3].homepage,checkedAt,status:'reachable',httpStatus:200,contentType:'application/json'},
+    {projectId:'github:9999',candidateUrl:'https://other.example.net/',url:'https://other.example.net/',checkedAt,status:'reachable',httpStatus:200,contentType:'text/html'}
   ]};
   assert.equal(recentCheckSummary(repos,base,now).count,1);
   assert.equal(recentCheckSummary(repos,{...base,owner:'NotThisOwner'},now).count,null);
