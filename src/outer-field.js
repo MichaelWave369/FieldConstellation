@@ -102,7 +102,7 @@ export const OUTER_STEPS=[
 
 export const OUTER_MAX_XP=OUTER_STEPS.reduce((sum,step)=>sum+step.xp,0);
 export const emptyOuter=()=>({schemaVersion:1,completedIds:[]});
-const nameList=OUTER_STEPS.flatMap(step=>[...step.sources,...step.choices.filter(c=>/^[\w.-]+$/.test(c[0])).map(c=>c[0]),...(step.visit?[step.visit]:[])]);
+const nameList=OUTER_STEPS.flatMap(step=>[...step.sources,...(step.visit?[step.visit]:[]),...(step.id==='warden-convergence'?[]:step.choices.flatMap(([id])=>id.split('|')))]);
 export function availableOuter(repos){
   const byName=new Map(repos.filter(r=>r.visibility==='public').map(r=>[r.name.toLowerCase(),r]));
   // All nine gates require a complete, public project catalog. Never render
@@ -154,7 +154,7 @@ export function attemptOuter(repos,missionSave,outerSave,quest,stepId,choiceId){
     return {accepted:false,correct:false,reason:'unavailable',save:saved};
   }
   if(choiceId!==step.correct)return {accepted:true,correct:false,reason:'wrong',step,save:saved};
-  if(step.visitRepo&&!Array.isArray(quest?.discoveredIds)||step.visitRepo&&!quest.discoveredIds.includes(projectId(step.visitRepo))){
+  if(step.visitRepo&&(!Array.isArray(quest?.discoveredIds)||!quest.discoveredIds.includes(projectId(step.visitRepo)))){
     return {accepted:true,correct:true,reason:'visit-required',step,visitRepo:step.visitRepo,save:saved};
   }
   return {accepted:true,correct:true,reason:'cleared',step,save:{schemaVersion:1,completedIds:[...saved.completedIds,step.id]}};
