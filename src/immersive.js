@@ -1,3 +1,5 @@
+import {destinationStatus} from './destinations.js';
+
 /**
  * An editorial route across real, public repository stars.
  * These are thematic exhibits, never architecture claims or deployment receipts.
@@ -34,16 +36,10 @@ export function recentCheckSummary(repos,ledger,now=Date.now()){
     return {count:null,label:'checks expired',
       detail:'The last destination verification snapshot is dated '+new Date(checked).toISOString().slice(0,10)+'. Checks are valid for seven days. Expired evidence is not proof a site is down.'};
   }
-  const validIds=new Set(repos.filter(repo=>repo.visibility==='public').map(repo=>'github:'+repo.id));
-  const visited=new Set();
-  for(const check of ledger.checks||[]){
-    if(!check||!validIds.has(check.projectId)||visited.has(check.projectId))continue;
-    const at=Date.parse(check.checkedAt);
-    if(check.status!=='reachable'||!Number.isFinite(at)||now-at>RECENT_CHECK_WINDOW_MS||
-       now-at< -60000||!Number.isInteger(check.httpStatus)||check.httpStatus<200||check.httpStatus>=300||
-       !/^text\/html(?:;|$)/i.test(check.contentType||''))continue;
-    visited.add(check.projectId);
-  }
-  return {count:visited.size,label:'HTML checked ≤7d',
-    detail:visited.size+' recent recorded 2xx HTML destination checks. This does not certify app health, functionality or integration.'};
+  // Reuse the original bounded HTTPS verification contract, which also
+  // binds each receipt to the *current* declared candidate URL.
+  const count=repos.filter(repo=>repo.visibility==='public'&&
+    destinationStatus(repo,ledger,now).state==='reachable').length;
+  return {count,label:'HTML checked ≤7d',
+    detail:count+' recent recorded 2xx HTML destination checks. This does not certify app health, functionality or integration.'};
 }
