@@ -13,7 +13,7 @@ function cleanIds(ids,repos){
   if(!Array.isArray(ids))return [];
   const allowed=publicIds(repos),seen=new Set(),result=[];
   for(const id of ids){
-    if(typeof id!=='string'||!/^github:[1-9]\\d{0,19}$/.test(id)||!allowed.has(id)||seen.has(id))continue;
+    if(typeof id!=='string'||!/^github:[1-9]\d{0,19}$/.test(id)||!allowed.has(id)||seen.has(id))continue;
     seen.add(id);result.push(id);
     if(result.length>=MAX_DISCOVERIES)break;
   }
