@@ -1,10 +1,18 @@
-# Field Constellation 12 · New Worlds
+# Field Constellation 14 · Fresh Stars
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
 [Open the production map](https://michaelwave369.github.io/FieldConstellation/) · [Build and deployment status](https://github.com/MichaelWave369/FieldConstellation/actions) · [Read the Field Atlas](https://michaelwave369.github.io/FieldAtlas/)
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
+
+## Edition 14 · 211 Public Stars (November 1, 2026)
+
+The **current checked-in snapshot reconciles 211 unique public repositories** against a complete three-populated-page GitHub repository search (with a fourth empty page). The prior October 29 Edition 12 snapshot held 199 public repositories. **Twelve newly identified public projects** are now collectible stars: PhiSafe, LWG, PhiServe, PieceByPiece, Opti-Eyes, ReelTheater, PhiVine, CycleWeave, PhiDecisionField, PhiOS-Mobile, PhiOperator and PhiXRCommons.
+
+New projects have explicit reviewed **thematic groups** across the existing 3D layouts and the Quest RPG's eight skill-tree branches. **Fresh Stars · New Discoveries** provides a twelve-stop collector trail. These groupings and tours are **editorial associations, not executable integrations**. The Field Passport and Quest Journal remain separate browser-local collections keyed by public numeric GitHub IDs.
+
+**Freshness scope:** Repository identities were reconciled on November 1 from a paginated GitHub repository search; the twelve additions' public metadata was read directly from their repository API records. The previously recorded 199 records retain their independently dated October 29 metadata, rather than falsely implying every field was freshly fetched. The separately dated Atlas chapter and published-HTML manifests and destination checks are **not** refreshed, and should not be advertised as live health or complete coverage of 211 repos. No private repo records are bundled or exposed. Older historical counts below remain documentary history.
 
 ## Edition 13 · The Infinite Tinkerer RPG (November 1, 2026)
 

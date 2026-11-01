@@ -10,7 +10,7 @@ const inventory=load('repos'),repos=inventory.repos,atlas=load('atlas'),publishe
 test('coverage receipt distinguishes recorded reviewed chapters, published HTML and public repositories',()=>{
   const audit=atlasCoverageAudit(repos,inventory,atlas,published);
   assert.equal(audit.kind,COVERAGE_KIND);
-  assert.equal(audit.publicInventory.repositoryCount,199);
+  assert.equal(audit.publicInventory.repositoryCount,repos.length);
   assert.equal(audit.reviewed.valid,true);
   assert.equal(audit.reviewed.recordedCount,131);
   assert.equal(audit.reviewed.matchedCount,131);
@@ -43,7 +43,7 @@ test('a private or renamed repository never silently enters public coverage',()=
   const modified=repos.map(r=>r.id===found.id?{...r,visibility:'private'}:r);
   const a=atlasCoverageAudit(modified,inventory,atlas,published);
   assert(a.published.unmatched.some(x=>x.projectId===projectId(found)));
-  assert.equal(a.publicInventory.repositoryCount,198);
+  assert.equal(a.publicInventory.repositoryCount,repos.length-1);
   const renamed=repos.map(r=>r.id===found.id?{...r,name:'renamed-example'}:r);
   const b=atlasCoverageAudit(renamed,inventory,atlas,published);
   assert(b.published.unmatched.some(x=>x.projectId===projectId(found)&&x.reason.includes('name differs')));
