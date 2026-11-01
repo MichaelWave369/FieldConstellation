@@ -364,6 +364,7 @@ try{
   assert.equal(await fallbackPage.locator('#directoryDialog').isVisible(),true,'Directory must stay accessible without WebGL2.');
   assert.equal(await fallbackPage.locator('#domeOverlay').count(),1,'Planetarium frame remains visible with Canvas fallback.');
   assert.equal(await fallbackPage.locator('#showtimeButton').count(),1,'Dome Show remains accessible in Canvas fallback.');
+  await fallbackPage.locator('#directoryDialog').evaluate(dialog=>dialog.close());
   await fallbackPage.locator('#immersiveButton').click();
   assert.equal(await fallbackPage.locator('#immersiveHud').isVisible(),true,'Canvas fallback supports the same immersive exhibit UI.');
   await fallbackPage.locator('#immersiveExit').click();
