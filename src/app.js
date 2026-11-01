@@ -470,8 +470,8 @@ function renderMissions(){
     '<div><strong>'+progress.xp+' XP</strong><span>Mission XP · game only</span></div>'+
     '<div><strong>'+escape(progress.finished?'The Field Awaits':current?.actTitle||'No gates')+'</strong><span>'+(progress.finished?'All available gates cleared':'Current chapter')+'</span></div>';
   $('missionChapters').innerHTML=progress.chapters.map(chapter=>'<div class="mission-chapter'+(chapter.total>0&&chapter.cleared===chapter.total?' cleared':'')+'"><small>ACT '+chapter.act+'</small><strong>'+escape(chapter.title||'Unavailable')+'</strong><span>'+chapter.cleared+' / '+chapter.total+' gates</span></div>').join('');
-  $('missionNext').hidden=!reviewed||!progress.current;
-  $('missionNext').textContent='Continue to gate '+(progress.cleared+1)+' →';
+  $('missionNext').hidden=!reviewed;
+  $('missionNext').textContent=progress.current?'Continue to gate '+(progress.cleared+1)+' →':'See your victory →';
   $('missionFeedback').textContent=state.missionFeedback;
   $('missionFeedback').classList.toggle('success',!!reviewed);
   if(!current){
