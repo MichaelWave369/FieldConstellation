@@ -105,8 +105,9 @@ try{
   assert.equal(await page.locator('#questCount').textContent(),'0');
   assert.match(await page.locator('#passportSummary').textContent(),/2 saved worlds/);
   await page.locator('#questDialog').evaluate(dialog=>dialog.close());
-  await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.getElementById('loading')?.hidden===true);
+  // A repo deep link intentionally discovers that world again. Navigate to the
+  // unselected home view to test persistence without a new visit.
+  await ready(page,base);
   assert.equal(await page.locator('#questCount').textContent(),'0','Reset must persist without re-seeding from Passport.');
   assert.equal(await page.locator('#passportCount').textContent(),'2','RPG reset must not erase existing bookmarks.');
   assert.deepEqual(errors,[],'Desktop app must have no uncaught JavaScript errors.');
