@@ -11,6 +11,7 @@ import {availableTrails} from './trails.js';
 import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
 import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite,recordVisit,clearPassportSection,passportRepos,exportFavorites,importFavorites} from './passport.js';
 import {QUEST_KEY,emptyQuest,readQuest,sanitizeQuest,discover,questProgress} from './quest.js';
+import {MISSION_KEY,emptyMissionSave,readMissionSave,sanitizeMissionSave,missionProgress,attemptMission} from './missions.js';
 import {reviewedAtlasIds,atlasManifestLabel} from './atlas-lens.js';
 import {publishedAtlasIds,publishedAtlasLabel,publishedAtlasLink,publishedAtlasWebsite} from './atlas-published.js';
 import {atlasCoverageAudit,atlasCoverageReceipt} from './atlas-audit.js';
@@ -20,7 +21,7 @@ const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),postcardView:null,postcardDraft:[]};
+const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',postcardView:null,postcardDraft:[]};
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new THREE.Color(),tempProjection=new THREE.Vector3();
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
@@ -44,6 +45,7 @@ async function boot(){
     state.repos=prepareRepos(state.snapshot.repos);
     try{state.passport=parsePassport(localStorage.getItem(PASSPORT_KEY),state.repos);}catch{state.passport=emptyPassport();}
     try{state.quest=readQuest(localStorage.getItem(QUEST_KEY),state.repos,state.passport);saveQuest(false);}catch{state.quest=emptyQuest();}
+    try{state.missionSave=readMissionSave(localStorage.getItem(MISSION_KEY),state.repos);}catch{state.missionSave=emptyMissionSave();}
     const extras=await Promise.allSettled(['relationships','deployments','atlas','atlas-published'].map(async name=>{const r=await fetch('./'+name+'.json',{signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error(name+' unavailable');return r.json();}));
     try{state.relationshipLedger=extras[0].status==='fulfilled'?extras[0].value:null;state.relationships=resolveRelationships(state.repos,state.relationshipLedger);}catch{state.relationshipLedger=null;}
     state.deployments=extras[1].status==='fulfilled'?extras[1].value:null;
@@ -97,6 +99,13 @@ function bindUI(){
   $('questButton').onclick=()=>{renderQuest();$('questDialog').showModal();};
   $('questReset').onclick=()=>{if(!confirm('Reset all Quest RPG discoveries in this browser? Your Passport will not change.'))return;state.quest=emptyQuest();saveQuest();updateQuestCount();renderQuest();if(state.lens==='quest'){renderLensLegend();renderSidebarIndex();if(sceneReady)updateAppearance();}};
   $('questLensButton').onclick=()=>{setLens(state.lens==='quest'?'world':'quest');renderQuest();};
+  $('missionStart').onclick=()=>{state.missionReview=null;state.missionFeedback='';$('questDialog').close();renderMissions();$('missionDialog').showModal();};
+  $('missionJournal').onclick=()=>{$('missionDialog').close();renderQuest();$('questDialog').showModal();};
+  $('missionNext').onclick=()=>{state.missionReview=null;state.missionFeedback='';renderMissions();};
+  $('missionReset').onclick=()=>{
+    if(!confirm('Restart The Nine Gates in this browser? Collected stars and the Field Passport will remain unchanged.'))return;
+    state.missionSave=emptyMissionSave();saveMissionProgress();state.missionReview=null;state.missionFeedback='';renderMissions();
+  };
   $('postcardComposer').onclick=()=>{
     if(!state.passport.favoriteIds.length)return;
     state.postcardView=null;state.postcardDraft=state.passport.favoriteIds.slice(0,MAX_POSTCARD_WORLDS);
@@ -428,6 +437,8 @@ function renderQuest(){
     '<div class="quest-rank-progress"><div><span>Next milestone</span><b>'+(p.next?p.next.at+' worlds · '+escape(p.next.name):'All ranks discovered')+'</b></div>'+
     '<progress max="'+(p.next?p.next.at:Math.max(1,p.total))+'" value="'+p.total+'"></progress></div>';
   $('questLensButton').textContent=state.lens==='quest'?'Return to world colors':'Show discoveries on map';
+  const ms=missionProgress(state.repos,state.missionSave);
+  $('missionJournalStatus').textContent='THE NINE GATES · '+ms.cleared+'/'+ms.total+' gates cleared · '+ms.xp+' mission XP. Challenge choices teach what public repositories really do, and what they cannot yet do.';
   $('questTree').innerHTML=GROUPS.map(group=>{
     const b=p.branches.find(branch=>branch.group===group.id)||{total:0,discovered:0,saved:0,next:null};
     const full=b.total>0&&b.discovered===b.total;
@@ -445,6 +456,52 @@ function renderQuest(){
   });
 }
 
+
+/** The Nine Gates stores only reviewed mission identifiers in this browser. */
+function saveMissionProgress(notify=true){
+  try{localStorage.setItem(MISSION_KEY,JSON.stringify(state.missionSave));return true;}
+  catch{if(notify)toast('Mission save is session-only: browser storage is unavailable.');return false;}
+}
+function renderMissions(){
+  const progress=missionProgress(state.repos,state.missionSave);
+  const reviewed=progress.missions.find(m=>m.id===state.missionReview&&progress.completedIds.includes(m.id));
+  const current=reviewed||progress.current;
+  $('missionProgress').innerHTML='<div><strong>'+progress.cleared+' / '+progress.total+'</strong><span>Gates cleared</span></div>'+
+    '<div><strong>'+progress.xp+' XP</strong><span>Mission XP · game only</span></div>'+
+    '<div><strong>'+escape(progress.finished?'The Field Awaits':current?.actTitle||'No gates')+'</strong><span>'+(progress.finished?'All available gates cleared':'Current chapter')+'</span></div>';
+  $('missionChapters').innerHTML=progress.chapters.map(chapter=>'<div class="mission-chapter'+(chapter.total>0&&chapter.cleared===chapter.total?' cleared':'')+'"><small>ACT '+chapter.act+'</small><strong>'+escape(chapter.title||'Unavailable')+'</strong><span>'+chapter.cleared+' / '+chapter.total+' gates</span></div>').join('');
+  $('missionNext').hidden=!reviewed;
+  $('missionNext').textContent=progress.current?'Continue to gate '+(progress.cleared+1)+' →':'See your victory →';
+  $('missionFeedback').textContent=state.missionFeedback;
+  $('missionFeedback').classList.toggle('success',!!reviewed);
+  if(!current){
+    $('missionEncounter').innerHTML='<div class="mission-victory"><h3>All nine gates cleared.</h3><p>You have explored nine real project ideas across three chapters. Continue discovering other stars in the Field Constellation.</p><button id="missionMapReturn" type="button">Return to the living map</button></div>';
+    $('missionMapReturn').onclick=()=>{$('missionDialog').close();};
+    return;
+  }
+  const isDone=progress.completedIds.includes(current.id);
+  const answer=current.answerRepo;
+  $('missionEncounter').innerHTML='<p class="mission-kicker">ACT '+current.act+' · '+escape(current.actTitle)+' · GATE '+(progress.missions.indexOf(current)+1)+' OF '+progress.total+'</p>'+
+    '<h3>'+escape(current.title)+'</h3><p class="mission-scene">'+escape(current.scene)+'</p><strong class="mission-question">'+escape(current.prompt)+'</strong>'+
+    (isDone?'<div class="mission-cleared"><strong>GATE CLEARED · '+escape(current.reward)+'</strong><p>'+escape(current.lesson)+'</p>'+
+      '<div class="mission-cleared-actions"><a href="'+escape(answer.url+'#readme')+'" target="_blank" rel="noopener noreferrer">Read '+escape(answer.name)+' on GitHub ↗</a><button id="missionTravel" data-mission-travel="'+escape(answer.id)+'" type="button">Travel to '+escape(answer.name)+' in the Field →</button></div></div>':
+      '<div class="mission-options" role="group" aria-label="Choose a project for this mission">'+current.optionRepos.map(repo=>
+        '<button type="button" data-mission-option="'+escape(repo.name)+'">'+escape(repo.name)+'<span aria-hidden="true">→</span></button>').join('')+'</div>'+
+      '<p class="mission-help">Explore a real project choice. Wrong answers give a hint without losing XP.</p>');
+  if(isDone){
+    $('missionTravel').onclick=()=>{$('missionDialog').close();resetFilters();selectRepo(answer.id,true);};
+  }else{
+    document.querySelectorAll('[data-mission-option]').forEach(button=>button.onclick=()=>{
+      const result=attemptMission(state.repos,state.missionSave,current.id,button.dataset.missionOption);
+      if(!result.accepted)return;
+      if(result.correct){
+        state.missionSave=result.save;saveMissionProgress();state.missionReview=current.id;
+        state.missionFeedback='Gate cleared! +30 mission XP. '+current.reward+' unlocked.';
+      }else state.missionFeedback='Not quite. '+current.hint;
+      renderMissions();
+    });
+  }
+}
 function passportRows(ids,emptyText){
   const repos=passportRepos(ids,state.repos);
   if(!repos.length)return '<p class="passport-empty">'+escape(emptyText)+'</p>';
@@ -602,7 +659,9 @@ async function refreshPublic(){
   state.snapshot=next;state.repos=prepareRepos(next.repos);state.publicUpdated=next.fetchedAt;state.activityNow=Date.now();
   state.passport=sanitizePassport(state.passport,state.repos);savePassport(false);
   state.quest=sanitizeQuest(state.quest,state.repos);saveQuest(false);
-  updatePassportCount();if($('passportDialog').open)renderPassport();if($('questDialog').open)renderQuest();
+  state.missionSave=sanitizeMissionSave(state.missionSave,state.repos);saveMissionProgress(false);
+  state.missionReview=null;state.missionFeedback='';
+  updatePassportCount();if($('passportDialog').open)renderPassport();if($('questDialog').open)renderQuest();if($('missionDialog').open)renderMissions();
   if($('postcardDialog').open){
     if(state.postcardView){
       const latest=readPostcardLink(location.href,state.repos);

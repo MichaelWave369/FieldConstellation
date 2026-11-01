@@ -1,10 +1,18 @@
-# Field Constellation 14 · Fresh Stars
+# Field Constellation 15 · The Nine Gates
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
 [Open the production map](https://michaelwave369.github.io/FieldConstellation/) · [Build and deployment status](https://github.com/MichaelWave369/FieldConstellation/actions) · [Read the Field Atlas](https://michaelwave369.github.io/FieldAtlas/)
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
+
+## Edition 15 · The Nine Gates playable quest campaign (November 1, 2026)
+
+The existing **Quest RPG** now includes **Play The Nine Gates**, a three-chapter, nine-mission educational adventure. A visitor reads a fictional situation, chooses between three **real, public repositories**, and learns which tool fits the task and what it **cannot** yet do. Correct answers earn **30 mission XP per gate (270 total)**, with chapter unlocks, no-penalty hints for wrong guesses, and links to the repository's README and its existing star in the 3D Field.
+
+This is a **real browser-playable quest campaign**, not merely a list of destinations. It is local-first and requires no login, WebXR headset or backend. Its saved progress consists solely of validated, sequential mission IDs in browser storage and can be independently reset without touching Passport favorites, public repository discoveries or postcards.
+
+**Truth boundary:** Mission choice descriptions were reviewed from the projects' public README files, but do not certify current runtime capability, deployments or CI. The Nine Gates story is fiction, rewards are game XP, and no new technical relationship edges or execution permissions are created. See [Edition 15 campaign and privacy contract](docs/EDITION_15_NINE_GATES.md).
 
 ## Edition 14 · 211 Public Stars (November 1, 2026)
 
