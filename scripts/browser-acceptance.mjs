@@ -100,6 +100,38 @@ try{
   assert.equal(await page.locator('#inspector').isVisible(),true,'Closing the show restores the previous project inspector.');
   await capture(page,'desktop-phitarium-observatory');
 
+  log('desktop: Phitarium Immersive Mode is full-viewport, read-only until Explore and restores navigation');
+  const immersivePreviousUrl=page.url();
+  const immersivePreviousQuest=await page.locator('#questCount').textContent();
+  const immersivePreviousPassport=await page.locator('#passportCount').textContent();
+  await page.locator('#immersiveButton').click();
+  assert.equal(await page.locator('#immersiveHud').isVisible(),true);
+  assert.equal(await page.locator('body').evaluate(body=>body.classList.contains('immersive-mode')),true);
+  assert.equal(await page.locator('.sidebar').isVisible(),false,'Immersive mode must hide the ordinary sidebar.');
+  assert.equal(await page.locator('.map-header').isVisible(),false,'Immersive mode must hide map technical controls.');
+  const mapBox=await page.locator('#map').boundingBox();
+  assert(mapBox&&Math.abs(mapBox.x)<1&&mapBox.width>=1439,'Dome must fill the viewport.');
+  assert.equal(await page.locator('#immersiveTitle').textContent(),'FieldConstellation');
+  await capture(page,'desktop-phitarium-immersive');
+  await page.locator('#immersiveNext').click();
+  assert.equal(await page.locator('#immersiveTitle').textContent(),'FieldAtlas');
+  assert.match(await page.locator('#immersiveReadme').getAttribute('href'),/github\.com\/MichaelWave369\/FieldAtlas#readme/);
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await page.locator('#immersiveTitle').textContent(),'PhiOS');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#immersiveHud').isVisible(),false);
+  assert.equal(await page.locator('.sidebar').isVisible(),true);
+  assert.equal(await page.locator('#inspector').isVisible(),true);
+  assert.equal(await page.locator('#questCount').textContent(),immersivePreviousQuest);
+  assert.equal(await page.locator('#passportCount').textContent(),immersivePreviousPassport);
+  assert.equal(page.url(),immersivePreviousUrl,'Presentation navigation must not rewrite repository deep links.');
+  await page.locator('#immersiveButton').click();
+  await page.locator('#immersiveQuest').click();
+  assert.equal(await page.locator('#immersiveHud').isVisible(),false);
+  assert.equal(await page.locator('#questDialog').isVisible(),true,'Immersive quest button opens the existing RPG.');
+  await page.locator('#questDialog').evaluate(dialog=>dialog.close());
+
+
   await page.locator('#passportButton').click();
   assert.equal(await page.locator('#passportDialog').isVisible(),true);
   assert.match(await page.locator('#passportSummary').textContent(),/2 saved worlds/);
@@ -243,6 +275,23 @@ try{
   assert.deepEqual(errors,[],'Desktop app must have no uncaught JavaScript errors.');
   await desktop.close();
 
+  log('independent immersive visitor: explicit Explore navigates and discovers one public star');
+  const exhibitContext=await browser.newContext({viewport:{width:1300,height:850}});
+  const exhibitPage=await exhibitContext.newPage();
+  await ready(exhibitPage,base);
+  const initialCount=Number(await exhibitPage.locator('#questCount').textContent());
+  await exhibitPage.locator('#immersiveButton').click();
+  await exhibitPage.locator('#immersiveNext').click();
+  assert.equal(await exhibitPage.locator('#immersiveTitle').textContent(),'FieldAtlas');
+  assert.equal(Number(await exhibitPage.locator('#questCount').textContent()),initialCount,'Merely viewing an exhibit must never add XP.');
+  await exhibitPage.locator('#immersiveExplore').click();
+  assert.equal(await exhibitPage.locator('#immersiveHud').isVisible(),false);
+  assert.equal(await exhibitPage.locator('#inspector').isVisible(),true);
+  assert.equal(new URL(exhibitPage.url()).searchParams.get('repo'),canonical(inventory.find(r=>r.name==='FieldAtlas')));
+  assert.equal(Number(await exhibitPage.locator('#questCount').textContent()),initialCount+1,'Explicit Explore records one normal discovery.');
+  await exhibitContext.close();
+
+
   log('anonymous recipient: preview and explicit opt-in without history sharing');
   const recipient=await browser.newContext({viewport:{width:1280,height:900}});
   const recvPage=await recipient.newPage();
@@ -280,6 +329,17 @@ try{
   await ready(mobilePage,base);
   assert.equal(await mobilePage.locator('#showtimeButton').isVisible(),true,'Mobile visitors must be able to start the Dome Show.');
   await capture(mobilePage,'mobile-phitarium-observatory');
+
+  await mobilePage.locator('#immersiveButton').click();
+  assert.equal(await mobilePage.locator('#immersiveHud').isVisible(),true);
+  const mobileMapBox=await mobilePage.locator('#map').boundingBox();
+  assert(mobileMapBox&&Math.abs(mobileMapBox.x)<1,'Immersive map must fill mobile viewport.');
+  await capture(mobilePage,'mobile-phitarium-immersive');
+  await mobilePage.locator('#immersiveNext').click();
+  assert.equal(await mobilePage.locator('#immersiveTitle').textContent(),'FieldAtlas');
+  await mobilePage.locator('#immersiveExit').click();
+  assert.equal(await mobilePage.locator('#immersiveHud').isVisible(),false);
+
   await mobilePage.locator('#showtimeButton').click();
   assert.equal(await mobilePage.locator('#showtimeHud').isVisible(),true,'Mobile Dome Show must display its controls.');
   await capture(mobilePage,'mobile-phitarium-dome-show');
@@ -304,6 +364,11 @@ try{
   assert.equal(await fallbackPage.locator('#directoryDialog').isVisible(),true,'Directory must stay accessible without WebGL2.');
   assert.equal(await fallbackPage.locator('#domeOverlay').count(),1,'Planetarium frame remains visible with Canvas fallback.');
   assert.equal(await fallbackPage.locator('#showtimeButton').count(),1,'Dome Show remains accessible in Canvas fallback.');
+  await fallbackPage.locator('#directoryDialog').evaluate(dialog=>dialog.close());
+  await fallbackPage.locator('#immersiveButton').click();
+  assert.equal(await fallbackPage.locator('#immersiveHud').isVisible(),true,'Canvas fallback supports the same immersive exhibit UI.');
+  await fallbackPage.locator('#immersiveExit').click();
+  assert.equal(await fallbackPage.locator('#immersiveHud').isVisible(),false);
   assert(Number((await fallbackPage.locator('#directoryCount').textContent()).match(/\d+/)?.[0])>0);
   await capture(fallbackPage,'canvas-directory-fallback');
   assert.deepEqual(fallbackErrors,[],'Canvas fallback should not produce uncaught JavaScript errors.');
