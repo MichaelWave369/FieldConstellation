@@ -12,10 +12,11 @@ const read=name=>JSON.parse(readFileSync(new URL('../src/'+name+'.json',import.m
 const inventory=parseSnapshot(read('repos'));
 const repos=inventory.repos, reviewed=read('atlas'), published=read('atlas-published');
 
-test('public inventory is a fully validated 199-record independent snapshot',()=>{
-  assert.equal(repos.length,199);
-  assert.equal(new Set(repos.map(r=>r.id)).size,199);
+test('complete public inventory expands beyond former 199-record snapshot',()=>{
+  assert(repos.length>=211,'expected at least 211 public stars in the Edition 14 snapshot');
+  assert.equal(new Set(repos.map(r=>r.id)).size,repos.length);
   assert(repos.every(r=>r.visibility==='public'));
+  for(const name of ['PhiSafe','LWG','PhiServe','PieceByPiece','Opti-Eyes','ReelTheater','PhiVine','CycleWeave','PhiDecisionField','PhiOS-Mobile','PhiOperator','PhiXRCommons'])assert(repos.some(r=>r.name===name),'missing newly discovered public star '+name);
   for(const name of ['BTM','SparkTheSubstrate','EchoesOfTheNine','TweedleVerse','LENZ','FieldStoryForge','BackyardProductionCompany','GenEWrist','PhiPress','PhiOS-XR']){
     assert(repos.some(r=>r.name===name),'missing public star '+name);
   }
@@ -29,12 +30,21 @@ test('recent games and studios have editorial groups without invented integratio
   }
   for(const name of ['FieldStoryForge','BackyardProductionCompany'])assert.equal(categoryFor(repos.find(r=>r.name===name)),'creative');
   assert.equal(categoryFor(repos.find(r=>r.name==='GenEWrist')),'infrastructure');
+  for(const [group,names] of Object.entries({
+    intelligence:['PhiServe'],creative:['LWG','ReelTheater'],play:['PieceByPiece','PhiOperator'],
+    research:['CycleWeave','PhiDecisionField'],infrastructure:['Opti-Eyes','PhiOS-Mobile','PhiVine'],
+    commons:['PhiSafe','PhiXRCommons']
+  }))for(const name of names)assert.equal(categoryFor(repos.find(r=>r.name===name)),group,name);
 });
 
 test('new guided routes resolve safely from public stars, not claims of live demos',()=>{
   const trails=availableTrails(repos);
   assert(trails.some(t=>t.id==='new-worlds'));
   assert(trails.some(t=>t.id==='studio-circuit'));
+  const fresh=trails.find(t=>t.id==='fresh-stars-2026');
+  assert(fresh);
+  assert.equal(fresh.stops.length,12);
+  assert(fresh.stops.every(t=>t.visibility==='public'));
   const games=trails.find(t=>t.id==='new-worlds');
   assert.deepEqual(games.stops.map(s=>s.name),['BTM','SparkTheSubstrate','EchoesOfTheNine','TweedleVerse','LENZ']);
   const without=availableTrails(repos.filter(r=>r.name!=='BTM'));
