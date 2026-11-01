@@ -1,10 +1,20 @@
-# Field Constellation 16 · The Outer Field
+# The Phitarium · Field Constellation 17
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
 [Open the production map](https://michaelwave369.github.io/FieldConstellation/) · [Build and deployment status](https://github.com/MichaelWave369/FieldConstellation/actions) · [Read the Field Atlas](https://michaelwave369.github.io/FieldAtlas/)
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
+
+## Edition 17 · The Phitarium: Living Repository Planetarium (November 1, 2026)
+
+The interactive observatory is now **THE PHITARIUM**, a cinematic planetarium experience around the existing, real public-repository star map. The scene has a celestial meridian/altitude grid, deep-sky colors, projected dome framework, observatory instrument UI, and updated Φ branding. The existing five layouts, public catalog, Atlas/relationships evidence, Field Passport, Nine Gates, Outer Field, and independent save states are preserved.
+
+An optional **Dome Show** offers a short six-star fly-through: FieldConstellation, FieldAtlas, PhiOS, PhiServe, BTM and GenEWrist. These are public, curated examples. The tour uses their current public-repository descriptions, with next/end and **Explore this star** controls. **Watching is read-only**: it does not silently mark a project visited, collect XP, import data, change URL history or save bookmarks. Explicitly exploring a star uses the familiar inspector and discovery mechanics. User camera input ends the show, the presentation pauses when the tab is hidden, and reduced-motion visitors advance manually. WebGL and Canvas fallback render the same dome-grid geometry.
+
+**Honesty:** A planetarium star represents a public repository, not a working deployment or verified integration. The curated show does not upgrade any architecture evidence, destination claims, or permissions. No new account, tracking, network API, external image, package or dependency is required.
+
+See [Edition 17 design, privacy and accessibility contract](docs/EDITION_17_PHITARIUM.md).
 
 ## Edition 16 · The Outer Field: Infinite Spiral (November 1, 2026)
 

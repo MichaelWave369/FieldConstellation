@@ -1,0 +1,311 @@
+/* THE PHITARIUM · Edition 17.
+ * A cinematic observatory shell around the existing interactive sky and games.
+ * Theme is visual only. No repository / evidence / save semantics are changed.
+ */
+body.phitarium{
+  --bg:#050a15;--panel:#0b1528;--panel2:#132239;--text:#eaf5ff;
+  --muted:#a7b8cd;--faint:#7087a5;--line:#2e4766;--accent:#b4e7fb;
+  --ph-ice:#8bd9ff;--ph-glow:#6d8df4;--ph-violet:#ae8ee7;
+  background:#050a15;
+}
+body.phitarium.lattice-theme{
+  --bg:#110e18;--panel:#1a1420;--panel2:#28202b;--text:#faf1e6;
+  --muted:#c1b19f;--faint:#9f886d;--line:#614b47;--accent:#f0cd91;
+  --ph-ice:#eed0a6;--ph-glow:#c0886a;--ph-violet:#c8a5bf;
+}
+.phitarium .sidebar{
+  background:radial-gradient(ellipse 110% 46% at 10% 0%,#27335c70,transparent 73%),
+    linear-gradient(160deg,#0c182e 0%,#091223 50%,#080f20 100%);
+  border-right:1px solid #48688978;
+  box-shadow:10px 0 42px #0307139c,inset -1px 0 #9ed9ff14;
+}
+.phitarium.lattice-theme .sidebar{
+  background:radial-gradient(ellipse 110% 42% at 12% 0%,#533d5570,transparent 73%),
+    linear-gradient(160deg,#211927,#140f1f 90%);
+}
+.phitarium .brand{gap:12px;color:#e5f6ff}
+.phitarium .brand-symbol{
+  font-family:Georgia,'Times New Roman',serif;font-size:42px;font-weight:400;
+  line-height:1;filter:drop-shadow(0 0 14px #8ecffc94);
+  color:var(--accent);transform:translateY(-3px);
+}
+.phitarium .brand b{font-size:13px;letter-spacing:1.7px;color:#ecf5ff}
+.phitarium .brand .edition{color:#98b7d9;border:1px solid #436381;border-radius:999px;
+  padding:3px 7px;margin-top:2px;font-size:9px}
+.phitarium .intro{margin-top:31px}
+.phitarium .intro .eyebrow,.phitarium .map-caption .eyebrow{
+  color:#9bbbdb;font-size:9px;letter-spacing:1.8px}
+.phitarium .intro h1,.phitarium.lattice-theme h1{
+  font-family:'Field Sans',Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:clamp(34px,3.6vw,45px);line-height:1.1;letter-spacing:-1.9px;font-weight:520;
+  margin-top:15px;margin-bottom:13px;color:#f5faff;
+}
+.phitarium .intro h1 span{
+  background:linear-gradient(130deg,#8cd5fd,#bd9cfc);background-clip:text;
+  color:transparent;text-shadow:0 0 25px #7c9fe455;
+}
+.phitarium .intro-copy{color:#a9bcd2;font-size:11px;line-height:1.85}
+.phitarium .stats{border-bottom:1px solid #345072;margin:23px 0 20px;padding-bottom:17px}
+.phitarium .stats strong{color:#f1f9ff;font-variant-numeric:tabular-nums}
+.phitarium .stats span{color:#9babc0;font-size:9px}
+.phitarium .search-box,.phitarium .sidebar-tabs{
+  background:#0b1b30ed;border:1px solid #3c587b;border-radius:9px;
+  box-shadow:inset 0 1px #a5dfff10;
+}
+.phitarium .search-box:focus-within{box-shadow:0 0 0 1px var(--accent),0 0 15px #68bfff22}
+.phitarium .search-box input::placeholder{color:#8ca8c6}
+.phitarium .sidebar-tabs button[aria-selected=true],
+.phitarium .category.selected,.phitarium .index-row.selected,
+.phitarium .index-row:hover{background:#203957;color:#c7efff;border-color:#517aa9}
+.phitarium .category{color:#c0cfe0;border-radius:7px}
+.phitarium .category:hover{background:#1b304c;color:#fff}
+.phitarium .category-count{color:#9eb1c8}
+.phitarium .quick-filters button{border:1px solid #3a5272;border-radius:7px;color:#b1c8dc}
+.phitarium .quick-filters button[aria-pressed=true]{
+  background:#263b5c;border-color:#80bfff;color:#c0ecff}
+.phitarium .color-control select{color:var(--accent)}
+.phitarium .sidebar-bottom{background:linear-gradient(0deg,#0a1224,transparent);margin-top:auto}
+.phitarium .avatar{background:#1c2d46;border-color:#7393b9;box-shadow:0 0 19px #6ac1ff26}
+.phitarium .data-status,.phitarium .owner{border-color:#345071}
+.phitarium .status-dot{background:#83e2dd;box-shadow:0 0 11px #88ffe5aa}
+.phitarium .map{
+  background:#050b1c;
+  isolation:isolate;
+}
+.phitarium.lattice-theme .map{background:#15101c}
+.phitarium .map::after{
+  z-index:1;
+  box-shadow:inset 0 0 130px #0206109c,inset 0 -55px 100px #02050a94,
+             inset 0 0 2px #a6d5ff30;
+  border:1px solid #5d86bc2b;
+}
+.phitarium .dome-overlay{
+  pointer-events:none;position:absolute;inset:0;overflow:hidden;z-index:1;
+  background:
+    radial-gradient(ellipse 63% 48% at 54% 44%,#7660c811 0%,transparent 75%),
+    radial-gradient(ellipse 55% 45% at 19% 85%,#5089e010 0%,transparent 75%),
+    linear-gradient(180deg,#102a4c15 0%,transparent 53%,#070e2270 100%);
+}
+.phitarium .dome-rim{
+  position:absolute;inset:30px 18px 11% 18px;
+  border:1px solid #7abaff35;border-radius:50% 50% 9% 9% / 60% 60% 7% 7%;
+  box-shadow:inset 0 0 55px #5e9bda0b,0 0 26px #558bcc12;
+}
+.phitarium .dome-rim::before{
+  content:'';position:absolute;inset:10px 11px;
+  border:1px solid #669fd324;border-radius:inherit;
+}
+.phitarium .dome-horizon{
+  position:absolute;height:18%;bottom:-9%;left:-16%;right:-16%;
+  border-top:1px solid #79ceea59;border-radius:50% 50% 0 0;
+  box-shadow:0 -3px 35px #74d3f829,0 -14px 70px #375cbb25;
+}
+.phitarium .dome-zenith{
+  position:absolute;top:100px;left:50%;transform:translateX(-50%);
+  font-size:8px;letter-spacing:3px;color:#a0bee6a1;white-space:nowrap;
+  display:flex;flex-direction:column;gap:5px;align-items:center;
+}
+.phitarium .dome-zenith::before{content:'✦';font-size:19px;color:#a8d7f8;line-height:1}
+.phitarium .dome-north,.phitarium .dome-east{
+  position:absolute;bottom:102px;color:#89bfe4a1;font-size:8px;letter-spacing:2px
+}
+.phitarium .dome-north{left:38px}.phitarium .dome-east{right:34px}
+.phitarium .map-header{
+  z-index:4;
+  background:linear-gradient(180deg,#071128ed,#07112888 70%,transparent);
+  border-bottom:1px solid #659fd92c;
+  min-width:0;gap:8px;padding-left:25px;padding-right:25px;
+}
+.phitarium .map-title{color:#cdeaff;letter-spacing:1.5px;gap:9px}
+.phitarium .map-wordmark{font-size:10px;font-weight:700;letter-spacing:1.8px}
+.phitarium .map-title #visibleCount{color:#b5c5dd}
+.phitarium .header-actions{gap:7px;flex-shrink:0}
+.phitarium .outlined-button{
+  background:#0b1935bd;border:1px solid #456b96a8;border-radius:8px;
+  color:#d9ebf8;box-shadow:inset 0 1px #c0e8ff0b;
+  padding:9px 10px;white-space:nowrap;
+}
+.phitarium .outlined-button:hover,.phitarium .outlined-button:focus-visible{
+  color:#fff;border-color:#9cdbff;background:#23385b;
+  box-shadow:0 0 16px #5da7f42b;
+}
+.phitarium .header-actions .outlined-button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);background:#243f5b}
+.phitarium .showtime-button{color:var(--accent);border-color:#79beddb3;background:#20425a9e}
+.phitarium .showtime-button[aria-pressed=true]{box-shadow:0 0 19px #83d6fa5a,inset 0 0 14px #80f2ec1b}
+.phitarium .map-caption{top:102px;left:33px;z-index:3;gap:10px}
+.phitarium .map-caption .caption-title{
+  color:#eff9ff;font-size:clamp(21px,2vw,30px);line-height:1.2;
+  font-weight:480;letter-spacing:-.8px;text-shadow:0 0 22px #588be359;
+}
+.phitarium .map-caption p.view-description{color:#b1c6dc;font-size:10px;max-width:420px}
+.phitarium .tiny-cross{color:#9bdaff;text-shadow:0 0 16px #7ad7ff}
+.phitarium .map-tools,.phitarium .layout-switch{
+  background:#0a1732d9;border:1px solid #567ca7a0;
+  border-radius:12px;box-shadow:0 14px 40px #0007,inset 0 1px #a7d9ff0e;
+}
+.phitarium .map-tools .icon-button:hover{background:#193c59;color:#d4faff}
+.phitarium .tool-divider{background:#3b5a78}
+.phitarium .layout-switch button{color:#b4cce3;border-radius:8px}
+.phitarium .layout-switch button:hover{background:#264261;color:#f5fcff}
+.phitarium .layout-switch button.selected{
+  background:linear-gradient(130deg,#c3ecff,#8fc9e5);color:#091b2c;
+  box-shadow:0 0 21px #80d2ff37;
+}
+.phitarium .inspector{
+  background:linear-gradient(170deg,#152942ee,#0d1b2de9);
+  border:1px solid #6287bb88;border-radius:13px;
+  box-shadow:0 20px 80px #020713bb,inset 0 1px #9edafa1a;
+  backdrop-filter:blur(22px);
+}
+.phitarium .inspector-heading{color:#a5c9e6}
+.phitarium .inspector h2{font-family:'Field Sans',Inter,sans-serif;font-weight:520;color:#eff9ff}
+.phitarium .repo-description,.phitarium .repo-meta dt,.phitarium .repo-facts dt{color:#a3b6cc}
+.phitarium .repo-tags span,.phitarium .repo-meta,.phitarium .repo-facts{border-color:#48617b}
+.phitarium .repo-links a.secondary{color:#d1e9fc;border-color:#6386ae;background:#132c47}
+.phitarium .repo-links a{background:var(--accent);color:#0b1a2c}
+.phitarium .inspector-footer{background:#142841;border-top:1px solid #3e6289;color:#a5c2da}
+.phitarium .map-footer{z-index:5}
+.phitarium .map-help{color:#a4b9d0}
+.phitarium .map-help span{color:#b9d9f5}
+.phitarium .map-coordinate{color:#93b4d7;z-index:3}
+.phitarium .map-coordinate span:first-child{color:#aadaf5}
+.phitarium .lens-legend{color:#b0c5db}
+.phitarium .node-label{color:#b5d1ee;text-shadow:0 0 8px #040c19,0 0 12px #050b1c}
+.phitarium .node-label.featured{color:#f0f9ff}
+.phitarium .cluster-label{text-shadow:0 0 11px #02050b}
+.phitarium .center-label{color:#b1e8ff;text-shadow:0 0 19px #77c5ff9f}
+.phitarium dialog{
+  background:linear-gradient(155deg,#15243c,#0b162a 62%,#0b192f);
+  border:1px solid #5078a9;border-radius:15px;box-shadow:0 24px 100px #02040ae8,inset 0 1px #b6e7ff1e;
+  color:#e9f5ff;
+}
+.phitarium dialog::backdrop{background:#030812d9;backdrop-filter:blur(8px)}
+.phitarium .dialog-header h2{color:#f0f8ff}
+.phitarium .dialog-footnote{color:#a4b6cc}
+.phitarium .tooltip{background:#172e4cf2;border:1px solid #77a2c8;color:#e3f6ff}
+.phitarium .toast{background:#213a56;border-color:#84b1da;color:#eff9ff}
+.phitarium .scene-loading{background:#060b1b;color:#d6eaff}
+.phitarium .scene-loading .loader-orbit{color:#b4dffc}
+.phitarium .directory-row:hover,.phitarium .passport-row:hover{background:#203954}
+.phitarium .quest-stat,.phitarium .mission-progress>div,.phitarium .outer-ledger>div{background:#13253f;border-color:#3b5c86}
+.phitarium .quest-branch,.phitarium .mission-chapter,.phitarium .outer-track-segment{background:#14243b;border-color:#426286}
+.phitarium .quest-branch.complete,.phitarium .mission-chapter.cleared,.phitarium .outer-track-segment.cleared{background:#1e3950;border-color:#80adcf}
+.phitarium .mission-encounter,.phitarium .outer-encounter{
+  background:radial-gradient(ellipse at 90% 0%,#3e4e9357,transparent 65%),linear-gradient(165deg,#1b3456,#101e35);
+  border:1px solid #537cac;
+}
+.phitarium .mission-options button,.phitarium .outer-options button,.phitarium .quest-toolbar button{
+  background:#1a3551;border-color:#517aa7;color:#e1f0ff
+}
+.phitarium .mission-options button:hover,.phitarium .outer-options button:hover,.phitarium .quest-toolbar button:hover{background:#2c4a6d;border-color:#a6dcff;color:#fff}
+.phitarium .mission-cleared,.phitarium .outer-reward{background:#203d58;border-color:#6ea6bc}
+.phitarium .mission-scene,.phitarium .outer-scene,.phitarium .mission-cleared>p,.phitarium .outer-reward>p:nth-of-type(2){color:#d3e1f1}
+.phitarium .mission-encounter .mission-question,.phitarium .outer-encounter .outer-question{color:var(--accent)}
+.phitarium .quest-dialog progress,.phitarium .outer-track progress{accent-color:var(--accent);background:#263b54}
+.phitarium .quest-dialog progress::-webkit-progress-bar,.phitarium .outer-track progress::-webkit-progress-bar{background:#263b54}
+.phitarium .quest-dialog progress::-webkit-progress-value,.phitarium .outer-track progress::-webkit-progress-value{background:var(--accent)}
+.phitarium .quest-dialog progress::-moz-progress-bar,.phitarium .outer-track progress::-moz-progress-bar{background:var(--accent)}
+/* Projection show: only visible when explicitly started. */
+.phitarium .showtime-hud{
+  position:absolute;left:94px;bottom:148px;width:min(370px,calc(100% - 124px));
+  z-index:7;pointer-events:auto;
+  border:1px solid #8bc8e6a8;border-radius:14px;
+  background:linear-gradient(140deg,#142e52ef,#0b1e37f2);
+  padding:17px 19px;backdrop-filter:blur(24px);
+  box-shadow:0 20px 80px #020917bf,inset 0 1px #b8e9ff2b;
+}
+.phitarium .showtime-hud[hidden]{display:none}
+.phitarium .showtime-kicker{display:flex;align-items:center;justify-content:space-between;gap:13px;color:#c1e8fa;font-size:9px;letter-spacing:1.4px}
+.phitarium .showtime-kicker .status-dot{width:7px;height:7px;display:inline-block}
+.phitarium .showtime-hud h2{margin:12px 0 8px;font-size:23px;line-height:1.2;font-weight:520;letter-spacing:-.6px;overflow-wrap:anywhere}
+.phitarium .showtime-hud p{font-size:11px;line-height:1.65;color:#cee0ef;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.phitarium .showtime-actions{display:flex;gap:8px;flex-wrap:wrap}
+.phitarium .showtime-actions button{background:#1a3856;color:#dbf4ff;border:1px solid #658ab6;border-radius:7px;font-size:10px;padding:9px 11px;min-height:36px}
+.phitarium .showtime-actions button:first-child{background:var(--accent);color:#0b1a29;border-color:var(--accent);font-weight:600}
+.phitarium .showtime-actions button:hover{filter:brightness(1.18)}
+.phitarium .showtime-hud progress{width:100%;height:3px;appearance:none;border:0;border-radius:3px;accent-color:var(--accent);background:#45637e;margin-top:15px}
+.phitarium .showtime-hud progress::-webkit-progress-bar{background:#45637e}
+.phitarium .showtime-hud progress::-webkit-progress-value{background:var(--accent)}
+.phitarium .showtime-hud progress::-moz-progress-bar{background:var(--accent)}
+.phitarium .map.showtime-active .map-caption{opacity:.48}
+.phitarium.lattice-theme .map-header{background:linear-gradient(180deg,#1c1426ed,#1c142699 70%,transparent)}
+.phitarium.lattice-theme .inspector,.phitarium.lattice-theme dialog{background:linear-gradient(155deg,#2b2030,#17121f 65%);border-color:#866958}
+.phitarium.lattice-theme .search-box,.phitarium.lattice-theme .sidebar-tabs{background:#241e2b;border-color:#6e5461}
+.phitarium.lattice-theme .outlined-button,.phitarium.lattice-theme .map-tools,.phitarium.lattice-theme .layout-switch,.phitarium.lattice-theme .showtime-hud{background:#251d2dcc;border-color:#806776}
+.phitarium.lattice-theme .layout-switch button.selected{background:var(--accent);color:#251c18}
+.phitarium.lattice-theme .mission-encounter,.phitarium.lattice-theme .outer-encounter{background:linear-gradient(150deg,#30243a,#1b1626);border-color:#7b6479}
+.phitarium.lattice-theme .quest-stat,.phitarium.lattice-theme .mission-progress>div,.phitarium.lattice-theme .outer-ledger>div{background:#302639;border-color:#785b73}
+.phitarium.lattice-theme .sidebar-tabs button[aria-selected=true],.phitarium.lattice-theme .category.selected{background:#443346;color:#ffe4bc;border-color:#987061}
+.phitarium.lattice-theme .dome-overlay{filter:hue-rotate(125deg) saturate(.65)}
+@media(max-width:1500px){
+  .phitarium .header-actions .outlined-button .button-label{display:none}
+  .phitarium .header-actions .outlined-button{padding:9px}
+  .phitarium .map-title #visibleCount{display:none}
+}
+@media(max-width:1150px){
+  .phitarium .header-actions .look-label{display:none}
+  .phitarium .header-actions{gap:5px}
+  .phitarium .map-header{padding:0 17px}
+  .phitarium .map-caption{left:22px}
+  .phitarium .map-wordmark{font-size:9px}
+  .phitarium .map-footer{left:17px;right:17px}
+}
+@media(max-width:760px){
+  .phitarium .sidebar{width:286px;box-shadow:23px 0 80px #010713e6}
+  .phitarium .sidebar .intro h1{font-size:36px}
+  .phitarium .map-header{height:64px;padding:0 12px}
+  .phitarium .map-title{gap:6px}
+  .phitarium .map-title .map-wordmark{font-size:9px;letter-spacing:.7px}
+  .phitarium .map-caption{top:78px;left:18px}
+  .phitarium .map-caption .caption-title{font-size:21px}
+  .phitarium .dome-zenith{top:125px;font-size:7px}
+  .phitarium .dome-north,.phitarium .dome-east{display:none}
+  .phitarium .dome-rim{inset:74px 11px 14% 11px}
+  .phitarium .showtime-hud{left:12px;right:12px;width:auto;bottom:188px;padding:14px}
+  .phitarium .showtime-hud h2{font-size:20px}
+  .phitarium .map-footer{bottom:43px}
+  .phitarium .header-actions .outlined-button{padding:8px}
+}
+@media(max-width:480px){
+  .phitarium .map-wordmark{max-width:88px;overflow:hidden;text-overflow:ellipsis}
+  .phitarium .map-title .status-dot{display:none}
+  .phitarium .header-actions #architectureToggle,.phitarium .header-actions #themeToggle{display:none}
+  .phitarium .header-actions .outlined-button{padding:7px}
+  .phitarium .showtime-hud{bottom:165px}
+  .phitarium .map-help{display:none}
+  .phitarium .layout-switch button{padding:10px 7px;font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .phitarium .dome-overlay,.phitarium .showtime-hud{transition:none!important}
+}
+
+
+/* Keep quest and postgame controls visually inside the same celestial theater. */
+.phitarium .mission-cleared-actions a,
+.phitarium .mission-cleared-actions button,
+.phitarium .mission-actions button,
+.phitarium .outer-source-links a,
+.phitarium .outer-controls button,
+.phitarium .outer-claim,.phitarium .outer-travel,
+.phitarium .outer-portal-button,.phitarium .mission-victory button,
+.phitarium .outer-victory button,.phitarium .outer-locked button,
+.phitarium .quest-toolbar button{
+  background:#1b385a;color:#dff4ff;border:1px solid #5d88b6;border-radius:7px;
+}
+.phitarium .mission-actions #missionNext,
+.phitarium .outer-controls #outerNext,
+.phitarium .outer-portal-button,
+.phitarium .mission-victory .outer-portal-button{
+  background:var(--accent);color:#081d2b;border-color:var(--accent);font-weight:600;
+}
+.phitarium .mission-cleared-actions a:hover,
+.phitarium .mission-cleared-actions button:hover,
+.phitarium .mission-actions button:hover,
+.phitarium .outer-source-links a:hover,
+.phitarium .outer-controls button:hover,
+.phitarium .quest-toolbar button:hover{background:#32577a;border-color:#b5edff;color:#fff}
+.phitarium .mission-actions #missionReset,.phitarium .outer-controls #outerReset,
+.phitarium .quest-toolbar #questReset{background:transparent;border-color:#526e91;color:#b9c7d8}
+.phitarium.lattice-theme .mission-actions #missionNext,
+.phitarium.lattice-theme .outer-controls #outerNext,
+.phitarium.lattice-theme .outer-portal-button{color:#211920}

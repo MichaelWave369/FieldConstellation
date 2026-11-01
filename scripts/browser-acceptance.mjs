@@ -71,6 +71,35 @@ try{
   log('desktop: stable project selection, Passport saves and persistence');
   await saveFavorite(page,first);
   await saveFavorite(page,second);
+
+  log('desktop: Phitarium dome shell and opt-in, noncollecting projection show');
+  assert.equal(await page.locator('body').getAttribute('class'),'phitarium');
+  assert.equal(await page.locator('#domeOverlay').count(),1);
+  assert.equal(await page.locator('.dome-rim').count(),1);
+  assert.equal(await page.locator('.brand b').textContent(),'PHITARIUM');
+  const beforeShowQuest=await page.locator('#questCount').textContent();
+  const beforeShowPassport=await page.locator('#passportCount').textContent();
+  const beforeShowUrl=page.url();
+  const beforeShowSelected=await page.locator('#inspector h2').textContent();
+  await page.locator('#showtimeButton').click();
+  assert.equal(await page.locator('#showtimeHud').isVisible(),true);
+  assert.equal(await page.locator('#showtimeButton').getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#showtimeName').textContent(),'FieldConstellation');
+  assert.match(await page.locator('#showtimeCount').textContent(),/1 \/ 6/);
+  await capture(page,'desktop-phitarium-dome-show');
+  await page.locator('#showtimeNext').click();
+  assert.equal(await page.locator('#showtimeName').textContent(),'FieldAtlas');
+  assert.equal(await page.locator('#showtimeButton').getAttribute('aria-pressed'),'true');
+  await page.locator('#showtimeStop').click();
+  assert.equal(await page.locator('#showtimeHud').isVisible(),false);
+  assert.equal(await page.locator('#showtimeButton').getAttribute('aria-pressed'),'false');
+  assert.equal(await page.locator('#questCount').textContent(),beforeShowQuest,'Watching a show must not collect new stars.');
+  assert.equal(await page.locator('#passportCount').textContent(),beforeShowPassport,'Watching a show must not touch saved bookmarks.');
+  assert.equal(page.url(),beforeShowUrl,'Dome Show must preserve project deep links and navigation history.');
+  assert.equal(await page.locator('#inspector h2').textContent(),beforeShowSelected,'Dome Show must preserve the selected repository.');
+  assert.equal(await page.locator('#inspector').isVisible(),true,'Closing the show restores the previous project inspector.');
+  await capture(page,'desktop-phitarium-observatory');
+
   await page.locator('#passportButton').click();
   assert.equal(await page.locator('#passportDialog').isVisible(),true);
   assert.match(await page.locator('#passportSummary').textContent(),/2 saved worlds/);
@@ -248,6 +277,14 @@ try{
   await capture(mobilePage,'mobile-postcard-preview');
   await mobilePage.keyboard.press('Escape');
   assert.equal(await mobilePage.locator('#postcardDialog').isVisible(),false);
+  await ready(mobilePage,base);
+  assert.equal(await mobilePage.locator('#showtimeButton').isVisible(),true,'Mobile visitors must be able to start the Dome Show.');
+  await capture(mobilePage,'mobile-phitarium-observatory');
+  await mobilePage.locator('#showtimeButton').click();
+  assert.equal(await mobilePage.locator('#showtimeHud').isVisible(),true,'Mobile Dome Show must display its controls.');
+  await capture(mobilePage,'mobile-phitarium-dome-show');
+  await mobilePage.locator('#showtimeStop').click();
+  assert.equal(await mobilePage.locator('#showtimeHud').isVisible(),false);
   await mobile.close();
 
   log('graphics fallback: canvas renderer and public directory are usable without WebGL2');
@@ -265,6 +302,8 @@ try{
   await ready(fallbackPage,base);
   await fallbackPage.locator('#directoryButton').click();
   assert.equal(await fallbackPage.locator('#directoryDialog').isVisible(),true,'Directory must stay accessible without WebGL2.');
+  assert.equal(await fallbackPage.locator('#domeOverlay').count(),1,'Planetarium frame remains visible with Canvas fallback.');
+  assert.equal(await fallbackPage.locator('#showtimeButton').count(),1,'Dome Show remains accessible in Canvas fallback.');
   assert(Number((await fallbackPage.locator('#directoryCount').textContent()).match(/\d+/)?.[0])>0);
   await capture(fallbackPage,'canvas-directory-fallback');
   assert.deepEqual(fallbackErrors,[],'Canvas fallback should not produce uncaught JavaScript errors.');
