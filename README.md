@@ -6,6 +6,16 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 13 · The Infinite Tinkerer RPG (November 1, 2026)
+
+**Quest RPG** adds an optional, browser-local game layer to the existing public constellation. The **Quest RPG** header button opens an eight-branch skill tree with discoverable public repositories, 10 playful XP per unique explored project, 3/6/9 milestone ranks, and local achievements. Branch buttons jump back to their next unvisited public star in the real map.
+
+The **Quest discoveries** color lens distinguishes explored from unexplored stars. An existing Passport's favorites and recent visits seed the new journal once; a separate **Reset discoveries** button clears only the RPG journal, not the Passport. No account, tracking, game engine, backend or external write permissions are required. The RPG uses **public numeric GitHub repository IDs only**, pruning unavailable IDs when the public listing changes.
+
+**Important:** RPG ranks, XP and badges are not PR merges, successful builds or deployment checks. Its eight branch paths are editorial categories, not software dependencies. The `Evidence Trail` achievement counts exploration of both endpoints in the existing, source-reviewed relationship ledger, not proof of runtime integration.
+
+See [Edition 13 Quest RPG contract](docs/EDITION_13_RPG.md).
+
 ## Edition 12 · New Worlds and refreshed public coverage (October 29, 2026)
 
 The bundled **public-only GitHub listing now includes 199 unique owner repositories**, collected by a complete anonymous three-page REST read on October 29, rather than the previous 177-repo observation. All 22 newly discovered public repositories receive stars, including BTM, SparkTheSubstrate, EchoesOfTheNine, TweedleVerse, LENZ, FieldStoryForge, BackyardProductionCompany, GenEWrist, PhiOS-XR, PhiARK, PhiPress and other new research or creative experiments. The listing is a dated snapshot, not a private-account inventory. Older Edition 01–11 counts below describe their historical observations.
