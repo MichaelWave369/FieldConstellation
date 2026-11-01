@@ -22,7 +22,7 @@ export function resolveShowtimeStops(repos){
  * The result is all line *segments*, so both WebGL and Canvas renderers can
  * project the same planetarium geometry without a shader dependency.
  */
-export function domeLinePositions({radius=190,baseY=-50,meridians=12,steps=48}={}){
+export function domeLinePositions({radius=190,baseY=-50,meridians=10,steps=24}={}){
   if(!Number.isFinite(radius)||radius<10||radius>500||
      !Number.isFinite(baseY)||Math.abs(baseY)>500||
      !Number.isInteger(meridians)||meridians<4||meridians>36||
@@ -34,7 +34,7 @@ export function domeLinePositions({radius=190,baseY=-50,meridians=12,steps=48}={
     baseY+radius*Math.sin(elevation),
     radius*Math.cos(elevation)*Math.sin(az)
   ];
-  // Twelve fine longitude arcs pass through the zenith.
+  // Ten fine longitude arcs pass through the zenith.
   for(let m=0;m<meridians;m++){
     const az=m/meridians*2*Math.PI;
     for(let i=1;i<=steps;i++){
