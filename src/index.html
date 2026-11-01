@@ -29,7 +29,7 @@
   </defs></svg>
   <aside class="sidebar" id="sidebar">
     <button id="closeMobileMenu" class="icon-button mobile-only sidebar-close" aria-label="Close navigation"><svg><use href="#i-close"/></svg></button>
-    <a class="brand" href="./" aria-label="Field Constellation home"><span class="brand-symbol">✳</span><span>FIELD<br><b>CONSTELLATION</b></span><span class="edition">15</span></a>
+    <a class="brand" href="./" aria-label="Field Constellation home"><span class="brand-symbol">✳</span><span>FIELD<br><b>CONSTELLATION</b></span><span class="edition">16</span></a>
     <div class="intro"><p class="eyebrow">THE MICHAELWAVE369 UNIVERSE</p><h1>Your ideas,<br>in orbit<span>.</span></h1><p class="intro-copy">Every project, a point of possibility.<br>Explore the connections between them.</p></div>
     <div class="stats"><div><strong id="totalCount">—</strong><span>public repos</span></div><div><strong id="groupCount">8</strong><span>constellations</span></div><div><strong id="liveCount">—</strong><span title="HTTPS HTML destinations checked within seven days; not a full application test">HTML checked</span></div></div>
     <label class="search-box"><svg><use href="#i-search"/></svg><input id="search" type="search" placeholder="Find a world…" autocomplete="off" aria-label="Search repositories"><kbd>/</kbd></label>
@@ -84,8 +84,8 @@
     <div class="dialog-header"><div><p class="eyebrow">FIELD CONSTELLATION · GAME MODE · LOCAL ONLY</p><h2>The Infinite Tinkerer<span>.</span></h2></div><button class="icon-button" data-close-dialog aria-label="Close quest journal"><svg><use href="#i-close"/></svg></button></div>
     <p class="quest-intro">Every public repository is a discoverable star. Explore outward, circle back, and collect a universe of possibilities.</p>
     <div id="questSummary" class="quest-summary" aria-live="polite"></div>
-    <div class="quest-toolbar"><button id="missionStart" type="button">Play The Nine Gates</button><button id="questLensButton" type="button">Show discoveries on map</button><button id="questReset" type="button">Reset discoveries</button></div>
-    <p id="missionJournalStatus" class="quest-note" role="status">The Nine Gates campaign adds playable missions to your constellation exploration.</p><h3 class="quest-section-heading">Eight skill-tree branches</h3>
+    <div class="quest-toolbar"><button id="missionStart" type="button">Play The Nine Gates</button><button id="outerStart" type="button">Enter The Outer Field</button><button id="questLensButton" type="button">Show discoveries on map</button><button id="questReset" type="button">Reset discoveries</button></div>
+    <p id="missionJournalStatus" class="quest-note" role="status">The Nine Gates campaign adds playable missions to your constellation exploration.</p><p id="outerJournalStatus" class="quest-note" role="status">The Outer Field unlocks after all nine gates.</p><h3 class="quest-section-heading">Eight skill-tree branches</h3>
     <p class="quest-note">Branches are thematic paths, not verified dependencies. Select a next star to fly to that repository in the existing map.</p>
     <div id="questTree" class="quest-tree" aria-label="Public repository skill tree"></div>
     <h3 class="quest-section-heading">Achievements</h3><div id="questAchievements" class="quest-achievements" aria-label="Local exploration achievements"></div>
@@ -99,7 +99,17 @@
     <p id="missionFeedback" class="mission-feedback" role="status" aria-live="polite"></p>
     <div class="mission-actions"><button id="missionNext" type="button" hidden>Next gate</button><button id="missionJournal" type="button">Back to Quest RPG</button><button id="missionReset" type="button">Restart campaign</button></div>
     <p class="dialog-footnote">A fictional adventure about actual public repositories. Every winning project links to its GitHub README, with explicit experimental limits. Campaign XP is only game progress, never a claim of successful CI, working deployment, or interoperable systems. Saved progress consists only of known mission IDs in this browser.</p>
-  </dialog><dialog id="passportDialog" class="passport-dialog" aria-label="Field Passport">
+  </dialog><dialog id="outerDialog" class="outer-dialog" aria-label="The Outer Field exploration adventure">
+    <div class="dialog-header"><div><p class="eyebrow">QUEST RPG · AFTER THE NINE GATES</p><h2>The Outer Field<span>.</span></h2></div><button class="icon-button" data-close-dialog aria-label="Close The Outer Field"><svg><use href="#i-close"/></svg></button></div>
+    <p class="outer-intro">Travel beyond the known map. Recover three artifacts, combine what you've learned, find the secret room, and face the Fracture Warden before opening the Infinite Spiral.</p>
+    <div id="outerLedger" class="outer-ledger" aria-live="polite"></div>
+    <div id="outerTrack" class="outer-track" aria-label="Outer Field chapter progress"></div>
+    <section id="outerEncounter" class="outer-encounter" aria-live="polite"></section>
+    <p id="outerFeedback" class="outer-feedback" role="status" aria-live="polite"></p>
+    <div class="outer-controls"><button type="button" id="outerNext" hidden>Continue</button><button type="button" id="outerJournal">Back to Quest RPG</button><button type="button" id="outerReset">Restart Outer Field</button></div>
+    <p class="dialog-footnote">A fictional RPG built around public repositories, not a systems audit. The artifact inventory and wins are browser-local game progress. Project combinations describe complementary ideas, not verified software integrations. No account, telemetry, GitHub writes, or new runtime permissions.</p>
+  </dialog><div id="spiralArrival" class="spiral-arrival" role="status" aria-live="polite" hidden><span aria-hidden="true">Φ</span><strong>THE INFINITE SPIRAL</strong><small>The map is yours to explore again.</small></div>
+  <dialog id="passportDialog" class="passport-dialog" aria-label="Field Passport">
     <div class="dialog-header"><div><p class="eyebrow">YOUR LOCAL FIELD COLLECTION</p><h2>Field Passport<span>.</span></h2></div><button class="icon-button" data-close-dialog aria-label="Close Field Passport"><svg><use href="#i-close"/></svg></button></div>
     <p class="passport-description">Save the worlds you want to revisit. Favorites and recent visits stay in this browser, not on a server. No login or tracking.</p>
     <p id="passportSummary" class="passport-summary">No saved worlds yet</p>

@@ -1,10 +1,18 @@
-# Field Constellation 15 · The Nine Gates
+# Field Constellation 16 · The Outer Field
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
 [Open the production map](https://michaelwave369.github.io/FieldConstellation/) · [Build and deployment status](https://github.com/MichaelWave369/FieldConstellation/actions) · [Read the Field Atlas](https://michaelwave369.github.io/FieldAtlas/)
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
+
+## Edition 16 · The Outer Field: Infinite Spiral (November 1, 2026)
+
+The **postgame RPG** is here. After clearing all **9/9 Nine Gates**, visitors can enter **The Outer Field**, a second nine-encounter story made of three real-project artifact hunts, two conceptual combination puzzles, one hidden-world star hunt, and a three-stage **Fracture Warden** boss. Four of these challenges require actually exploring their repository stars to claim items. Wrong answers reveal hints and never cost XP.
+
+Winning the adventure awards up to **400 additional game XP**, a fictional four-piece artifact inventory, and the **Infinite Spiral portal**, which sends players back to the live Constellation map in its golden-angle spiral layout. The original Nine Gates victory screen now opens the postgame, and the Quest RPG journal also offers an entrance. All UI works without a login, external backend, new dependency or VR headset; existing map rendering and Passport behavior remain unchanged.
+
+**Truth boundary:** Missions are educational fiction grounded in public README descriptions, with links to sources. Combining two repo names **never asserts a verified running integration**. The Fracture Warden finale explicitly distinguishes public repository presence from independently verified website reachability and integration evidence. XP, loot, boss shields and the portal are only browser-local game state, not execution authority or proof of deployment. See [Edition 16 contract, controls and privacy](docs/EDITION_16_OUTER_FIELD.md).
 
 ## Edition 15 · The Nine Gates playable quest campaign (November 1, 2026)
 

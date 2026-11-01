@@ -3,6 +3,8 @@ import {spawn} from 'node:child_process';
 import {mkdir,readFile} from 'node:fs/promises';
 import {setTimeout as delay} from 'node:timers/promises';
 import {chromium} from 'playwright';
+import {MISSIONS} from '../src/missions.js';
+import {OUTER_STEPS} from '../src/outer-field.js';
 
 /**
  * Real-browser visitor acceptance. All inputs are served from the checked-in
@@ -143,6 +145,72 @@ try{
   await page.locator('#missionDialog').evaluate(dialog=>dialog.close());
   assert.equal(await page.locator('#passportCount').textContent(),'2','Campaign restart must preserve Passport bookmarks.');
   assert.equal(await page.locator('#questCount').textContent(),'0','Campaign restart must preserve the existing Quest RPG journal.');
+
+  log('desktop: Outer Field is locked until the full Nine Gates campaign is cleared');
+  await page.locator('#questButton').click();
+  await page.locator('#outerStart').click();
+  assert.equal(await page.locator('#outerDialog').isVisible(),true);
+  assert.match(await page.locator('#outerEncounter').textContent(),/The Outer Field is sealed/);
+  await page.locator('#outerBackGates').click();
+  for(let i=0;i<MISSIONS.length;i++){
+    const mission=MISSIONS[i];
+    await page.locator('[data-mission-option="'+mission.answer+'"]').click();
+    await page.locator('#missionNext').click();
+  }
+  assert.match(await page.locator('#missionEncounter').textContent(),/All nine gates cleared/);
+  assert.equal(await page.locator('#missionOuter').isVisible(),true,'Original victory must open the new adventure.');
+  await page.locator('#missionOuter').click();
+  assert.equal(await page.locator('#outerDialog').isVisible(),true);
+  assert.match(await page.locator('#outerLedger').textContent(),/0\/9/);
+  assert.equal(await page.locator('.outer-track-segment').count(),4);
+
+  log('desktop: three true star hunts, two knowledge combinations, secret world and boss');
+  for(let i=0;i<OUTER_STEPS.length;i++){
+    const step=OUTER_STEPS[i];
+    assert((await page.locator('#outerEncounter').textContent()).includes(step.title),'Expected current encounter '+step.id);
+    if(step.visit){
+      await page.locator('[data-outer-choice="'+step.correct+'"]').click();
+      assert.match(await page.locator('#outerFeedback').textContent(),/Correct world/);
+      assert.equal(await page.locator('#outerTravel').isVisible(),true);
+      await page.locator('#outerTravel').click();
+      assert.equal(await page.locator('#outerDialog').isVisible(),false);
+      assert.match(new URL(page.url()).searchParams.get('repo')||'',/^github:/);
+      await page.locator('#questButton').click();
+      await page.locator('#outerStart').click();
+      assert.equal(await page.locator('#outerClaim').isVisible(),true,'Discovering the real star should permit collecting the artifact.');
+      await page.locator('#outerClaim').click();
+    }else{
+      await page.locator('[data-outer-choice="'+step.correct+'"]').click();
+    }
+    assert.match(await page.locator('#outerFeedback').textContent(),/Encounter cleared|Artifact attuned/i);
+    assert.match(await page.locator('#outerEncounter').textContent(),/Read .* README/,'Completed encounter must link to real project documentation.');
+    await page.locator('#outerNext').click();
+    if(i===4)assert.match(await page.locator('#outerEncounter').textContent(),/Room Between Worlds/);
+    if(i===5)assert.match(await page.locator('#outerEncounter').textContent(),/Boss Phase I/);
+  }
+  assert.match(await page.locator('#outerEncounter').textContent(),/The field was never broken/);
+  assert.match(await page.locator('#outerLedger').textContent(),/400 \/ 400 XP/);
+  assert.equal(await page.locator('#outerPortal').isVisible(),true);
+  await capture(page,'desktop-outer-field-victory');
+  await page.locator('#outerPortal').click();
+  assert.equal(await page.locator('#outerDialog').isVisible(),false);
+  assert.equal(await page.locator('#layoutLabel').textContent(),'GOLDEN-ANGLE TIMELINE');
+  assert.equal(await page.locator('#spiralArrival').isVisible(),true,'Spiral portal must visually arrive in the real map.');
+  await page.locator('#questButton').click();
+  await page.locator('#outerStart').click();
+  assert.match(await page.locator('#outerLedger').textContent(),/9\/9/,'Outer Field completion must persist.');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.locator('#outerReset').click();
+  assert.match(await page.locator('#outerLedger').textContent(),/0\/9/,'Only the Outer Field campaign is reset.');
+  await page.locator('#outerDialog').evaluate(dialog=>dialog.close());
+  await ready(page,base);
+  await page.locator('#questButton').click();
+  assert.match(await page.locator('#missionJournalStatus').textContent(),/9\/9 gates cleared/);
+  assert.match(await page.locator('#outerJournalStatus').textContent(),/0\/9 encounters/);
+  assert(Number(await page.locator('#questCount').textContent())>=4,'Existing discovered stars must survive the Outer Field reset.');
+  assert.equal(await page.locator('#passportCount').textContent(),'2','Passport bookmarks survive the whole adventure.');
+  await page.locator('#questDialog').evaluate(dialog=>dialog.close());
+
   assert.deepEqual(errors,[],'Desktop app must have no uncaught JavaScript errors.');
   await desktop.close();
 
