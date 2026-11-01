@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {CanvasFieldRenderer} from './canvas-renderer.js';
 import {installDome,resolveShowtimeStops,SHOWTIME_INTERVAL_MS} from './phitarium.js';
+import {resolveImmersiveExhibits,recentCheckSummary} from './immersive.js';
 import {GROUPS,ageInDays,hash,prepareRepos,layoutPositions,layoutEdges,languageOrbits,languageColor,colorFor,activityWeight,filterRepos,safeUrl,normalizePublic} from './model.js';
 
 import {parseSnapshot,newerPublicCache,fetchPublicInventory,CACHE_KEY} from './inventory.js';
@@ -26,6 +27,7 @@ const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,dome=null,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 let showtimeIndex=-1,showtimeTimer=null,showtimeStops=[],showtimeWasOrbit=false,showtimeInspectorWasVisible=false;
+let immersiveActive=false,immersiveStops=[],immersiveIndex=0,immersiveRestore=null;
 const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new THREE.Color(),tempProjection=new THREE.Vector3();
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
 const featured=['BTM','SparkTheSubstrate','EchoesOfTheNine','TweedleVerse','LENZ','FieldStoryForge','BackyardProductionCompany','GenEWrist','SuperPhiVessel','BrainC','PhiLearn','Agentora','Domistika','SiliconLouvre','FramefieldStudio','RastaPhi','PhiCade','GitPorch','FieldAtlas','Pulse369','MoreBounceLabs','NestedBubbleGear','MRIPHI','RegenerationAtlas','Phithon','Vibe','WhiteHatLedger369','PhiOS','CommonTable','FamilyVault','FieldAccord','axiomforge-ledger','Infinite-Commons'];
@@ -100,6 +102,16 @@ function bindUI(){
   $('directoryButton').onclick=()=>{renderDirectory();$('directoryDialog').showModal();};
   $('trailsButton').onclick=()=>{renderTrails();$('trailsDialog').showModal();};
   $('showtimeButton').onclick=()=>showtimeIndex>=0?stopShowtime():startShowtime();
+  $('immersiveButton').onclick=()=>immersiveActive?exitImmersive():enterImmersive();
+  $('immersiveExit').onclick=()=>exitImmersive();
+  $('immersivePrev').onclick=()=>moveImmersive(-1);
+  $('immersiveNext').onclick=()=>moveImmersive(1);
+  $('immersiveExplore').onclick=()=>{
+    const repo=immersiveStops[immersiveIndex];
+    exitImmersive(false);
+    if(repo)selectRepo(repo.id,true);
+  };
+  $('immersiveQuest').onclick=()=>{exitImmersive();renderQuest();$('questDialog').showModal();};
   $('showtimeStop').onclick=()=>stopShowtime();
   $('showtimeNext').onclick=advanceShowtime;
   $('showtimeExplore').onclick=()=>{const repo=showtimeStops[showtimeIndex];stopShowtime(false);if(repo){resetFilters();selectRepo(repo.id,true);}};
@@ -144,6 +156,7 @@ function bindUI(){
   $('fitConnections').onclick=fitConnections;
   $('includeThematic').onchange=event=>{state.includeThematic=event.target.checked;if(sceneReady)buildEdges();else edges=relationshipEdges(state.repos,state.relationships,state.includeThematic);refreshNeighborhood();updateRelationshipUI();if(state.selected)showInspector(state.repos.find(r=>r.id===state.selected),false);};
   window.addEventListener('popstate',()=>{
+    if(immersiveActive)exitImmersive(false);
     const shared=readTrailLink(location.href,state.repos);
     const repo=shared?.repo||readProjectLink(location.href,state.repos);
     resetFilters();
@@ -156,7 +169,14 @@ function bindUI(){
   document.addEventListener('keydown',event=>{
     const editing=event.target.matches('input,textarea,select');
     if(event.key==='/'&&!editing&&!document.querySelector('dialog[open]')){event.preventDefault();if(innerWidth<761)setSidebar(true);$('search').focus();}
-    if(event.key==='Escape'&&!document.querySelector('dialog[open]')){if(state.query){$('search').value='';state.query='';applyFilters();}else clearSelection();setSidebar(false);}
+    if(event.key==='Escape'&&!document.querySelector('dialog[open]')){
+      if(immersiveActive){event.preventDefault();exitImmersive();return;}
+      if(state.query){$('search').value='';state.query='';applyFilters();}else clearSelection();setSidebar(false);
+    }
+    if(immersiveActive&&!editing&&!document.querySelector('dialog[open]')){
+      if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();moveImmersive(event.key==='ArrowRight'?1:-1);return;}
+      if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();return;}
+    }
     if(!editing&&event.target.tagName!=='CANVAS'&&!document.querySelector('dialog[open]')&&(event.key==='ArrowDown'||event.key==='ArrowUp')){event.preventDefault();cycleRepo(event.key==='ArrowDown'?1:-1);}
   });
   window.addEventListener('resize',resize);
@@ -165,7 +185,12 @@ function bindUI(){
 }
 
 function updateInventoryUI(){
-  $('totalCount').textContent=state.repos.length;$('groupCount').textContent=GROUPS.length;$('liveCount').textContent=state.repos.filter(r=>destinationStatus(r,state.deployments).state==='reachable').length;
+  const freshness=recentCheckSummary(state.repos,state.deployments);
+  $('liveCount').textContent=freshness.count===null?'—':String(freshness.count);
+  $('liveCount').title=freshness.detail;
+  $('liveCountLabel').textContent=freshness.label;
+  $('liveCountLabel').title=freshness.detail;
+  $('totalCount').textContent=state.repos.length;$('groupCount').textContent=GROUPS.length;
   $('indexTotal').textContent=state.repos.length;$('inventoryFacts').textContent=`${state.repos.reduce((n,r)=>n+r.stars,0)} stars · ${state.repos.filter(r=>r.pages).length} Pages flags · ${state.repos.filter(r=>r.fork).length} forks`;
   const options=['',...new Set(state.repos.map(r=>r.language))].sort((a,b)=>!a?-1:!b?1:a.localeCompare(b));
   $('language').innerHTML=options.map(x=>`<option value="${escape(x)}">${escape(x||'All languages')}</option>`).join('');$('language').value=state.language;
@@ -392,13 +417,13 @@ function resize(){
   fitDistance=Math.max(108,98/Math.min(1,w/h));controls.maxDistance=innerWidth<761?340:230;
   if(frame<3)fitField(false);
 }
-function setCameraOffset(){if(!camera)return;const w=$('scene').clientWidth,h=$('scene').clientHeight;camera.clearViewOffset();if(innerWidth<761&&!$('inspector').hidden)camera.setViewOffset(w,h,0,h*(state.architecture?.17:.27),w,h);else if(w>720)camera.setViewOffset(w,h,70,0,w,h);camera.updateProjectionMatrix();}
+function setCameraOffset(){if(!camera)return;const w=$('scene').clientWidth,h=$('scene').clientHeight;camera.clearViewOffset();if(immersiveActive){camera.updateProjectionMatrix();return;}if(innerWidth<761&&!$('inspector').hidden)camera.setViewOffset(w,h,0,h*(state.architecture?.17:.27),w,h);else if(w>720)camera.setViewOffset(w,h,70,0,w,h);camera.updateProjectionMatrix();}
 function fitField(smooth){if(!camera)return;const target=new THREE.Vector3(0,0,0),destination=state.layout==='orbits'?new THREE.Vector3(0,fitDistance*.72,fitDistance*.98):state.layout==='spiral'?new THREE.Vector3(fitDistance*.24,fitDistance*.16,fitDistance):new THREE.Vector3(0,state.layout==='helix'?6:20,fitDistance);if(smooth&&!reducedMotion)flyTo(destination,target);else{camera.position.copy(destination);controls.target.copy(target);controls.update();}}
 function fitMatches(){if(!camera||!state.visible.size)return;setOrbit(false);const points=targets.filter((p,i)=>state.visible.has(state.repos[i].id)),box=new THREE.Box3().setFromPoints(points),center=box.getCenter(new THREE.Vector3()),radius=Math.max(3,...points.map(p=>p.distanceTo(center))),distance=THREE.MathUtils.clamp(radius/(Math.sin(camera.fov*Math.PI/360)*Math.min(1,camera.aspect)) * 1.25,20,controls.maxDistance),offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(distance);flyTo(center.clone().add(offset),center);setSidebar(false);}
 function flyTo(to,toTarget){if(!camera)return;if(reducedMotion){camera.position.copy(to);controls.target.copy(toTarget);controls.update();return;}flight={from:camera.position.clone(),to,fromTarget:controls.target.clone(),toTarget,start:performance.now()};}
 function zoom(factor){if(!camera)return;setOrbit(false);const offset=camera.position.clone().sub(controls.target),distance=THREE.MathUtils.clamp(offset.length()*factor,controls.minDistance,controls.maxDistance);flyTo(controls.target.clone().add(offset.normalize().multiplyScalar(distance)),controls.target.clone());}
 function pickRepo(event){if(!camera)return null;const rect=$('scene').getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;let best=null,distance=14;for(let i=0;i<state.repos.length;i++){const repo=state.repos[i];if(!state.visible.has(repo.id))continue;tempProjection.copy(positions[i]).project(camera);if(tempProjection.z>1||tempProjection.z<-1)continue;const px=(tempProjection.x*.5+.5)*rect.width,py=(-tempProjection.y*.5+.5)*rect.height,d=Math.hypot(x-px,y-py);if(d<distance){distance=d;best=repo;}}return best;}
-function selectRepo(id,focus=true,closeMenu=true){if(showtimeIndex>=0)stopShowtime(false);const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;const before=state.quest.discoveredIds.length;state.quest=discover(state.quest,repo,state.repos);if(state.quest.discoveredIds.length!==before){saveQuest(false);if(state.lens==='quest'&&sceneReady)updateAppearance();}state.passport=recordVisit(state.passport,repo,state.repos);savePassport(false);updatePassportCount();if($('questDialog').open)renderQuest();refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',withoutPostcard(state.trail?trailLink(location.href,state.trail,state.trailStop):withoutTrail(projectLink(location.href,repo))));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
+function selectRepo(id,focus=true,closeMenu=true){if(immersiveActive)exitImmersive(false);if(showtimeIndex>=0)stopShowtime(false);const repo=state.repos.find(r=>r.id===id);if(!repo)return;if(state.trail&&state.trail.stops[state.trailStop]?.id!==id)stopTrail();state.selected=id;const before=state.quest.discoveredIds.length;state.quest=discover(state.quest,repo,state.repos);if(state.quest.discoveredIds.length!==before){saveQuest(false);if(state.lens==='quest'&&sceneReady)updateAppearance();}state.passport=recordVisit(state.passport,repo,state.repos);savePassport(false);updatePassportCount();if($('questDialog').open)renderQuest();refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',withoutPostcard(state.trail?trailLink(location.href,state.trail,state.trailStop):withoutTrail(projectLink(location.href,repo))));}catch{}$('inspector').hidden=false;showInspector(repo,false);updateTrailHud();updateAppearance();renderSidebarIndex();if(sceneReady&&focus){setOrbit(false);const p=targets[state.repos.indexOf(repo)],offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(innerWidth<761?48:34);flyTo(p.clone().add(offset),p.clone());}if(sceneReady&&focus&&state.architecture&&state.neighbors.size>1)fitConnections();if(innerWidth<761&&closeMenu)setSidebar(false);}
 function clearSelection(){stopTrail();state.selected=null;refreshNeighborhood();updateRelationshipUI();try{history.replaceState(null,'',withoutPostcard(withoutTrail(projectLink(location.href,null))));}catch{}$('inspector').hidden=true;setCameraOffset();if(sceneReady)updateAppearance();renderSidebarIndex();}
 
 /**
@@ -846,6 +871,7 @@ function renderDirectory(){
 }
 
 async function refreshPublic(){
+  if(immersiveActive)exitImmersive(false);
   if(showtimeIndex>=0)stopShowtime(false);
   const button=$('refresh');button.disabled=true;button.classList.add('refreshing');$('snapshotStatus').textContent='Checking all public pages…';
   let next;
