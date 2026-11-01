@@ -1,10 +1,20 @@
-# The Phitarium · Field Constellation 17
+# The Phitarium · Field Constellation 18
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
 [Open the production map](https://michaelwave369.github.io/FieldConstellation/) · [Build and deployment status](https://github.com/MichaelWave369/FieldConstellation/actions) · [Read the Field Atlas](https://michaelwave369.github.io/FieldAtlas/)
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
+
+## Edition 18 · Immersive Dome & the living exhibits (November 1, 2026)
+
+**Enter Dome** opens a full-viewport planetarium experience around the original interactive repository constellation. Hide the technical UI, fly between twelve curated *real public* project stars, read their current public-repository descriptions and inspect the wider field. The sky adds soft CSS nebulae and occasional decorative meteors, with reduced-motion support. The exhibit route works with both WebGL and Canvas fallback and needs no login or external media.
+
+**Previous / Next / arrow keys** change the spotlight and camera without silently adding Quest RPG XP, changing the current URL or writing visit history. **Explore this star** is the explicit action that opens the real repository inspector and records a normal local discovery. **Read project README** opens its real GitHub docs. **Quest RPG**, **Exit Dome**, and **Escape** return to the existing features; previous selection, saved Passport, gameplay, and user camera preferences are preserved.
+
+The old **0 HTML checked** label also gets a truthfulness fix. The supplied destination receipt was last verified on **October 21**, beyond its seven-day limit, so the sidebar now displays **— / checks expired** instead of implying zero functional websites. New fresh receipts must match declared public HTTPS destinations, and even then certify **an HTML response only**, not complete application health.
+
+See [Edition 18 immersive design, accessibility and evidence contract](docs/EDITION_18_IMMERSIVE.md). No new package, backend, personal tracking or runtime integration claims were introduced.
 
 ## Edition 17 · The Phitarium: Living Repository Planetarium (November 1, 2026)
 
