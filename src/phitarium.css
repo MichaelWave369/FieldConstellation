@@ -383,3 +383,32 @@ body.phitarium.lattice-theme{
 .phitarium .solar-discovery-footnote{font-size:11px;color:#a9c4db;line-height:1.6;margin:18px 0 0}
 @media(max-width:640px){.phitarium .solar-discovery-dialog{padding:15px;max-height:92dvh}.phitarium .solar-discovery-lists{grid-template-columns:1fr;gap:12px}.phitarium .solar-discovery-lists section{padding:12px}.phitarium .solar-discovery-head{gap:8px}.phitarium #solarDiscoveryClose{padding:8px}.phitarium .solar-tour{padding:13px}.phitarium .solar-tour-actions button{flex:1 1 80px}}
 @media(prefers-reduced-motion:reduce){.phitarium .solar-discovery-dialog::backdrop{backdrop-filter:none}}
+
+/* Edition 25 · Opt-in Planet Dossier. Keep compact inspector unchanged by default. */
+.phitarium .inspector-heading-actions{display:flex;align-items:center;gap:7px}
+.phitarium #toggleDossier{border:1px solid #658cb5;border-radius:6px;padding:5px 8px;background:#1c3856;color:#d9f2ff;font-size:10px;letter-spacing:.1px;cursor:pointer;white-space:nowrap}
+.phitarium #toggleDossier:hover{background:#2b5175}
+.phitarium #toggleDossier[aria-pressed="true"]{background:#b4e8ff;color:#092139;font-weight:700}
+.phitarium #toggleDossier:focus-visible{outline:3px solid #a9e9ff;outline-offset:3px}
+.phitarium .inspector.dossier-open{width:min(410px,calc(100vw - var(--sidebar) - 64px));max-height:calc(100dvh - 156px);overflow-y:auto;overscroll-behavior:contain}
+.phitarium .inspector.dossier-open .inspector-heading{position:sticky;top:0;z-index:2;background:#152d47ee;backdrop-filter:blur(10px);border-bottom:1px solid #6189ad77}
+.phitarium .planet-dossier{margin:14px 0 20px;padding:17px;background:linear-gradient(150deg,#142e48,#0c2034);border:1px solid #668fbb;border-radius:11px}
+.phitarium .planet-dossier .dossier-eyebrow{margin:0;color:#acdafa;letter-spacing:1.2px;font-size:9px;font-weight:700}
+.phitarium .planet-dossier h3{font-size:18px;line-height:1.3;margin:8px 0;color:#f0f9ff;letter-spacing:-.3px}
+.phitarium .planet-dossier .dossier-explain,.phitarium .planet-dossier .dossier-footnote{font-size:11px;color:#c3d7e9;line-height:1.65;margin:8px 0}
+.phitarium .planet-dossier h4{margin:14px 0 6px;font-size:12px;color:#deefff;font-weight:700}
+.phitarium .dossier-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:9px 0}
+.phitarium .dossier-stat{border:1px solid #567ca1;background:#11253c;border-radius:8px;min-width:0;padding:10px}
+.phitarium .dossier-stat strong{display:block;font-size:24px;color:#b5ebff;font-weight:750;font-variant-numeric:tabular-nums}
+.phitarium .dossier-stat span{font-size:10px;color:#b6cde3}
+.phitarium .dossier-evidence>small,.phitarium .dossier-ledger-unavailable{font-size:10px;color:#b3c8dc;line-height:1.6}
+.phitarium .dossier-neighbors>p{font-size:11px;color:#b9cede;line-height:1.6;margin:4px 0 11px}
+.phitarium .dossier-neighbor{width:100%;border:1px solid #668bae;border-radius:8px;background:#1c3a57;color:#ebf8ff;padding:10px 11px;margin:7px 0;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer}
+.phitarium .dossier-neighbor:hover{background:#2c5376;border-color:#b0e5ff}
+.phitarium .dossier-neighbor:focus-visible{outline:3px solid #c0f0ff;outline-offset:2px}
+.phitarium .dossier-neighbor strong{font-size:12px;display:block;overflow-wrap:anywhere}
+.phitarium .dossier-neighbor small{font-size:10px;line-height:1.5;display:block;color:#b9d0e7;margin-top:4px}
+.phitarium .dossier-empty{font-size:11px;color:#b5c8d8}
+@media(max-width:760px){.phitarium .inspector.dossier-open{right:15px;width:min(365px,calc(100vw - 30px));max-height:60dvh;bottom:148px;top:auto}.phitarium .planet-dossier{padding:13px}}
+@media(max-width:400px){.phitarium .inspector.dossier-open{max-height:55dvh}.phitarium .inspector-heading{gap:5px}.phitarium #toggleDossier{font-size:9px;padding:5px 6px}}
+@media(prefers-reduced-motion:reduce){.phitarium .inspector.dossier-open .inspector-heading{backdrop-filter:none}}
