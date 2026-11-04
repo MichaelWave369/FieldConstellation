@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {parseSnapshot,validatePublicRepos,newerPublicCache,fetchPublicInventory} from '../src/inventory.js';
+import {parseSnapshot,validatePublicRepos,newerPublicCache,fetchPublicInventory,autoRefreshDue} from '../src/inventory.js';
 
 const snapshot=JSON.parse(readFileSync(new URL('../src/repos.json',import.meta.url),'utf8'));
 function raw(index){return {id:9000000+index,name:'Fixture-'+index,private:false,owner:{login:'MichaelWave369'},html_url:'https://github.com/MichaelWave369/Fixture-'+index,topics:[],created_at:'2026-01-01T00:00:00Z',pushed_at:'2026-10-01T00:00:00Z',has_pages:false,archived:false,fork:false};}
@@ -52,4 +52,15 @@ test('Edition 19 catalog preserves the 225 public star floor and new owner ident
   for(const name of ["CompAware","PhiRSI","phi-field","ElsewhereEngine","ShedofShadows","InfiniteTinkerer","RetroVerse","Blackout","PaperGhost","Altermath","G-FunkProp","PhiMadaPrime","PhiBridge369","RacetoOblivion"])assert(names.has(name),'Missing verified public star: '+name);
   assert(snapshot.repos.length>=225);
   assert(snapshot.repos.every(r=>r.visibility==='public'));
+});
+
+test('automatic inventory check respects daily TTL, opt-out, and clock correctness',()=>{
+  const at=Date.parse(snapshot.fetchedAt);
+  const day=24*60*60*1000;
+  assert.equal(autoRefreshDue(true,null,snapshot.fetchedAt,at+day-1),false);
+  assert.equal(autoRefreshDue(true,null,snapshot.fetchedAt,at+day),true);
+  assert.equal(autoRefreshDue(true,String(at+day),snapshot.fetchedAt,at+day+3000),false);
+  assert.equal(autoRefreshDue(false,null,snapshot.fetchedAt,at+day*8),false);
+  assert.equal(autoRefreshDue(true,String(at+day*4),snapshot.fetchedAt,at+day*2),false);
+  assert.equal(autoRefreshDue(true,null,'invalid',at+day*2),false);
 });
