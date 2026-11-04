@@ -107,6 +107,10 @@ try{
   await page.locator('#solarMotion').uncheck();
   await page.locator('[data-layout="constellation"]').click();
   assert.equal(await page.locator('#solarLegend').isVisible(),false);
+  // Focusing a different category intentionally clears an out-of-system selection.
+  // Restore the fixture before the next Dome Show's selected-project preservation checks.
+  await ready(page,base+'?repo='+encodeURIComponent(canonical(second)));
+  assert.equal(await page.locator('#inspector').isVisible(),true);
 
   log('desktop: Phitarium dome shell and opt-in, noncollecting projection show');
   assert.equal(await page.locator('body').getAttribute('class'),'phitarium');
