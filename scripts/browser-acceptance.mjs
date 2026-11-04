@@ -75,22 +75,31 @@ try{
   await saveFavorite(page,first);
   await saveFavorite(page,second);
 
+  // Dossier navigation is a real project visit. Isolate this acceptance check
+  // in its own browser context so it cannot seed the later Quest/Passport fixtures.
   log('desktop: optional expanded Planet Dossier and public neighbor navigation');
-  assert.equal(await page.locator('#toggleDossier').getAttribute('aria-pressed'),'false');
-  await page.locator('#toggleDossier').click();
-  assert.equal(await page.locator('#inspector').evaluate(element=>element.classList.contains('dossier-open')),true);
-  assert.equal(await page.locator('#toggleDossier').getAttribute('aria-pressed'),'true');
-  assert.equal(await page.locator('#planetDossierTitle').textContent(),'Source & neighborhood');
-  assert.match(await page.locator('.dossier-evidence').textContent(),/Reviewed connection coverage/);
-  assert(await page.locator('[data-dossier-repo]').count()>0,'Public neighboring stars must be navigable');
-  await capture(page,'desktop-planet-dossier');
-  const dossierBefore=await page.locator('#inspector').getAttribute('data-repo');
-  await page.locator('[data-dossier-repo]').first().click();
-  assert.notEqual(await page.locator('#inspector').getAttribute('data-repo'),dossierBefore,'Neighbor opens normal inspector');
-  await page.locator('#toggleDossier').click();
-  assert.equal(await page.locator('#toggleDossier').getAttribute('aria-pressed'),'false');
-  assert.equal(await page.locator('.planet-dossier').count(),0,'Compact inspector contains no expanded dossier');
-  await ready(page,base+'?repo='+encodeURIComponent(canonical(second)));
+  const dossierContext=await browser.newContext({viewport:{width:1440,height:960}});
+  await dossierContext.addInitScript(disableAuto);
+  const dossierPage=await dossierContext.newPage();
+  const dossierErrors=[];
+  dossierPage.on('pageerror',error=>dossierErrors.push(error.message));
+  await ready(dossierPage,base+'?repo='+encodeURIComponent(canonical(second)));
+  assert.equal(await dossierPage.locator('#toggleDossier').getAttribute('aria-pressed'),'false');
+  await dossierPage.locator('#toggleDossier').click();
+  assert.equal(await dossierPage.locator('#inspector').evaluate(element=>element.classList.contains('dossier-open')),true);
+  assert.equal(await dossierPage.locator('#toggleDossier').getAttribute('aria-pressed'),'true');
+  assert.equal(await dossierPage.locator('#planetDossierTitle').textContent(),'Source & neighborhood');
+  assert.match(await dossierPage.locator('.dossier-evidence').textContent(),/Reviewed connection coverage/);
+  assert(await dossierPage.locator('[data-dossier-repo]').count()>0,'Public neighboring stars must be navigable');
+  await capture(dossierPage,'desktop-planet-dossier');
+  const dossierBefore=await dossierPage.locator('#inspector').getAttribute('data-repo');
+  await dossierPage.locator('[data-dossier-repo]').first().click();
+  assert.notEqual(await dossierPage.locator('#inspector').getAttribute('data-repo'),dossierBefore,'Neighbor opens normal inspector');
+  await dossierPage.locator('#toggleDossier').click();
+  assert.equal(await dossierPage.locator('#toggleDossier').getAttribute('aria-pressed'),'false');
+  assert.equal(await dossierPage.locator('.planet-dossier').count(),0,'Compact inspector contains no expanded dossier');
+  assert.deepEqual(dossierErrors,[],'Dossier navigation must not produce uncaught browser errors');
+  await dossierContext.close();
 
   log('desktop: repository index sort controls and the public-only auto-check preference');
   assert.equal(await page.locator('#autoRefresh').count(),1,'Auto-check toggle exists.');
