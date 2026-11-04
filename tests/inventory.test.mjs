@@ -46,3 +46,10 @@ test('a second-page failure, pagination cap, duplicates, private records and rat
   await assert.rejects(fetchPublicInventory(async()=>response({message:'unexpected'})),/unexpected/);
   assert.equal(JSON.stringify(snapshot),original);
 });
+
+test('Edition 19 catalog preserves the 225 public star floor and new owner identities',()=> {
+  const names=new Set(snapshot.repos.map(r=>r.name));
+  for(const name of ["CompAware","PhiRSI","phi-field","ElsewhereEngine","ShedofShadows","InfiniteTinkerer","RetroVerse","Blackout","PaperGhost","Altermath","G-FunkProp","PhiMadaPrime","PhiBridge369","RacetoOblivion"])assert(names.has(name),'Missing verified public star: '+name);
+  assert(snapshot.repos.length>=225);
+  assert(snapshot.repos.every(r=>r.visibility==='public'));
+});

@@ -6,6 +6,14 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 19 · 225 public stars (November 4, 2026)
+
+The Phitarium now includes **225 public repositories**, up from the November 1 snapshot of 211. A connected GitHub owner search fully paginated 260 accessible repositories (100 + 100 + 60 + empty fourth page): **225 public and 35 private**. All 211 prior public identities are retained. Fourteen additions have source-checked public metadata: CompAware, PhiRSI, phi-field, ElsewhereEngine, ShedofShadows, InfiniteTinkerer, RetroVerse, Blackout, PaperGhost, Altermath, G-FunkProp, PhiMadaPrime, PhiBridge369, RacetoOblivion.
+
+**Freshness boundary:** November 4 is the date the full public identity set was reconciled, not a claim that the prior 211 records were newly audited field-by-field. Older Atlas, deployment checks, and architectural relationship evidence keep their own original dates. Category placement is thematic and does not prove working integrations, installs, or live deployments.
+
+The visitor Refresh control already provides a browser-local fully paginated public GitHub REST refresh without Netlify. It preserves the existing view on API failure and never exposes private repository data. See [Edition 19 audit](docs/EDITION_19_PUBLIC_INVENTORY.md).
+
 ## Edition 18 · Immersive Dome & the living exhibits (November 1, 2026)
 
 **Enter Dome** opens a full-viewport planetarium experience around the original interactive repository constellation. Hide the technical UI, fly between twelve curated *real public* project stars, read their current public-repository descriptions and inspect the wider field. The sky adds soft CSS nebulae and occasional decorative meteors, with reduced-motion support. The exhibit route works with both WebGL and Canvas fallback and needs no login or external media.
