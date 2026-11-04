@@ -6,6 +6,14 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 23 · Solar Navigator / Focus Mode (November 4, 2026)
+
+Solar Systems now has a **Solar Navigator**, letting visitors select any of the eight existing category suns from a keyboard-accessible, touch-friendly control. Selecting a category focuses the camera on that system and filters the visible public planets; **All systems** restores the global sky. The ordinary sidebar category buttons participate in the same behavior while Solar Systems mode is active.
+
+Category suns are also pointer-clickable inside the existing Three.js or Canvas fallback map, with a tooltip explaining the public planet count. The selector remains the required accessible route because a 3D canvas is not inherently keyboard navigable. Counts follow the current public inventory and respect existing search and filter choices; neither category focus nor orbit decoration asserts a source dependency or project health. The selected mode remains opt-in, with motion off by default.
+
+Responsive controls and browser acceptance test focus/reset on desktop, mobile and Canvas. Existing Phitarium modes, Six Houses, saved Passport/Quest state and published domain setups are unchanged. See [Edition 23 Solar Navigator notes](docs/EDITION_23_SOLAR_NAVIGATOR.md).
+
 ## Edition 22 · Solar Systems view (November 4, 2026)
 
 **Solar Systems** is a sixth Phitarium viewing mode, inspired by an astronomical taxonomy of 220+ code repositories. It reuses the existing public-only GitHub inventory, 3D Three.js render path, and accessible Canvas2D fallback. The eight editorial project constellations become decorative category **suns**, with their public repositories orbiting as **planets**. Three guide rings per sun make the model easy to read. This does not modify the underlying verified architectural relationship ledger.
