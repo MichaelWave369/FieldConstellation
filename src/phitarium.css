@@ -328,3 +328,20 @@ body.phitarium.lattice-theme{
 .phitarium .solar-legend{max-width:335px;font-size:10px!important;line-height:1.5!important;color:#aacee8!important;letter-spacing:0!important;margin:9px 0 0!important}
 @media(max-width:800px){.phitarium .map-footer{flex-wrap:wrap;gap:5px}.phitarium .layout-switch{max-width:calc(100vw - 30px)}.phitarium .layout-switch button{padding:8px;font-size:9px}.phitarium .scene-toggles{gap:8px}}
 @media(max-width:480px){.phitarium .solar-legend{max-width:240px;font-size:9px!important}.phitarium #solarMotionControl{font-size:8px}}
+
+/* Edition 23: accessible Solar Navigator. The map's category suns are an alternate pointer shortcut. */
+.phitarium .solar-navigator{position:absolute;z-index:6;top:193px;left:29px;width:min(334px,calc(100% - 58px));padding:12px 14px 11px;border:1px solid #608ab4a1;border-radius:12px;background:linear-gradient(150deg,#102843ed,#0b1a30f2);box-shadow:0 12px 35px #010714b3;color:#e0f2ff;backdrop-filter:blur(12px)}
+.phitarium .solar-navigator[hidden],.phitarium.immersive-mode .solar-navigator{display:none!important}
+.phitarium .solar-nav-heading{display:flex;align-items:center;gap:8px;letter-spacing:1.5px;font-size:10px;color:#c5eaff}
+.phitarium .solar-nav-heading>span{font-size:19px;color:#9dd5ff}
+.phitarium .solar-nav-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px;align-items:end;margin-top:9px}
+.phitarium .solar-nav-controls label{grid-column:1/-1;font-size:11px;color:#bed3e8}
+.phitarium .solar-nav-controls select{width:100%;min-width:0;min-height:36px;padding:6px 8px;border:1px solid #648db9;border-radius:6px;background:#0b1a30;color:#edf9ff;font:inherit;font-size:12px}
+.phitarium .solar-nav-controls button{min-height:36px;padding:6px 10px;border:1px solid #648db9;border-radius:6px;background:#244667;color:#eaf8ff;font-size:11px}
+.phitarium .solar-nav-controls button:disabled{opacity:.48;cursor:not-allowed}
+.phitarium .solar-nav-controls button:not(:disabled):hover{background:#346590}
+.phitarium .solar-navigator :is(select,button):focus-visible{outline:2px solid #a9e9ff;outline-offset:2px}
+.phitarium .solar-navigator #solarSystemStatus{margin:10px 0 0;color:#a9c8e5;font-size:11px;line-height:1.5}
+@media(max-width:760px){.phitarium .solar-navigator{top:163px;left:15px;width:min(296px,calc(100% - 30px));padding:10px 12px}}
+@media(max-width:480px){.phitarium .solar-navigator{top:153px;width:min(272px,calc(100% - 30px))}.phitarium .solar-nav-heading{font-size:9px}.phitarium .solar-nav-controls label,.phitarium .solar-navigator #solarSystemStatus{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.phitarium .solar-navigator{backdrop-filter:none}}
