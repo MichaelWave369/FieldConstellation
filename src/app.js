@@ -37,7 +37,8 @@ const repoTint=repo=>state.lens==='quest'?(state.quest.discoveredIds.includes(pr
 const repoGlow=repo=>{
   if(state.layout!=='solar')return activityWeight(repo,state.activityNow);
   const attention=Math.log1p(Math.max(0,(repo.stars||0)+(repo.forks||0)));
-  return Math.min(1.18,.52+.28*Math.exp(-ageInDays(repo,state.activityNow)/200)+attention*.12);
+  const intensity=Math.min(1.18,.52+.28*Math.exp(-ageInDays(repo,state.activityNow)/200)+attention*.12);
+  return repo.archived?intensity*.55:intensity;
 };
 const nodeActive=id=>state.visible.has(id)&&(!state.architecture||!state.selected||state.neighbors.has(id)||(showtimeIndex>=0&&state.hovered===id));
 const chronological=()=>state.layout==='helix'||state.layout==='spiral';
