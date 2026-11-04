@@ -90,13 +90,27 @@ try{
   await page.locator('[data-layout="solar"]').click();
   assert.equal(await page.locator('[data-layout="solar"]').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('#solarLegend').isVisible(),true);
-  assert.equal(await page.locator('#solarMotion').isChecked(),false,'Moving planets must be opt-in');
+  assert.equal(await page.locator('#solarNavigator').isVisible(),true,'Solar navigator is available');
+  assert.equal(await page.locator('#solarSystemReset').isDisabled(),true);
+  await page.locator('#solarSystemSelect').selectOption('infrastructure');
+  assert.equal(await page.locator('#solarSystemSelect').inputValue(),'infrastructure');
+  assert.equal(await page.locator('[data-group="infrastructure"]').getAttribute('aria-pressed'),'true');
+  assert.match(await page.locator('#solarSystemStatus').textContent(),/matching planets/);
+  assert(Number((await page.locator('#visibleCount').textContent()).split(' ')[0])>0,'Focused system has public planets');
+  await page.locator('#solarSystemReset').click();
+  assert.equal(await page.locator('#solarSystemSelect').inputValue(),'');
+  assert.equal(await page.locator('#solarSystemReset').isDisabled(),true,'Reset returns to all systems');
+    assert.equal(await page.locator('#solarMotion').isChecked(),false,'Moving planets must be opt-in');
   await page.locator('#solarMotion').check();
   assert.equal(await page.locator('#solarMotion').isChecked(),true);
   await capture(page,'desktop-solar-systems');
   await page.locator('#solarMotion').uncheck();
   await page.locator('[data-layout="constellation"]').click();
   assert.equal(await page.locator('#solarLegend').isVisible(),false);
+  // Focusing a different category intentionally clears an out-of-system selection.
+  // Restore the fixture before the next Dome Show's selected-project preservation checks.
+  await ready(page,base+'?repo='+encodeURIComponent(canonical(second)));
+  assert.equal(await page.locator('#inspector').isVisible(),true);
 
   log('desktop: Phitarium dome shell and opt-in, noncollecting projection show');
   assert.equal(await page.locator('body').getAttribute('class'),'phitarium');
@@ -387,7 +401,11 @@ try{
   assert.equal(await mobilePage.locator('#showtimeButton').isVisible(),true,'Mobile visitors must be able to start the Dome Show.');
   await capture(mobilePage,'mobile-phitarium-observatory');
   await mobilePage.locator('[data-layout="solar"]').click();
-  assert.equal(await mobilePage.locator('#solarLegend').isVisible(),true,'Solar legend must be shown on mobile');
+  assert.equal(await mobilePage.locator('#solarNavigator').isVisible(),true);
+  await mobilePage.locator('#solarSystemSelect').selectOption('creative');
+  assert.match(await mobilePage.locator('#solarSystemStatus').textContent(),/matching planets/);
+  await mobilePage.locator('#solarSystemReset').click();
+    assert.equal(await mobilePage.locator('#solarLegend').isVisible(),true,'Solar legend must be shown on mobile');
   await capture(mobilePage,'mobile-solar-systems');
   await mobilePage.locator('[data-layout="constellation"]').click();
 
@@ -434,7 +452,10 @@ try{
   assert.equal(await fallbackPage.locator('#showtimeButton').count(),1,'Dome Show remains accessible in Canvas fallback.');
   await fallbackPage.locator('#directoryDialog').evaluate(dialog=>dialog.close());
   await fallbackPage.locator('[data-layout="solar"]').click();
-  assert.equal(await fallbackPage.locator('[data-layout="solar"]').getAttribute('aria-pressed'),'true','Canvas fallback supports Solar Systems mode');
+    assert.equal(await fallbackPage.locator('[data-layout="solar"]').getAttribute('aria-pressed'),'true','Canvas fallback supports Solar Systems mode');
+  await fallbackPage.locator('#solarSystemSelect').selectOption('research');
+  assert.match(await fallbackPage.locator('#solarSystemStatus').textContent(),/matching planets/);
+  await fallbackPage.locator('#solarSystemReset').click();
   await capture(fallbackPage,'canvas-solar-systems');
   await fallbackPage.locator('[data-layout="constellation"]').click();
   await fallbackPage.locator('#immersiveButton').click();
