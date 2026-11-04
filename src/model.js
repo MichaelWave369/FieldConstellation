@@ -47,7 +47,28 @@ export function filterRepos(repos,filters={}){
 }
 export function chronologicalOrder(repos){return repos.map((r,index)=>({r,index})).sort((a,b)=>(a.r.created||'').localeCompare(b.r.created||'')||a.r.name.localeCompare(b.r.name)).map(x=>x.index);}
 export function prepareRepos(repos){return repos.map(r=>({...r,group:categoryFor(r),radius:Math.min(.65,.22+Math.log10(1+(r.size||0))*.075)})).sort((a,b)=>a.name.localeCompare(b.name));}
+/** A deterministic, illustrative star-system arrangement; GitHub metrics are not physical quantities or health scores. */
+export function solarSystemPositions(repos,phase=0,now=Date.now()){
+  const lists=new Map(GROUPS.map(g=>[g.id,repos.filter(r=>r.group===g.id)]));
+  const golden=Math.PI*(3-Math.sqrt(5));
+  const at=Number.isFinite(now)?now:Date.now();
+  const positions=new Map();
+  for(const group of GROUPS){
+    const list=lists.get(group.id);
+    list.forEach((repo,index)=>{
+      const updated=Date.parse(repo.updated||'');
+      const days=Number.isFinite(updated)?Math.max(0,Math.min(3650,(at-updated)/86400000)):3650;
+      const radius=3.5+10*Math.log1p(days)/Math.log1p(3650);
+      const angle=index*golden+hash(String(repo.id)+'solar')*.4+phase*(5/(radius+3));
+      const tilt=Math.sin(angle*1.27+hash(String(repo.id)+'incline')*Math.PI*2)*.75;
+      positions.set(repo.id,[group.center[0]+Math.cos(angle)*radius,group.center[1]+tilt,group.center[2]+Math.sin(angle)*radius]);
+    });
+  }
+  return repos.map(repo=>positions.get(repo.id)||[0,0,0]);
+}
 export function layoutPositions(repos,mode){
+  if(mode==='solar')return solarSystemPositions(repos);
+
   const buckets=new Map(GROUPS.map(g=>[g.id,repos.filter(r=>r.group===g.id)]));
   const order=chronologicalOrder(repos),chronology=order.map(i=>repos[i]),orbits=languageOrbits(repos);
   return repos.map((r,i)=>{
@@ -73,6 +94,7 @@ export function layoutPositions(repos,mode){
   });
 }
 export function layoutEdges(repos,points,mode){
+  if(mode==='solar')return []; // Orbital rings are visual guides, not claims of source dependencies.
   if(mode==='helix'||mode==='spiral'){const order=chronologicalOrder(repos);return order.slice(1).map((i,k)=>[order[k],i]);}
   if(mode==='orbits'){
     const edges=[];for(const ring of languageOrbits(repos)){const members=repos.map((r,i)=>({r,i})).filter(x=>x.r.language===ring.language);if(members.length>1)for(let i=0;i<members.length-(members.length===2?1:0);i++)edges.push([members[i].i,members[(i+1)%members.length].i]);}return edges;
