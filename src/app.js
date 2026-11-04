@@ -478,9 +478,10 @@ function openSolarDiscovery(){
   if(state.layout!=='solar'||!group||!state.visible.size)return;
   const data=solarDiscoveryFor(state.repos,group.id,state.visible);
   if(!data.route.length)return;
+  const sameRoute=solarDiscoveryGroup===group.id&&solarDiscoveryRoute.map(repo=>repo.id).join('|')===data.route.map(repo=>repo.id).join('|');
   solarDiscoveryGroup=group.id;
   solarDiscoveryRoute=data.route;
-  solarDiscoveryIndex=0;
+  solarDiscoveryIndex=sameRoute?Math.min(solarDiscoveryIndex,data.route.length-1):0;
   $('solarDiscoveryTitle').textContent=group.name+' · Planet discovery';
   $('solarDiscoverySummary').textContent=`${data.count} public planets match your current filters. Most starred and newest reflect the displayed inventory snapshot, not software quality or deployability.`;
   const list=(repos,kind)=>repos.map(repo=>`<button type="button" class="solar-discovery-item" data-solar-repo="${escape(repo.id)}"><strong>${escape(repo.name)}</strong><span>${kind==='stars'?escape(String(repo.stars||0))+' GitHub stars':'Created '+escape(repo.created?new Date(repo.created).toLocaleDateString():'date unknown')}</span></button>`).join('');
