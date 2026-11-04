@@ -259,6 +259,7 @@ function applyFilters(){
   if(state.selected&&!state.visible.has(state.selected))clearSelection();
   if($('inspector').dataset.repo&&!state.visible.has($('inspector').dataset.repo))$('inspector').hidden=true;
   if(state.query&&state.visible.size===1&&state.selected!==[...state.visible][0])selectRepo([...state.visible][0],true,false);
+  if(dossierExpanded&&state.selected&&state.visible.has(state.selected)){const active=state.repos.find(repo=>repo.id===state.selected);if(active)showInspector(active,false);}
   if(sceneReady)updateAppearance();
   if($('directoryDialog').open)renderDirectory();
   $('pagesOnly').setAttribute('aria-pressed',String(state.pagesOnly));$('hideForks').setAttribute('aria-pressed',String(state.hideForks));$('atlasOnly').setAttribute('aria-pressed',String(state.atlasOnly));$('atlasPublishedOnly').setAttribute('aria-pressed',String(state.atlasPublishedOnly));renderSidebarIndex();renderLensLegend();
