@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {prepareRepos,layoutPositions,layoutEdges,languageOrbits,filterRepos,colorFor,normalizePublic,safeUrl} from '../src/model.js';
+import {GROUPS,prepareRepos,layoutPositions,solarSystemPositions,layoutEdges,languageOrbits,filterRepos,colorFor,normalizePublic,safeUrl} from '../src/model.js';
 
 // Synthetic fixtures; none represents a captured account repository.
 const fixture=prepareRepos([
@@ -10,9 +10,9 @@ const fixture=prepareRepos([
   {id:'mid',name:'Middle',description:'',language:'Python',created:'2026-02-01T00:00:00Z',updated:'2026-02-02T00:00:00Z',visibility:'public',pages:true,fork:true,size:200}
 ]);
 
-test('all five layouts retain every project, including inventories beyond 512 nodes',()=>{
+test('all six layouts retain every project, including inventories beyond 512 nodes',()=>{
   const large=prepareRepos(Array.from({length:600},(_,i)=>({...fixture[0],id:'repo-'+i,name:'Repository '+i,created:new Date(Date.UTC(2026,0,1)+i*3600000).toISOString()})));
-  for(const mode of ['constellation','helix','sphere','orbits','spiral'])for(const repos of [[],fixture.slice(0,1),fixture,large]){
+  for(const mode of ['constellation','helix','sphere','orbits','spiral','solar'])for(const repos of [[],fixture.slice(0,1),fixture,large]){
     const positions=layoutPositions(repos,mode);assert.equal(positions.length,repos.length);assert(positions.every(p=>p.length===3&&p.every(Number.isFinite)));assert.equal(new Set(positions.map(p=>p.join(','))).size,repos.length);
   }
 });
@@ -53,4 +53,27 @@ test('the public snapshot excludes private records and retains the reconciled Gr
   const data=JSON.parse(readFileSync(new URL('../src/repos.json',import.meta.url),'utf8'));
   assert(data.complete);assert.equal(new Set(data.repos.map(r=>r.id)).size,data.repos.length);assert.equal(new Set(data.repos.map(r=>r.name.toLowerCase())).size,data.repos.length);
   assert.equal(data.scope,'public');assert(data.repos.length>0);assert(data.repos.every(r=>r.visibility==='public'&&r.url==='https://github.com/'+data.owner+'/'+r.name));assert.equal(data.integration.matchingRepositories,data.integration.grokPublicSnapshotCount);assert(data.repos.every(r=>typeof r.pages==='boolean'&&typeof r.issues==='number'));
+});
+
+test('solar systems keep public projects around their thematic suns without inventing edges',()=>{
+  const now=Date.parse('2026-11-04T12:00:00Z');
+  const records=prepareRepos([
+    {...fixture[1],id:'first-solar',name:'PhiOS',updated:'2026-11-03T12:00:00Z',archived:false,visibility:'public'},
+    {...fixture[2],id:'second-solar',name:'PhiMadaPrime',updated:'2025-01-04T12:00:00Z',archived:true,visibility:'public'}
+  ]);
+  assert.equal(records[0].group,records[1].group);
+  const star=GROUPS.find(group=>group.id===records[0].group);
+  assert(star,'Category sun must exist');
+  const points=solarSystemPositions(records,0,now);
+  const radius=point=>Math.hypot(point[0]-star.center[0],point[2]-star.center[2]);
+  const recent=radius(points[records.findIndex(r=>r.id==='first-solar')]);
+  const older=radius(points[records.findIndex(r=>r.id==='second-solar')]);
+  assert(recent<older,'Recent push must orbit more closely than older push');
+  const moving=solarSystemPositions(records,2,now);
+  points.forEach((p,i)=>{
+    assert(Math.abs(radius(p)-radius(moving[i]))<1e-9,'Motion must preserve orbital distance');
+    assert(p.some((coordinate,k)=>Math.abs(coordinate-moving[i][k])>1e-4),'Opt-in orbit should change position');
+  });
+  assert.deepEqual(layoutEdges(records,points,'solar'),[],'Orbital rings do not mean repository dependencies');
+  assert.deepEqual(solarSystemPositions(records,0,now),points,'Stable repos and time must produce stable positions');
 });

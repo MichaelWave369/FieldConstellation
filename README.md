@@ -6,6 +6,19 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 22 · Solar Systems view (November 4, 2026)
+
+**Solar Systems** is a sixth Phitarium viewing mode, inspired by an astronomical taxonomy of 220+ code repositories. It reuses the existing public-only GitHub inventory, 3D Three.js render path, and accessible Canvas2D fallback. The eight editorial project constellations become decorative category **suns**, with their public repositories orbiting as **planets**. Three guide rings per sun make the model easy to read. This does not modify the underlying verified architectural relationship ledger.
+
+- **Category sun:** a thematic project grouping, not a verifiable code dependency.
+- **Planet position:** relative distance is determined by *time since last code push*, not health or abandonment. Stable project identity determines angular position.
+- **Planet size:** already derives from GitHub-reported repository size (KB), not lines of code or business impact.
+- **Glow:** recent push activity and public stars/forks increase brightness; archived repos are dimmed and explicitly labeled in the inspector.
+- **Movement:** an opt-in **Move planets** checkbox animates the metaphor at restrained speed. Default off; disabled when the visitor requests reduced motion. Animation pauses with the hidden tab.
+- **Meaning:** public-repository metadata is a visual metaphor, **not** proof of runtime integration, code quality, deployment, CI health, or working apps.
+
+The original five layouts, Quest/Passport browser-local saves, project deep links, Six Houses, public-only refresh logic, and no-Netlify build workflow remain unchanged. Tests cover 600+ repo layouts, orbital-distance preservation, keyboard-operable controls, motion opt-in, mobile, and Canvas fallback. See [Solar Systems design and evidence contract](docs/EDITION_22_SOLAR_SYSTEMS.md).
+
 ## Edition 21 · Field Gateway (November 4, 2026)
 
 A new **Field Constellation gateway** is staged at `/gateway/index.html`, designed to become the future `enterthefield.org` entrance only after explicit release approval. The standalone, static HTML/CSS page has three entry routes: the **Phitarium**, its **full project Directory**, and **Other Fields / the Six Houses**. The PhiOS-centered architecture points to real public repository stars for PhiOS, Infinite Porch, and Infinite Commons, with separate PhiOS Mobile and XR source links. These thematic routes do **not** claim native installers, production integration or live peer networks.

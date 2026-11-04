@@ -3,7 +3,7 @@ import {OrbitControls} from './vendor/OrbitControls.js';
 import {CanvasFieldRenderer} from './canvas-renderer.js';
 import {installDome,resolveShowtimeStops,SHOWTIME_INTERVAL_MS} from './phitarium.js';
 import {resolveImmersiveExhibits,recentCheckSummary} from './immersive.js';
-import {GROUPS,ageInDays,hash,prepareRepos,layoutPositions,layoutEdges,languageOrbits,languageColor,colorFor,activityWeight,filterRepos,safeUrl,normalizePublic} from './model.js';
+import {GROUPS,ageInDays,hash,prepareRepos,layoutPositions,solarSystemPositions,layoutEdges,languageOrbits,languageColor,colorFor,activityWeight,filterRepos,safeUrl,normalizePublic} from './model.js';
 
 import {parseSnapshot,newerPublicCache,fetchPublicInventory,CACHE_KEY,AUTO_REFRESH_KEY,AUTO_CHECK_KEY,autoRefreshDue} from './inventory.js';
 import {SORT_MODES,normalizeSortMode,sortRepositoryList} from './sort.js';
@@ -25,8 +25,8 @@ const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',sortMode:'name',autoRefresh:true,activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
-let autoRefreshTimer=null;
+const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',sortMode:'name',autoRefresh:true,activityNow:Date.now(),layout:'constellation',solarMotion:false,selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
+let autoRefreshTimer=null,solarPhase=0,solarSuns=[];
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,dome=null,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 let showtimeIndex=-1,showtimeTimer=null,showtimeStops=[],showtimeWasOrbit=false,showtimeInspectorWasVisible=false;
 let immersiveActive=false,immersiveStops=[],immersiveIndex=0,immersiveRestore=null;
@@ -34,7 +34,12 @@ const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
 const featured=['BTM','SparkTheSubstrate','EchoesOfTheNine','TweedleVerse','LENZ','FieldStoryForge','BackyardProductionCompany','GenEWrist','SuperPhiVessel','BrainC','PhiLearn','Agentora','Domistika','SiliconLouvre','FramefieldStudio','RastaPhi','PhiCade','GitPorch','FieldAtlas','Pulse369','MoreBounceLabs','NestedBubbleGear','MRIPHI','RegenerationAtlas','Phithon','Vibe','WhiteHatLedger369','PhiOS','CommonTable','FamilyVault','FieldAccord','axiomforge-ledger','Infinite-Commons'];
 const repoTint=repo=>state.lens==='quest'?(state.quest.discoveredIds.includes(projectId(repo))?'#d0f29b':'#66736a'):colorFor(repo,state.lens,state.activityNow);
-const repoGlow=repo=>activityWeight(repo,state.activityNow);
+const repoGlow=repo=>{
+  if(state.layout!=='solar')return activityWeight(repo,state.activityNow);
+  const attention=Math.log1p(Math.max(0,(repo.stars||0)+(repo.forks||0)));
+  const intensity=Math.min(1.18,.52+.28*Math.exp(-ageInDays(repo,state.activityNow)/200)+attention*.12);
+  return repo.archived?intensity*.55:intensity;
+};
 const nodeActive=id=>state.visible.has(id)&&(!state.architecture||!state.selected||state.neighbors.has(id)||(showtimeIndex>=0&&state.hovered===id));
 const chronological=()=>state.layout==='helix'||state.layout==='spiral';
 
@@ -99,7 +104,10 @@ function bindUI(){
   $('atlasAuditRefresh').onclick=async()=>{const button=$('atlasAuditRefresh');button.disabled=true;try{await refreshPublic();renderAtlasAudit();}finally{button.disabled=false;}};
   $('fitMatches').onclick=fitMatches;
   document.querySelectorAll('[data-layout]').forEach(button=>button.onclick=()=>setLayout(button.dataset.layout));
-  $('linksToggle').onchange=event=>{state.links=event.target.checked;if(lineMesh)lineMesh.visible=state.links;};
+  $('solarMotion').onchange=event=>{state.solarMotion=event.target.checked&&!reducedMotion;};
+  $('solarMotion').disabled=reducedMotion;
+  $('solarMotion').title=reducedMotion?'Animation disabled by reduced-motion preference':'Animate repository orbits in Solar Systems view';
+  $('linksToggle').onchange=event=>{state.links=event.target.checked;if(lineMesh)lineMesh.visible=state.links;if(sceneReady)updateAppearance();};
   $('labelsToggle').onchange=event=>{state.labels=event.target.checked;$('labels').style.display=state.labels?'':'none';};
   $('orbitToggle').onclick=()=>setOrbit(!state.orbit);
   $('resetView').onclick=()=>fitField(true);$('zoomIn').onclick=()=>zoom(.78);$('zoomOut').onclick=()=>zoom(1.26);
@@ -439,7 +447,22 @@ function updateShowtime(){
 function setTheme(theme){state.theme=theme;document.body.classList.toggle('lattice-theme',theme==='lattice');$('themeToggle').setAttribute('aria-pressed',String(theme==='lattice'));document.querySelector('meta[name="theme-color"]').content=theme==='lattice'?'#15101c':'#050a15';if(scene){scene.background.set(theme==='lattice'?'#15101c':'#060d1f');scene.fog.color.copy(scene.background);dome?.setPalette(theme==='lattice');for(const child of core.children)if(child.material?.color)child.material.color.set(theme==='lattice'?'#e0b15a':'#a5d9f6');}}
 function setSidebar(open){$('sidebar').classList.toggle('open',open);$('sidebar').inert=innerWidth<761&&!open;$('mobileMenu').setAttribute('aria-expanded',String(open));}
 function setOrbit(value){state.orbit=value;if(controls)controls.autoRotate=value;$('orbitToggle').classList.toggle('active',value);$('orbitToggle').setAttribute('aria-pressed',String(value));}
-function setLayout(mode){if(showtimeIndex>=0)stopShowtime(false);if(state.layout===mode)return;state.layout=mode;document.querySelectorAll('[data-layout]').forEach(b=>{b.classList.toggle('selected',b.dataset.layout===mode);b.setAttribute('aria-pressed',String(b.dataset.layout===mode));});$('layoutLabel').textContent={constellation:'CONSTELLATION SPACE',helix:'CHRONOLOGICAL HELIX',sphere:'FIBONACCI SPHERE',orbits:'LANGUAGE ORBITS',spiral:'GOLDEN-ANGLE TIMELINE'}[mode];$('viewDescription').textContent={constellation:'Eight worlds of ideas. One shared field.',helix:'Follow the order in which your projects began.',sphere:'Every world, a place on the same Fibonacci shell.',orbits:'One orbit per programming language. Inspired by Grok’s Field Lattice.',spiral:'A widening golden-angle spiral, ordered by creation. From Grok’s Field Lattice.'}[mode];$('linksCaption').textContent=chronological()?'Creation thread':mode==='orbits'?'Orbit links':'World links';if(mode==='orbits')setLens('language');updateRelationshipUI();if(sceneReady){targets=layoutPositions(state.repos,mode).map(p=>new THREE.Vector3(...p));if(reducedMotion)positions=targets.map(p=>p.clone());buildEdges();refreshGuides();buildLabels();fitField(true);}}
+function setLayout(mode){
+  if(showtimeIndex>=0)stopShowtime(false);
+  if(state.layout===mode)return;
+  if(state.layout==='solar'){state.solarMotion=false;$('solarMotion').checked=false;}
+  state.layout=mode;
+  document.querySelectorAll('[data-layout]').forEach(b=>{b.classList.toggle('selected',b.dataset.layout===mode);b.setAttribute('aria-pressed',String(b.dataset.layout===mode));});
+  $('layoutLabel').textContent={constellation:'CONSTELLATION SPACE',helix:'CHRONOLOGICAL HELIX',sphere:'FIBONACCI SPHERE',orbits:'LANGUAGE ORBITS',spiral:'GOLDEN-ANGLE TIMELINE',solar:'CATEGORY SOLAR SYSTEMS'}[mode];
+  $('viewDescription').textContent={constellation:'Eight worlds of ideas. One shared field.',helix:'Follow the order in which your projects began.',sphere:'Every world, a place on the same Fibonacci shell.',orbits:'One orbit per programming language. Inspired by Grok’s Field Lattice.',spiral:'A widening golden-angle spiral, ordered by creation. From Grok’s Field Lattice.',solar:'Eight suns. Every public repository is a planet. Distance represents last push, not project health.'}[mode];
+  $('linksCaption').textContent=chronological()?'Creation thread':mode==='orbits'?'Orbit links':mode==='solar'?'Orbit guides':'World links';
+  $('solarMotionControl').hidden=mode!=='solar';
+  $('solarLegend').hidden=mode!=='solar';
+  if(mode==='orbits')setLens('language');
+  if(mode==='solar'){solarPhase=0;setOrbit(false);setLens('world');}
+  updateRelationshipUI();
+  if(sceneReady){targets=layoutPositions(state.repos,mode).map(p=>new THREE.Vector3(...p));if(reducedMotion)positions=targets.map(p=>p.clone());buildEdges();refreshGuides();buildLabels();fitField(true);}
+}
 
 function initScene(){
   const host=$('scene');scene=new THREE.Scene();scene.background=new THREE.Color('#060d1f');scene.fog=new THREE.FogExp2('#060d1f',.0035);dome=installDome(THREE,scene);
@@ -452,6 +475,13 @@ function initScene(){
   const dotCanvas=document.createElement('canvas');dotCanvas.width=dotCanvas.height=128;const ctx=dotCanvas.getContext('2d'),gradient=ctx.createRadialGradient(64,64,0,64,64,64);gradient.addColorStop(0,'rgba(255,255,255,1)');gradient.addColorStop(.1,'rgba(255,255,255,.8)');gradient.addColorStop(.28,'rgba(255,255,255,.19)');gradient.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);const glowTexture=new THREE.CanvasTexture(dotCanvas);
   core=new THREE.Group();const coreMesh=new THREE.Mesh(new THREE.IcosahedronGeometry(1.8,2),new THREE.MeshBasicMaterial({color:'#a5d9f6',wireframe:true,transparent:true,opacity:.35}));core.add(coreMesh);const innerCore=new THREE.Mesh(new THREE.SphereGeometry(.85,20,16),new THREE.MeshBasicMaterial({color:'#d3f1ff'}));core.add(innerCore);coreGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture,color:'#87c9ff',transparent:true,opacity:.4,blending:THREE.AdditiveBlending,depthWrite:false}));coreGlow.scale.set(16,16,1);core.add(coreGlow);scene.add(core);
   for(const g of GROUPS){const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture,color:g.color,opacity:.055,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));halo.position.set(...g.center);halo.scale.set(27,27,1);scene.add(halo);groupHalos.push(halo);}
+  // Decorative category suns, not repository nodes or verified connections.
+  for(const g of GROUPS){
+    const sun=new THREE.Mesh(new THREE.SphereGeometry(1.1,12,10),new THREE.MeshBasicMaterial({color:g.color,transparent:true,opacity:.95,depthWrite:false}));
+    const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture,color:g.color,transparent:true,opacity:.24,blending:THREE.AdditiveBlending,depthWrite:false}));
+    sun.position.set(...g.center);glow.position.set(...g.center);glow.scale.set(9,9,1);
+    sun.visible=glow.visible=false;scene.add(sun,glow);solarSuns.push({sun,glow,group:g});
+  }
   for(let ringIndex=0;ringIndex<3;ringIndex++){
     const radius=ringIndex===0?43:ringIndex===1?51:57,points=[];for(let i=0;i<=240;i++){const angle=i/240*Math.PI*2;points.push(new THREE.Vector3(Math.cos(angle)*radius,0,Math.sin(angle)*radius));}
     const ring=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:'#829fda',transparent:true,opacity:ringIndex===0?.13:.065,depthWrite:false}));ring.rotation.set((ringIndex-1)*.29,0,ringIndex===1?.43:-.12);ring.position.y=-3;scene.add(ring);orbitLines.push(ring);
@@ -484,6 +514,13 @@ function refreshGuides(){
   for(const guide of layoutGuides){scene.remove(guide);guide.geometry.dispose();guide.material.dispose();}layoutGuides=[];
   orbitLines.forEach(line=>line.visible=state.layout==='constellation');
   if(state.layout==='orbits')for(const ring of languageOrbits(state.repos)){const points=[];for(let i=0;i<=180;i++){const angle=i/180*Math.PI*2;points.push(new THREE.Vector3(Math.cos(angle)*ring.radius,ring.y,Math.sin(angle)*ring.radius));}const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:ring.color,transparent:true,opacity:.23,depthWrite:false}));line.userData.language=ring.language;scene.add(line);layoutGuides.push(line);}
+  if(state.layout==='solar'){
+    for(const group of GROUPS)for(const radius of [4.5,8.5,13]){
+      const points=[];for(let i=0;i<=96;i++){const angle=i/96*Math.PI*2;points.push(new THREE.Vector3(group.center[0]+Math.cos(angle)*radius,group.center[1],group.center[2]+Math.sin(angle)*radius));}
+      const ring=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:group.color,transparent:true,opacity:.17,depthWrite:false}));
+      ring.userData.solarGroup=group.id;scene.add(ring);layoutGuides.push(ring);
+    }
+  }
   if(state.layout==='sphere'){const base=new THREE.IcosahedronGeometry(40,1),geometry=new THREE.EdgesGeometry(base);base.dispose();const cage=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:'#c5b581',transparent:true,opacity:.1,depthWrite:false}));scene.add(cage);layoutGuides.push(cage);}
   updateAppearance();
 }
@@ -494,7 +531,8 @@ function updateAppearance(){
   instanced.instanceColor.needsUpdate=true;colors.needsUpdate=true;sizes.needsUpdate=true;
   if(lineMesh?.geometry.attributes.color){const arr=lineMesh.geometry.attributes.color;edges.forEach(([a,b],i)=>{const ra=state.repos[a],rb=state.repos[b],visible=nodeActive(ra.id)&&nodeActive(rb.id),selected=ra.id===state.selected||rb.id===state.selected;tempColor.set(state.architecture?RELATIONSHIP_STYLES[edges[i][2]].color:chronological()?'#dfb86d':repoTint(ra)).multiplyScalar(visible?(selected?1:state.architecture?.8:chronological()?.47:.34):.012);arr.setXYZ(i*2,tempColor.r,tempColor.g,tempColor.b);arr.setXYZ(i*2+1,tempColor.r,tempColor.g,tempColor.b);});arr.needsUpdate=true;}
   groupHalos.forEach((h,i)=>{h.material.opacity=state.layout==='constellation'&&(!state.group||state.group===GROUPS[i].id)?.045:0;});
-  layoutGuides.forEach(g=>{if(g.userData.language)g.material.opacity=state.repos.some(r=>r.language===g.userData.language&&state.visible.has(r.id))?.23:.025;});
+  solarSuns.forEach(({sun,glow,group})=>{const visible=state.layout==='solar'&&state.repos.some(repo=>repo.group===group.id&&state.visible.has(repo.id));sun.visible=glow.visible=visible;});
+  layoutGuides.forEach(g=>{if(g.userData.language)g.material.opacity=state.repos.some(r=>r.language===g.userData.language&&state.visible.has(r.id))?.23:.025;if(g.userData.solarGroup)g.visible=state.links&&state.repos.some(r=>r.group===g.userData.solarGroup&&state.visible.has(r.id));});
 }
 function updateGeometry(){
   const points=glowPoints.geometry.attributes.position,lines=lineMesh.geometry.attributes.position;
@@ -515,13 +553,18 @@ function updateLabels(){
   const blocked=(x,y,width)=>y<86||y>h-143||x<60||x+width>w-15||(x+width>caption.left-sceneRect.left-10&&x<caption.right-sceneRect.left+10&&y+14>caption.top-sceneRect.top-10&&y<caption.bottom-sceneRect.top+12)||(inspectorVisible&&x+width>inspectorRect.left-sceneRect.left-12&&x<inspectorRect.right-sceneRect.left+12&&y>inspectorRect.top-sceneRect.top-15&&y<inspectorRect.bottom-sceneRect.top+15);
   const ordered=labelNodes.map((l,i)=>({...l,i,priority:l.repo.id===state.selected?0:l.repo.id===state.hovered?1:state.architecture&&state.selected&&state.neighbors.has(l.repo.id)?2:featured.includes(l.repo.name)?2:3})).sort((a,b)=>a.priority-b.priority);let count=0;
   for(const label of ordered){const {el,repo,i}=label;el.style.display='none';if(!nodeActive(repo.id))continue;const allow=label.priority<3||state.query||state.visible.size<50||camera.position.distanceTo(positions[i])<48;if(!allow||count>42)continue;tempProjection.copy(positions[i]).project(camera);if(tempProjection.z>1||tempProjection.z<-1)continue;const x=(tempProjection.x*.5+.5)*w+9,y=(-tempProjection.y*.5+.5)*h-5,width=repo.name.length*(label.priority===0?6:5.4);if(blocked(x,y,width))continue;const box={x,y,w:width,h:14};if(occupied.some(o=>x<o.x+o.w+10&&x+width>o.x-10&&y<o.y+o.h+5&&y+14>o.y-5))continue;occupied.push(box);el.style.display='';el.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;el.classList.toggle('selected',repo.id===state.selected);el.style.color=repo.id===state.selected?'':state.lens==='world'?'':repoTint(repo);count++;}
-  for(const {el,group}of clusterLabels){el.style.display='none';if(group.language){if(state.layout!=='orbits'||!state.repos.some(r=>r.language===group.language&&state.visible.has(r.id)))continue;}else if(state.layout!=='constellation'||(state.group&&state.group!==group.id)||!state.repos.some(r=>r.group===group.id&&state.visible.has(r.id)))continue;tempProjection.set(group.center[0],group.center[1]+11,group.center[2]).project(camera);const x=(tempProjection.x*.5+.5)*w,y=(-tempProjection.y*.5+.5)*h,width=group.short.length*5.5;if(tempProjection.z>1||blocked(x-width/2,y,width)||occupied.some(o=>x-width/2<o.x+o.w+8&&x+width/2>o.x-8&&y<o.y+o.h+14&&y+10>o.y-8))continue;el.style.display='';el.style.left=x+'px';el.style.top=y+'px';occupied.push({x:x-width/2,y,w:width,h:14});}
+  for(const {el,group}of clusterLabels){el.style.display='none';if(group.language){if(state.layout!=='orbits'||!state.repos.some(r=>r.language===group.language&&state.visible.has(r.id)))continue;}else if(!['constellation','solar'].includes(state.layout)||(state.group&&state.group!==group.id)||!state.repos.some(r=>r.group===group.id&&state.visible.has(r.id)))continue;tempProjection.set(group.center[0],group.center[1]+(state.layout==='solar'?3.5:11),group.center[2]).project(camera);const x=(tempProjection.x*.5+.5)*w,y=(-tempProjection.y*.5+.5)*h,width=group.short.length*5.5;if(tempProjection.z>1||blocked(x-width/2,y,width)||occupied.some(o=>x-width/2<o.x+o.w+8&&x+width/2>o.x-8&&y<o.y+o.h+14&&y+10>o.y-8))continue;el.style.display='';el.style.left=x+'px';el.style.top=y+'px';occupied.push({x:x-width/2,y,w:width,h:14});}
   tempProjection.set(0,-2,0).project(camera);centerLabel.style.left=((tempProjection.x*.5+.5)*w)+'px';centerLabel.style.top=((-tempProjection.y*.5+.5)*h+12)+'px';centerLabel.style.display=state.selected||state.query||state.group?'none':'';
 }
 
 function animate(now){
   requestAnimationFrame(animate);if(document.hidden||contextLost)return;const delta=Math.min(.05,lastTime?(now-lastTime)/1000:.016);lastTime=now;frame++;
   if(flight){const t=reducedMotion?1:Math.min(1,(now-flight.start)/950),e=1-Math.pow(1-t,3);camera.position.lerpVectors(flight.from,flight.to,e);controls.target.lerpVectors(flight.fromTarget,flight.toTarget,e);if(t===1)flight=null;}
+  if(state.layout==='solar'&&state.solarMotion&&!reducedMotion&&frame%3===0){
+    solarPhase+=delta*.5;
+    const next=solarSystemPositions(state.repos,solarPhase,state.activityNow);
+    next.forEach((p,i)=>targets[i].set(...p));
+  }
   let changing=false;for(let i=0;i<positions.length;i++)if(positions[i].distanceToSquared(targets[i])>.0001){positions[i].lerp(targets[i],reducedMotion?1:Math.min(1,delta*5));changing=true;}
   if(changing||frame<3||frame%10===0)updateGeometry();
   controls.update(delta);core.rotation.y+=reducedMotion?0:delta*.1;coreGlow.material.opacity=.35+(reducedMotion?0:Math.sin(now*.0006)*.045);
@@ -534,7 +577,7 @@ function resize(){
   if(frame<3)fitField(false);
 }
 function setCameraOffset(){if(!camera)return;const w=$('scene').clientWidth,h=$('scene').clientHeight;camera.clearViewOffset();if(immersiveActive){camera.updateProjectionMatrix();return;}if(innerWidth<761&&!$('inspector').hidden)camera.setViewOffset(w,h,0,h*(state.architecture?.17:.27),w,h);else if(w>720)camera.setViewOffset(w,h,70,0,w,h);camera.updateProjectionMatrix();}
-function fitField(smooth){if(!camera)return;const target=new THREE.Vector3(0,0,0),destination=state.layout==='orbits'?new THREE.Vector3(0,fitDistance*.72,fitDistance*.98):state.layout==='spiral'?new THREE.Vector3(fitDistance*.24,fitDistance*.16,fitDistance):new THREE.Vector3(0,state.layout==='helix'?6:20,fitDistance);if(smooth&&!reducedMotion)flyTo(destination,target);else{camera.position.copy(destination);controls.target.copy(target);controls.update();}}
+function fitField(smooth){if(!camera)return;const target=new THREE.Vector3(0,0,0),destination=state.layout==='orbits'||state.layout==='solar'?new THREE.Vector3(0,fitDistance*.72,fitDistance*.98):state.layout==='spiral'?new THREE.Vector3(fitDistance*.24,fitDistance*.16,fitDistance):new THREE.Vector3(0,state.layout==='helix'?6:20,fitDistance);if(smooth&&!reducedMotion)flyTo(destination,target);else{camera.position.copy(destination);controls.target.copy(target);controls.update();}}
 function fitMatches(){if(!camera||!state.visible.size)return;setOrbit(false);const points=targets.filter((p,i)=>state.visible.has(state.repos[i].id)),box=new THREE.Box3().setFromPoints(points),center=box.getCenter(new THREE.Vector3()),radius=Math.max(3,...points.map(p=>p.distanceTo(center))),distance=THREE.MathUtils.clamp(radius/(Math.sin(camera.fov*Math.PI/360)*Math.min(1,camera.aspect)) * 1.25,20,controls.maxDistance),offset=camera.position.clone().sub(controls.target).normalize().multiplyScalar(distance);flyTo(center.clone().add(offset),center);setSidebar(false);}
 function flyTo(to,toTarget){if(!camera)return;if(reducedMotion){camera.position.copy(to);controls.target.copy(toTarget);controls.update();return;}flight={from:camera.position.clone(),to,fromTarget:controls.target.clone(),toTarget,start:performance.now()};}
 function zoom(factor){if(!camera)return;setOrbit(false);const offset=camera.position.clone().sub(controls.target),distance=THREE.MathUtils.clamp(offset.length()*factor,controls.minDistance,controls.maxDistance);flyTo(controls.target.clone().add(offset.normalize().multiplyScalar(distance)),controls.target.clone());}

@@ -86,6 +86,18 @@ try{
   await page.locator('#directoryDialog').evaluate(dialog=>dialog.close());
   await page.locator('#worldsTab').click();
 
+  log('desktop: Solar Systems layout, data legend and opt-in orbital motion');
+  await page.locator('[data-layout="solar"]').click();
+  assert.equal(await page.locator('[data-layout="solar"]').getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#solarLegend').isVisible(),true);
+  assert.equal(await page.locator('#solarMotion').isChecked(),false,'Moving planets must be opt-in');
+  await page.locator('#solarMotion').check();
+  assert.equal(await page.locator('#solarMotion').isChecked(),true);
+  await capture(page,'desktop-solar-systems');
+  await page.locator('#solarMotion').uncheck();
+  await page.locator('[data-layout="constellation"]').click();
+  assert.equal(await page.locator('#solarLegend').isVisible(),false);
+
   log('desktop: Phitarium dome shell and opt-in, noncollecting projection show');
   assert.equal(await page.locator('body').getAttribute('class'),'phitarium');
   assert.equal(await page.locator('#domeOverlay').count(),1);
@@ -374,6 +386,10 @@ try{
   await ready(mobilePage,base);
   assert.equal(await mobilePage.locator('#showtimeButton').isVisible(),true,'Mobile visitors must be able to start the Dome Show.');
   await capture(mobilePage,'mobile-phitarium-observatory');
+  await mobilePage.locator('[data-layout="solar"]').click();
+  assert.equal(await mobilePage.locator('#solarLegend').isVisible(),true,'Solar legend must be shown on mobile');
+  await capture(mobilePage,'mobile-solar-systems');
+  await mobilePage.locator('[data-layout="constellation"]').click();
 
   await mobilePage.locator('#immersiveButton').click();
   assert.equal(await mobilePage.locator('#immersiveHud').isVisible(),true);
@@ -417,6 +433,10 @@ try{
   assert.equal(await fallbackPage.locator('#domeOverlay').count(),1,'Planetarium frame remains visible with Canvas fallback.');
   assert.equal(await fallbackPage.locator('#showtimeButton').count(),1,'Dome Show remains accessible in Canvas fallback.');
   await fallbackPage.locator('#directoryDialog').evaluate(dialog=>dialog.close());
+  await fallbackPage.locator('[data-layout="solar"]').click();
+  assert.equal(await fallbackPage.locator('[data-layout="solar"]').getAttribute('aria-pressed'),'true','Canvas fallback supports Solar Systems mode');
+  await capture(fallbackPage,'canvas-solar-systems');
+  await fallbackPage.locator('[data-layout="constellation"]').click();
   await fallbackPage.locator('#immersiveButton').click();
   assert.equal(await fallbackPage.locator('#immersiveHud').isVisible(),true,'Canvas fallback supports the same immersive exhibit UI.');
   await fallbackPage.locator('#immersiveExit').click();
