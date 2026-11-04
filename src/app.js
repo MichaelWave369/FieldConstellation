@@ -5,7 +5,8 @@ import {installDome,resolveShowtimeStops,SHOWTIME_INTERVAL_MS} from './phitarium
 import {resolveImmersiveExhibits,recentCheckSummary} from './immersive.js';
 import {GROUPS,ageInDays,hash,prepareRepos,layoutPositions,layoutEdges,languageOrbits,languageColor,colorFor,activityWeight,filterRepos,safeUrl,normalizePublic} from './model.js';
 
-import {parseSnapshot,newerPublicCache,fetchPublicInventory,CACHE_KEY} from './inventory.js';
+import {parseSnapshot,newerPublicCache,fetchPublicInventory,CACHE_KEY,AUTO_REFRESH_KEY,AUTO_CHECK_KEY,autoRefreshDue} from './inventory.js';
+import {SORT_MODES,normalizeSortMode,sortRepositoryList} from './sort.js';
 import {resolveRelationships,relationshipEdges,neighborhood,relatedProjects,RELATIONSHIP_STYLES,RELATIONSHIP_KINDS} from './relationships.js';
 import {destinationStatus} from './destinations.js';
 import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.js';
@@ -24,7 +25,8 @@ const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
+const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',sortMode:'name',autoRefresh:true,activityNow:Date.now(),layout:'constellation',selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
+let autoRefreshTimer=null;
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,dome=null,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 let showtimeIndex=-1,showtimeTimer=null,showtimeStops=[],showtimeWasOrbit=false,showtimeInspectorWasVisible=false;
 let immersiveActive=false,immersiveStops=[],immersiveIndex=0,immersiveRestore=null;
@@ -38,6 +40,7 @@ const chronological=()=>state.layout==='helix'||state.layout==='spiral';
 
 async function boot(){
   try{
+    try{state.autoRefresh=localStorage.getItem(AUTO_REFRESH_KEY)!=='off';state.sortMode=normalizeSortMode(localStorage.getItem('field-constellation-repo-sort-v1'));}catch{}
     let saved=null;try{saved=localStorage.getItem(CACHE_KEY);}catch{}
     try{
       const response=await fetch('./repos.json',{signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('Inventory unavailable');
@@ -74,6 +77,7 @@ async function boot(){
     if(sharedPostcard){state.postcardView=sharedPostcard;renderPostcard();$('postcardDialog').showModal();}
     else if(new URL(location.href).searchParams.has('postcard'))toast('This Field Postcard contains no available public worlds.');
     if(!state.relationshipLedger)toast('Relationship evidence is unavailable. The five layouts and directory remain usable.');
+    scheduleAutoRefresh();
   }catch(error){console.error(error);$('loading').innerHTML=`<span class="loader-orbit">✳</span><p>Your public inventory could not load.</p><button class="primary-button" id="retryLoad">Try again</button><a href="https://github.com/MichaelWave369?tab=repositories" target="_blank" rel="noopener noreferrer">Browse on GitHub ↗</a>`;$('retryLoad').onclick=()=>location.reload();}
 }
 
@@ -146,11 +150,16 @@ function bindUI(){
   $('trailNext').onclick=()=>moveTrail(1);
   $('trailExit').onclick=stopTrail;
   $('trailShare').onclick=copyTrailLink;
-  $('directorySort').onchange=renderDirectory;
+  $('sortRepos').onclick=()=>setRepoSort(SORT_MODES[(SORT_MODES.findIndex(option=>option.id===state.sortMode)+1)%SORT_MODES.length].id);
+  $('directorySort').onchange=event=>setRepoSort(event.target.value);
+  $('autoRefresh').checked=state.autoRefresh;
+  $('autoRefresh').onchange=event=>{state.autoRefresh=event.target.checked;try{localStorage.setItem(AUTO_REFRESH_KEY,state.autoRefresh?'on':'off');}catch{}if(state.autoRefresh)scheduleAutoRefresh();else if(autoRefreshTimer!==null){clearTimeout(autoRefreshTimer);autoRefreshTimer=null;}};
+  updateSortControls();
   $('aboutButton').onclick=()=>$('aboutDialog').showModal();
   document.querySelectorAll('[data-close-dialog]').forEach(button=>button.onclick=()=>button.closest('dialog').close());
   document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}}));
-  $('refresh').onclick=refreshPublic;
+  $('refresh').onclick=()=>refreshPublic();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)scheduleAutoRefresh();});
   document.addEventListener('visibilitychange',()=>{if(showtimeIndex<0)return;if(document.hidden){clearTimeout(showtimeTimer);showtimeTimer=null;}else scheduleShowtime();});
   $('architectureToggle').onclick=()=>setArchitecture(!state.architecture);
   $('fitConnections').onclick=fitConnections;
@@ -235,14 +244,38 @@ function applyFilters(){
 }
 function resetFilters(){state.query='';state.group=null;state.language='';state.visibility='';state.pagesOnly=false;state.hideForks=false;state.atlasOnly=false;state.atlasPublishedOnly=false;$('search').value='';$('language').value='';$('visibility').value='';clearSelection();applyFilters();if(sceneReady)fitField(true);}
 function setSidebarMode(mode){state.sidebarMode=mode;$('worldPanel').hidden=mode!=='worlds';$('repoPanel').hidden=mode!=='repos';$('worldsTab').setAttribute('aria-selected',String(mode==='worlds'));$('reposTab').setAttribute('aria-selected',String(mode==='repos'));$('worldsTab').tabIndex=mode==='worlds'?0:-1;$('reposTab').tabIndex=mode==='repos'?0:-1;$('browseHeading').textContent=mode==='worlds'?'CONSTELLATIONS':'REPOSITORIES';if(mode==='repos')renderSidebarIndex();}
+function sortedVisibleRepos(){return sortRepositoryList(state.repos.filter(repo=>state.visible.has(repo.id)),state.sortMode);}
+function updateSortControls(){
+  const option=SORT_MODES.find(entry=>entry.id===state.sortMode)||SORT_MODES[0];
+  const button=$('sortRepos');
+  button.textContent='Sort: '+option.label;
+  button.title='Current ordering: '+option.description+'. Click for the next sort mode.';
+  button.setAttribute('aria-label','Sort repository index, currently '+option.description+'. Activate for the next order.');
+  $('directorySort').value=option.id;
+}
+function setRepoSort(value){
+  state.sortMode=normalizeSortMode(value);
+  try{localStorage.setItem('field-constellation-repo-sort-v1',state.sortMode);}catch{}
+  updateSortControls();renderSidebarIndex();
+  if($('directoryDialog').open)renderDirectory();
+}
+function scheduleAutoRefresh(){
+  if(!state.autoRefresh||autoRefreshTimer!==null||!state.snapshot||document.hidden)return;
+  let attempted=null;try{attempted=localStorage.getItem(AUTO_CHECK_KEY);}catch{}
+  if(!autoRefreshDue(state.autoRefresh,attempted,state.snapshot.fetchedAt))return;
+  autoRefreshTimer=setTimeout(()=>{
+    autoRefreshTimer=null;
+    if(state.autoRefresh&&!document.hidden&&!$('refresh').disabled)void refreshPublic({automatic:true});
+  },1500);
+}
 function renderSidebarIndex(){
   const previousScroll=$('repoIndex').scrollTop;
-  const visible=state.repos.filter(r=>state.visible.has(r.id));$('indexCount').textContent=`${visible.length} in view`;
+  const visible=sortedVisibleRepos();$('indexCount').textContent=`${visible.length} in view`;
   $('repoIndex').innerHTML=visible.length?visible.map(r=>`<button class="index-row${r.id===state.selected?' selected':''}${state.architecture&&state.selected&&!nodeActive(r.id)?' context-muted':''}" data-index-repo="${escape(r.id)}" title="${escape(r.description||r.name)}" aria-label="Explore ${escape(r.name)}"><i style="background:${repoTint(r)}"></i><span>${escape(r.name)}</span></button>`).join(''):'<p class="index-empty">No matching worlds. Try Show all.</p>';
   document.querySelectorAll('[data-index-repo]').forEach(button=>{button.onclick=()=>selectRepo(button.dataset.indexRepo,true);button.onmouseenter=()=>{state.hovered=button.dataset.indexRepo;$('tooltip').hidden=true;if(sceneReady)updateAppearance();};button.onmouseleave=()=>{if(state.hovered===button.dataset.indexRepo)state.hovered=null;if(sceneReady)updateAppearance();};});
   $('repoIndex').scrollTop=previousScroll;
 }
-function cycleRepo(direction){const visible=state.repos.filter(r=>state.visible.has(r.id));if(!visible.length)return;const index=visible.findIndex(r=>r.id===state.selected),next=index<0?(direction>0?0:visible.length-1):(index+direction+visible.length)%visible.length;selectRepo(visible[next].id,true,false);if(state.sidebarMode==='repos'){const row=document.querySelector(`[data-index-repo="${visible[next].id}"]`);row?.focus({preventScroll:true});row?.scrollIntoView({block:'nearest'});}}
+function cycleRepo(direction){const visible=sortedVisibleRepos();if(!visible.length)return;const index=visible.findIndex(r=>r.id===state.selected),next=index<0?(direction>0?0:visible.length-1):(index+direction+visible.length)%visible.length;selectRepo(visible[next].id,true,false);if(state.sidebarMode==='repos'){const row=document.querySelector(`[data-index-repo="${visible[next].id}"]`);row?.focus({preventScroll:true});row?.scrollIntoView({block:'nearest'});}}
 function setLens(lens){state.lens=lens;state.activityNow=Date.now();$('colorLens').value=lens;renderLensLegend();renderSidebarIndex();if(sceneReady)updateAppearance();if(!$('inspector').hidden){const r=state.repos.find(r=>r.id===$('inspector').dataset.repo);if(r)showInspector(r,!state.selected);}}
 function renderLensLegend(){
   const visible=state.repos.filter(r=>state.visible.has(r.id));
@@ -946,15 +979,17 @@ function downloadAtlasAudit(){
 }
 
 function renderDirectory(){
-  const sort=$('directorySort').value,visible=state.repos.filter(r=>state.visible.has(r.id)).sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):String(b[sort]||'').localeCompare(String(a[sort]||'')));
+  const visible=sortedVisibleRepos();
   $('directoryCount').textContent=`${visible.length} of ${state.repos.length} repositories`;
   $('directoryList').innerHTML=visible.length?visible.map(r=>`<button class="directory-row" data-repo="${escape(r.id)}" style="--repo-color:${repoTint(r)}"><i></i><div><strong>${escape(r.name)}</strong><p>${escape(r.description||groupMap.get(r.group).name)}</p></div><span class="language">${escape(r.language)}</span>${svg('arrow')}</button>`).join(''):'<p class="dialog-footnote">No repositories match your current filters.</p>';
   document.querySelectorAll('[data-repo]').forEach(b=>b.onclick=()=>{$('directoryDialog').close();selectRepo(b.dataset.repo,true);});
 }
 
-async function refreshPublic(){
-  if(immersiveActive)exitImmersive(false);
-  if(showtimeIndex>=0)stopShowtime(false);
+async function refreshPublic({automatic=false}={}){
+  if($('refresh').disabled)return;
+  if(automatic&&(immersiveActive||showtimeIndex>=0||document.hidden||document.querySelector('dialog[open]')))return;
+  if(!automatic){if(immersiveActive)exitImmersive(false);if(showtimeIndex>=0)stopShowtime(false);}
+  try{localStorage.setItem(AUTO_CHECK_KEY,String(Date.now()));}catch{}
   const button=$('refresh');button.disabled=true;button.classList.add('refreshing');$('snapshotStatus').textContent='Checking all public pages…';
   let next;
   try{

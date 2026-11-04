@@ -309,3 +309,12 @@ body.phitarium.lattice-theme{
 .phitarium.lattice-theme .mission-actions #missionNext,
 .phitarium.lattice-theme .outer-controls #outerNext,
 .phitarium.lattice-theme .outer-portal-button{color:#211920}
+
+/* Public-only browser auto-check and compact, keyboard-accessible index sort. */
+.phitarium .refresh-preference{padding:8px 2px 10px;display:flex;flex-direction:column;gap:4px;border-top:1px solid #345071;color:#c8dfee}
+.phitarium .refresh-preference label{display:flex;align-items:center;gap:8px;font-size:10px;cursor:pointer}
+.phitarium .refresh-preference input{accent-color:var(--accent);width:14px;height:14px;margin:0}
+.phitarium .refresh-preference span{font-size:9px;color:#a2b8d0}
+.phitarium .index-heading{gap:7px;flex-wrap:wrap}
+.phitarium #sortRepos{border:1px solid #5c83a8;padding:5px 7px;border-radius:6px;white-space:nowrap;color:#cdf2ff;background:#15283f}
+.phitarium #sortRepos:hover{background:#284968}

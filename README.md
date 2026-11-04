@@ -6,6 +6,12 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 20 · Browser-local auto-updates and sortable discoveries (November 4, 2026)
+
+The constellation can now **check for updated public GitHub inventory automatically once per day per browser**, subject to its bundled snapshot age and the most recent attempt. It uses the existing fully paginated, public-only anonymous GitHub REST check. Auto-check can be switched off in the sidebar. It is deliberately **not** a scheduled GitHub commit or a Netlify build; visitors without public GitHub API access retain the last valid complete snapshot. Manual Refresh always remains available.
+
+The **Sort** button in the repository index cycles A–Z, recently pushed, newest created, and most stars. The full Directory sort selector follows the same choice; the 3D spatial layout and saved public repository IDs are not re-ordered. See [Edition 20 contract](docs/EDITION_20_AUTO_DISCOVERY.md).
+
 ## Edition 19 · 225 public stars (November 4, 2026)
 
 The Phitarium now includes **225 public repositories**, up from the November 1 snapshot of 211. A connected GitHub owner search fully paginated 260 accessible repositories (100 + 100 + 60 + empty fourth page): **225 public and 35 private**. All 211 prior public identities are retained. Fourteen additions have source-checked public metadata: CompAware, PhiRSI, phi-field, ElsewhereEngine, ShedofShadows, InfiniteTinkerer, RetroVerse, Blackout, PaperGhost, Altermath, G-FunkProp, PhiMadaPrime, PhiBridge369, RacetoOblivion.

@@ -59,7 +59,10 @@ try{
   server.stderr.on('data',buf=>process.stderr.write(buf));
   await waitForServer();
   browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader']});
+  // Acceptance must be deterministic even when the checked-in inventory grows older than 24 hours.
+  const disableAuto=()=>{try{localStorage.setItem('field-constellation-auto-public-v1','off');}catch{}};
   const desktop=await browser.newContext({viewport:{width:1440,height:960}});
+  await desktop.addInitScript(disableAuto);
   // Exercise the selectable link fallback independent of system clipboard permissions.
   await desktop.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{
     configurable:true,get:()=>undefined
@@ -71,6 +74,17 @@ try{
   log('desktop: stable project selection, Passport saves and persistence');
   await saveFavorite(page,first);
   await saveFavorite(page,second);
+
+  log('desktop: repository index sort controls and the public-only auto-check preference');
+  assert.equal(await page.locator('#autoRefresh').count(),1,'Auto-check toggle exists.');
+  await page.locator('#reposTab').click();
+  assert.equal(await page.locator('#sortRepos').textContent(),'Sort: A → Z');
+  await page.locator('#sortRepos').click();
+  assert.equal(await page.locator('#sortRepos').textContent(),'Sort: Updated');
+  await page.locator('#directoryButton').click();
+  assert.equal(await page.locator('#directorySort').inputValue(),'updated','Directory and sidebar must share the sort mode.');
+  await page.locator('#directoryDialog').evaluate(dialog=>dialog.close());
+  await page.locator('#worldsTab').click();
 
   log('desktop: Phitarium dome shell and opt-in, noncollecting projection show');
   assert.equal(await page.locator('body').getAttribute('class'),'phitarium');
@@ -307,6 +321,7 @@ try{
 
   log('anonymous recipient: preview and explicit opt-in without history sharing');
   const recipient=await browser.newContext({viewport:{width:1280,height:900}});
+  await recipient.addInitScript(disableAuto);
   const recvPage=await recipient.newPage();
   const recipientErrors=[];
   recvPage.on('pageerror',e=>recipientErrors.push(e.message));
@@ -331,6 +346,7 @@ try{
 
   log('mobile: preview remains accessible and a link can be dismissed by Escape');
   const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
+  await mobile.addInitScript(disableAuto);
   const mobilePage=await mobile.newPage();
   await mobilePage.goto(postcardUrl,{waitUntil:'domcontentloaded'});
   await mobilePage.waitForFunction(()=>document.getElementById('loading')?.hidden===true);
@@ -362,6 +378,7 @@ try{
 
   log('graphics fallback: canvas renderer and public directory are usable without WebGL2');
   const fallbackContext=await browser.newContext({viewport:{width:1280,height:800}});
+  await fallbackContext.addInitScript(disableAuto);
   await fallbackContext.addInitScript(()=>{
     const original=HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext=function(kind,...args){

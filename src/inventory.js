@@ -2,6 +2,18 @@ import {normalizePublic} from './model.js';
 
 export const OWNER='MichaelWave369';
 export const CACHE_KEY='field-constellation-public-v3';
+export const AUTO_REFRESH_KEY='field-constellation-auto-public-v1';
+export const AUTO_CHECK_KEY='field-constellation-auto-last-check-v1';
+export const AUTO_REFRESH_INTERVAL=24*60*60*1000;
+/** Public-only browser check. Never use a future/invalid clock or fetch on every visit. */
+export function autoRefreshDue(enabled,lastAttempt,snapshotAt,now=Date.now()){
+  if(!enabled||!Number.isFinite(now))return false;
+  const source=Date.parse(snapshotAt),attempt=Number(lastAttempt);
+  if(!Number.isFinite(source))return false;
+  const recent=Math.max(source,Number.isFinite(attempt)&&attempt>0?attempt:0);
+  return recent<=now&&now-recent>=AUTO_REFRESH_INTERVAL;
+}
+
 const namePattern=/^[\w.-]+$/;
 const idPattern=/^[1-9]\d*$/;
 const fields=['id','name','description','url','homepage','language','topics','stars','forks','size','created','updated','visibility','archived','fork','branch','license','pages','issues'];
