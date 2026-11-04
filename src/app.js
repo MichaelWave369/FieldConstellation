@@ -13,6 +13,7 @@ import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.j
 import {availableTrails} from './trails.js';
 import {solarDiscoveryFor} from './solar-discovery.js';
 import {planetDossierFor} from './planet-dossier.js';
+import {connectionExplorerIndex,filterConnections} from './connection-explorer.js';
 import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
 import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite,recordVisit,clearPassportSection,passportRepos,exportFavorites,importFavorites} from './passport.js';
 import {QUEST_KEY,emptyQuest,readQuest,sanitizeQuest,discover,questProgress} from './quest.js';
@@ -185,6 +186,12 @@ function bindUI(){
   document.addEventListener('visibilitychange',()=>{if(showtimeIndex<0)return;if(document.hidden){clearTimeout(showtimeTimer);showtimeTimer=null;}else scheduleShowtime();});
   $('architectureToggle').onclick=()=>setArchitecture(!state.architecture);
   $('fitConnections').onclick=fitConnections;
+  $('connectionExplorerButton').onclick=()=>openConnectionExplorer();
+  $('connectionExplorerClose').onclick=()=>$('connectionExplorerDialog').close();
+  ['connectionProject','connectionGrade'].forEach(id=>$(id).onchange=renderConnectionExplorer);
+  $('connectionQuery').oninput=renderConnectionExplorer;
+  $('connectionClear').onclick=()=>{ $('connectionProject').value='all';$('connectionGrade').value='all';$('connectionQuery').value='';renderConnectionExplorer();};
+  $('connectionResults').onclick=handleConnectionExplorerClick;
   $('includeThematic').onchange=event=>{state.includeThematic=event.target.checked;if(sceneReady)buildEdges();else edges=relationshipEdges(state.repos,state.relationships,state.includeThematic);refreshNeighborhood();updateRelationshipUI();if(state.selected)showInspector(state.repos.find(r=>r.id===state.selected),false);};
   window.addEventListener('popstate',()=>{
     if(immersiveActive)exitImmersive(false);
@@ -784,10 +791,60 @@ function renderPlanetDossier(data,selected){
     <p class="dossier-eyebrow">PUBLIC PLANET DOSSIER</p>
     <h3 id="planetDossierTitle">Source & neighborhood</h3>
     <p class="dossier-explain">Displayed inventory reconciliation: ${escape(inventory)}. Individual metadata fields may be older; code and social metrics are not proof of app readiness.</p>
-    <div class="dossier-evidence"><h4>Reviewed connection coverage</h4><div class="dossier-stats">${evidence}</div><small>${escape(reviewed)} · Counts cover only the separately reviewed relationship ledger, not all possible connections.</small></div>
+    <div class="dossier-evidence"><h4>Reviewed connection coverage</h4><div class="dossier-stats">${evidence}</div><small>${escape(reviewed)} · Counts cover only the separately reviewed relationship ledger, not all possible connections.</small>${state.relationshipLedger?'<button type="button" id="dossierConnections">Explore source connections ↗</button>':''}</div>
     <div class="dossier-neighbors"><h4>Nearby public stars</h4><p>Other projects in this curated category matching current filters. Proximity does not prove integration.</p>${neighbors||'<p class="dossier-empty">No other public planets match the current filters.</p>'}</div>
     <p class="dossier-footnote">Detailed connection scope and commit-pinned source citations remain in <b>Related worlds</b> below. Site reachability is independently dated.</p>
   </section>`;
+}
+function openConnectionExplorer(focusId=null){
+  if(!state.relationshipLedger){toast('The reviewed relationship ledger is unavailable. No source claims can be shown.');return;}
+  const index=connectionExplorerIndex(state.repos,state.relationships);
+  const project=focusId|| (state.selected?projectId(state.repos.find(r=>r.id===state.selected)||{}):'all');
+  const available=index.projects.some(repo=>projectId(repo)===project);
+  $('connectionProject').innerHTML='<option value="all">All reviewed projects</option>'+index.projects.map(repo=>`<option value="${escape(projectId(repo))}">${escape(repo.name)}</option>`).join('');
+  $('connectionProject').value=available?project:'all';
+  $('connectionGrade').value='all';
+  $('connectionQuery').value='';
+  renderConnectionExplorer();
+  $('connectionExplorerDialog').showModal();
+}
+function renderConnectionExplorer(){
+  if(!state.relationshipLedger)return;
+  const index=connectionExplorerIndex(state.repos,state.relationships);
+  const reviewed=Date.parse(state.relationshipLedger.reviewedAt||'');
+  const reviewDate=Number.isFinite(reviewed)?new Date(reviewed).toLocaleDateString():'date unavailable';
+  $('connectionExplorerScope').textContent=`${index.counts.total} reviewed source connections · ${index.counts.verified} verified in source · ${index.counts.documented} documented contracts · ${index.projects.length} public projects. Ledger last reviewed ${reviewDate}. Not a complete network audit.`;
+  const hits=filterConnections(index.links,{status:$('connectionGrade').value,project:$('connectionProject').value,query:$('connectionQuery').value});
+  $('connectionResultCount').textContent=`${hits.length} of ${index.counts.total} reviewed connections match these filters.`;
+  $('connectionResults').innerHTML=hits.length?hits.map(relation=>{
+    const label=RELATIONSHIP_STYLES[relation.status]?.label||'Source grade unavailable';
+    const kind=RELATIONSHIP_KINDS[relation.kind]||'Reviewed relation';
+    const direction=relation.direction==='undirected'?'↔':'→';
+    const date=new Date(relation.reviewedAt).toLocaleDateString();
+    const sourceLinks=relation.evidence.map((e,i)=>`<li><a href="${escape(e.url)}" target="_blank" rel="noopener noreferrer">Source ${i+1}: ${escape(e.claim)} ↗</a></li>`).join('');
+    return `<article class="connection-card ${relation.status}" aria-label="${escape(relation.fromRepo.name+' to '+relation.toRepo.name)}">
+      <p class="connection-status">${escape(label)} · ${escape(kind)} · Reviewed ${escape(date)}</p>
+      <div class="connection-endpoints">
+        <button type="button" data-connection-repo="${escape(relation.fromRepo.id)}" aria-label="Inspect ${escape(relation.fromRepo.name)}">${escape(relation.fromRepo.name)}</button>
+        <span aria-hidden="true">${direction}</span>
+        <button type="button" data-connection-repo="${escape(relation.toRepo.id)}" aria-label="Inspect ${escape(relation.toRepo.name)}">${escape(relation.toRepo.name)}</button>
+      </div>
+      <p class="connection-summary">${escape(relation.summary)}</p>
+      <details><summary>Scope and ${relation.evidence.length} commit-pinned source${relation.evidence.length===1?'':'s'}</summary>
+        <p>${escape(relation.scope)}</p><ul>${sourceLinks}</ul>
+      </details>
+    </article>`;
+  }).join(''):'<p class="connection-empty">No recorded sourced connections match these filters. Try All reviewed projects or clear your search; this is not proof that unlisted projects are unrelated.</p>';
+}
+function handleConnectionExplorerClick(event){
+  const button=event.target.closest('button[data-connection-repo]');
+  if(!button)return;
+  const repo=state.repos.find(item=>item.visibility==='public'&&item.id===button.dataset.connectionRepo);
+  if(!repo)return;
+  $('connectionExplorerDialog').close();
+  if(!state.visible.has(repo.id))resetFilters();
+  setArchitecture(true);
+  selectRepo(repo.id,true);
 }
 function relationshipCards(repo){
   if(!state.relationshipLedger)return '<section class="related-projects"><h3>Related worlds</h3><p class="discovery-note">Relationship evidence could not load. Reload the page to review sourced connections; the public repository directory remains available.</p></section>';
@@ -813,6 +870,7 @@ function showInspector(repo,spotlight){
   $('passportToggle').onclick=()=>{state.passport=toggleFavorite(state.passport,repo,state.repos);savePassport();updatePassportCount();showInspector(repo,spotlight);};
   $('shareProject').onclick=async()=>{try{await navigator.clipboard.writeText(projectLink(location.href,repo));toast('Project link copied.');}catch{$('shareFallback').hidden=false;$('shareFallback').focus();$('shareFallback').select();toast('Copy the selected project link.');}};
   document.querySelectorAll('[data-related]').forEach(button=>button.onclick=()=>{resetFilters();setArchitecture(true);selectRepo(button.dataset.related,true);});
+  if($('dossierConnections'))$('dossierConnections').onclick=()=>openConnectionExplorer(projectId(repo));
   document.querySelectorAll('[data-dossier-repo]').forEach(button=>button.onclick=()=>{
     const target=button.dataset.dossierRepo;
     if(state.visible.has(target))selectRepo(target,true);
@@ -1236,6 +1294,7 @@ function fitConnections(){
 }
 function updateRelationshipUI(){
   $('architectureToggle').setAttribute('aria-pressed',String(state.architecture));$('architectureToggle').disabled=!state.relationshipLedger;
+  $('connectionExplorerButton').disabled=!state.relationshipLedger;
   $('architecturePanel').hidden=!state.architecture;$('includeThematic').checked=state.includeThematic;
   $('linksCaption').textContent=state.architecture?'Relationship links':chronological()?'Creation thread':state.layout==='orbits'?'Orbit links':'World links';
   const counts={verified:0,documented:0,conceptual:0};
