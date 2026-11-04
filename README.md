@@ -6,6 +6,18 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 24 · Solar System Discovery (November 4, 2026)
+
+**Solar System Discovery** turns the focused Solar Navigator into a guided public-project exhibit, using the current validated public inventory only. Focus a category sun, then select **Discover planets & guided route**. The dialog shows its top three repositories by **public GitHub stars**, its three **newest repositories by creation date**, and a five-stop-or-fewer route mixing public stars, creation dates, and last code push dates. These metrics are **not** proxies for project quality, deployment readiness, source dependencies, or technical completion.
+
+- Clicking a listed planet or **Inspect planet** opens the normal Phitarium project inspector, keeping the existing repository links, Passport, and Quest behavior. The visitor decides when to inspect and thus save a discovery.
+- **Previous / Next** browse the route in the dialog without collecting stars or changing Passport. Reopening the same unchanged route resumes the current stop; changing systems or visible repository filters generates a new route.
+- The button only becomes available when Solar Systems mode has one category selected with at least one matching public repository. Existing filters, category focus, responsive navigation, original five layouts, and the Canvas2D fallback remain intact.
+- All content is escaped and derived from *public* data already displayed. No new external API, authenticated requests, scheduled GitHub builds, Netlify usage, paid hosting, or tracking is introduced.
+- Automated tests cover filtering, public-only selection, deterministic order at 650 projects, dialog controls on desktop/mobile/Canvas, and the existing inspector. On-device Quest browser acceptance remains unverified.
+
+See [Edition 24 discovery contract](docs/EDITION_24_SOLAR_DISCOVERY.md).
+
 ## Edition 23 · Solar Navigator / Focus Mode (November 4, 2026)
 
 Solar Systems now has a **Solar Navigator**, letting visitors select any of the eight existing category suns from a keyboard-accessible, touch-friendly control. Selecting a category focuses the camera on that system and filters the visible public planets; **All systems** restores the global sky. The ordinary sidebar category buttons participate in the same behavior while Solar Systems mode is active.
