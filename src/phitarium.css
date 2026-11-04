@@ -318,3 +318,13 @@ body.phitarium.lattice-theme{
 .phitarium .index-heading{gap:7px;flex-wrap:wrap}
 .phitarium #sortRepos{border:1px solid #5c83a8;padding:5px 7px;border-radius:6px;white-space:nowrap;color:#cdf2ff;background:#15283f}
 .phitarium #sortRepos:hover{background:#284968}
+
+/* Edition 22 · Solar Systems is an opt-in illustrative layout. */
+.phitarium .layout-switch{max-width:min(100%,calc(100vw - 28px));overflow-x:auto;scrollbar-width:thin;scrollbar-color:#45668d transparent}
+.phitarium .layout-switch button{white-space:nowrap;flex-shrink:0}
+.phitarium #solarMotionControl[hidden],.phitarium #solarLegend[hidden]{display:none!important}
+.phitarium #solarMotionControl{white-space:nowrap;font-size:9px;color:#c7e7fd}
+.phitarium #solarMotionControl input{accent-color:#9cdcff}
+.phitarium .solar-legend{max-width:335px;font-size:10px!important;line-height:1.5!important;color:#aacee8!important;letter-spacing:0!important;margin:9px 0 0!important}
+@media(max-width:800px){.phitarium .map-footer{flex-wrap:wrap;gap:5px}.phitarium .layout-switch{max-width:calc(100vw - 30px)}.phitarium .layout-switch button{padding:8px;font-size:9px}.phitarium .scene-toggles{gap:8px}}
+@media(max-width:480px){.phitarium .solar-legend{max-width:240px;font-size:9px!important}.phitarium #solarMotionControl{font-size:8px}}
