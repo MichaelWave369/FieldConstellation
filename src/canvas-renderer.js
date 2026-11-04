@@ -11,7 +11,7 @@ export class CanvasFieldRenderer {
   project(v,camera){this.p.copy(v).project(camera);return{x:(this.p.x*.5+.5)*this.width,y:(-this.p.y*.5+.5)*this.height,z:this.p.z};}
   rgb(hex){if(!this.colors.has(hex)){const color=new THREE.Color(hex).getHexString(THREE.SRGBColorSpace);this.colors.set(hex,`${parseInt(color.slice(0,2),16)},${parseInt(color.slice(2,4),16)},${parseInt(color.slice(4,6),16)}`);}return this.colors.get(hex);}
   render(scene,camera){
-    const field=this.getField(),{state,positions,edges,starfield,orbitLines,layoutGuides,domeGuides=[],core,repoTint,repoGlow,nodeActive}=field;if(!positions.length)return;
+    const field=this.getField(),{state,positions,edges,starfield,orbitLines,layoutGuides,domeGuides=[],core,groupMap,repoTint,repoGlow,nodeActive}=field;if(!positions.length)return;
     const c=this.ctx,w=this.width,h=this.height;camera.updateMatrixWorld();scene.updateMatrixWorld();c.setTransform(this.ratio,0,0,this.ratio,0,0);c.clearRect(0,0,w,h);c.fillStyle=state.theme==='lattice'?'#15101c':'#060d1f';c.fillRect(0,0,w,h);
     const vault=c.createRadialGradient(w*.5,h*.38,Math.min(w,h)*.06,w*.5,h*.46,Math.max(w,h)*.78);
     vault.addColorStop(0,state.theme==='lattice'?'rgba(119,78,116,.19)':'rgba(63,111,182,.2)');
@@ -26,6 +26,18 @@ export class CanvasFieldRenderer {
     const center=this.project(new THREE.Vector3(),camera),centerScale=h/(2*Math.tan(camera.fov*Math.PI/360))/camera.position.length();
     if(center.z<1){const r=Math.min(120,centerScale*8),g=c.createRadialGradient(center.x,center.y,0,center.x,center.y,r),gold=state.theme==='lattice';g.addColorStop(0,gold?'rgba(224,177,90,.2)':'rgba(154,210,248,.17)');g.addColorStop(.24,gold?'rgba(224,177,90,.07)':'rgba(110,175,231,.06)');g.addColorStop(1,'rgba(110,175,231,0)');c.fillStyle=g;c.fillRect(center.x-r,center.y-r,r*2,r*2);c.fillStyle=gold?'#f1cf8e':'#d5f0ff';c.beginPath();c.arc(center.x,center.y,Math.max(3,centerScale*.8),0,Math.PI*2);c.fill();
       for(let j=0;j<4;j++){c.beginPath();for(let i=0;i<=48;i++){const a=i/48*Math.PI*2,v=new THREE.Vector3(Math.cos(a)*2.2,Math.sin(a)*2.2*Math.cos(j*.7),Math.sin(a)*2.2*Math.sin(j*.7)).applyMatrix4(core.matrixWorld),p=this.project(v,camera);if(i===0)c.moveTo(p.x,p.y);else c.lineTo(p.x,p.y);}c.strokeStyle='rgba(174,211,249,.3)';c.lineWidth=.6;c.stroke();}
+    }
+    if(state.layout==='solar')for(const group of groupMap.values()){
+      if(!state.repos.some(repo=>repo.group===group.id&&state.visible.has(repo.id)))continue;
+      const center=this.project(new THREE.Vector3(...group.center),camera);
+      if(center.z<=0||center.z>=1)continue;
+      const scale=h/(2*Math.tan(camera.fov*Math.PI/360))/Math.max(1,camera.position.distanceTo(new THREE.Vector3(...group.center)));
+      const radius=Math.max(3.5,scale*1.1),halo=radius*6.5;
+      const g=c.createRadialGradient(center.x,center.y,0,center.x,center.y,halo);
+      const color=this.rgb(group.color);
+      g.addColorStop(0,`rgba(${color},.44)`);g.addColorStop(.22,`rgba(${color},.13)`);g.addColorStop(1,`rgba(${color},0)`);
+      c.fillStyle=g;c.fillRect(center.x-halo,center.y-halo,halo*2,halo*2);
+      c.beginPath();c.arc(center.x,center.y,radius,0,Math.PI*2);c.fillStyle=group.color;c.fill();
     }
     for(const node of nodes){const {x,y,r,repo}=node;if(x<-40||x>w+40||y<-40||y>h+40)continue;const visible=nodeActive(repo.id),selected=repo.id===state.selected,hovered=repo.id===state.hovered,color=this.rgb(repoTint(repo)),strength=repoGlow(repo),radius=Math.min(13,r)*(visible?(selected?1.35:hovered?1.2:1):.45);if(visible){const glowRadius=Math.max(8,radius*(selected||hovered?7:5)),g=c.createRadialGradient(x,y,0,x,y,glowRadius);g.addColorStop(0,`rgba(${color},${.42*strength})`);g.addColorStop(.16,`rgba(${color},${.15*strength})`);g.addColorStop(.45,`rgba(${color},${.035*strength})`);g.addColorStop(1,`rgba(${color},0)`);c.fillStyle=g;c.fillRect(x-glowRadius,y-glowRadius,glowRadius*2,glowRadius*2);}
       c.beginPath();c.arc(x,y,radius,0,Math.PI*2);c.fillStyle=`rgba(${color},${visible?.96*strength:.06})`;c.fill();if(visible){c.beginPath();c.arc(x-radius*.18,y-radius*.18,Math.max(.55,radius*.42),0,Math.PI*2);c.fillStyle='rgba(242,249,228,.85)';c.fill();}if(selected||hovered){c.beginPath();c.arc(x,y,radius+5,0,Math.PI*2);c.strokeStyle=`rgba(${color},.7)`;c.lineWidth=.8;c.stroke();}
