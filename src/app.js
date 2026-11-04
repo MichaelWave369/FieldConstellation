@@ -12,6 +12,7 @@ import {destinationStatus} from './destinations.js';
 import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.js';
 import {availableTrails} from './trails.js';
 import {solarDiscoveryFor} from './solar-discovery.js';
+import {planetDossierFor} from './planet-dossier.js';
 import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
 import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite,recordVisit,clearPassportSection,passportRepos,exportFavorites,importFavorites} from './passport.js';
 import {QUEST_KEY,emptyQuest,readQuest,sanitizeQuest,discover,questProgress} from './quest.js';
@@ -27,7 +28,7 @@ const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',sortMode:'name',autoRefresh:true,activityNow:Date.now(),layout:'constellation',solarMotion:false,selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
-let autoRefreshTimer=null,solarPhase=0,solarSuns=[];
+let autoRefreshTimer=null,solarPhase=0,solarSuns=[],dossierExpanded=false;
 let solarDiscoveryGroup=null,solarDiscoveryRoute=[],solarDiscoveryIndex=0;
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,dome=null,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 let showtimeIndex=-1,showtimeTimer=null,showtimeStops=[],showtimeWasOrbit=false,showtimeInspectorWasVisible=false;
@@ -110,6 +111,7 @@ function bindUI(){
   $('solarSystemReset').onclick=()=>focusSolarSystem(null);
   $('solarDiscover').onclick=openSolarDiscovery;
   $('solarDiscoveryClose').onclick=()=>$('solarDiscoveryDialog').close();
+  $('toggleDossier').onclick=togglePlanetDossier;
   $('solarTourPrev').onclick=()=>moveSolarDiscovery(-1);
   $('solarTourNext').onclick=()=>moveSolarDiscovery(1);
   $('solarTourVisit').onclick=visitSolarDiscovery;
@@ -748,6 +750,44 @@ function updateTrailHud(){
   $('trailNext').disabled=state.trailStop===trail.stops.length-1;
 }
 
+function updatePlanetDossierToggle(){
+  const expanded=dossierExpanded;
+  const button=$('toggleDossier'),panel=$('inspector');
+  panel.classList.toggle('dossier-open',expanded);
+  button.setAttribute('aria-pressed',String(expanded));
+  button.setAttribute('aria-label',expanded?'Collapse Planet Dossier':'Expand Planet Dossier');
+  button.title=expanded?'Return to compact project view':'Expand project dossier';
+  button.textContent=expanded?'Compact ⤡':'Dossier ⤢';
+}
+function togglePlanetDossier(){
+  const id=$('inspector').dataset.repo;
+  const repo=state.repos.find(item=>item.id===id);
+  if(!repo)return;
+  dossierExpanded=!dossierExpanded;
+  updatePlanetDossierToggle();
+  showInspector(repo,false);
+  $('inspector').scrollTop=0;
+}
+function renderPlanetDossier(data,selected){
+  if(!data)return '';
+  const inventory=data.inventoryAt?new Date(data.inventoryAt).toLocaleDateString(undefined,{dateStyle:'medium'}):'date unavailable';
+  const reviewed=data.reviewedAt?new Date(data.reviewedAt).toLocaleDateString(undefined,{dateStyle:'medium'}):'No sourced reviews recorded';
+  const evidence=state.relationshipLedger
+    ?`<div class="dossier-stat"><strong>${data.counts.verified}</strong><span>Verified in source</span></div><div class="dossier-stat"><strong>${data.counts.documented}</strong><span>Documented contracts</span></div>`
+    :'<p class="dossier-ledger-unavailable">Relationship ledger unavailable. Source coverage cannot be assessed here.</p>';
+  const neighbors=data.nearby.map(repo=>{
+    const sameLanguage=repo.language===selected.language&&repo.language!=='Not specified';
+    return `<button type="button" class="dossier-neighbor" data-dossier-repo="${escape(repo.id)}"><span><strong>${escape(repo.name)}</strong><small>${sameLanguage?'Same curated field and language':'Same curated field'} · editorial suggestion</small></span><span aria-hidden="true">↗</span></button>`;
+  }).join('');
+  return `<section class="planet-dossier" aria-labelledby="planetDossierTitle">
+    <p class="dossier-eyebrow">PUBLIC PLANET DOSSIER</p>
+    <h3 id="planetDossierTitle">Source & neighborhood</h3>
+    <p class="dossier-explain">Repository snapshot ${escape(inventory)}. Code and social metrics are not independent verification of app readiness.</p>
+    <div class="dossier-evidence"><h4>Reviewed connection coverage</h4><div class="dossier-stats">${evidence}</div><small>${escape(reviewed)} · Counts cover only the separately reviewed relationship ledger, not all possible connections.</small></div>
+    <div class="dossier-neighbors"><h4>Nearby public stars</h4><p>Other projects in this curated category matching current filters. Proximity does not prove integration.</p>${neighbors||'<p class="dossier-empty">No other public planets match the current filters.</p>'}</div>
+    <p class="dossier-footnote">Detailed connection scope and commit-pinned source citations remain in <b>Related worlds</b> below. Site reachability is independently dated.</p>
+  </section>`;
+}
 function relationshipCards(repo){
   if(!state.relationshipLedger)return '<section class="related-projects"><h3>Related worlds</h3><p class="discovery-note">Relationship evidence could not load. Reload the page to review sourced connections; the public repository directory remains available.</p></section>';
   const related=relatedProjects(repo,state.relationships);
@@ -763,13 +803,19 @@ function showInspector(repo,spotlight){
   if(!repo)return;const changed=$('inspector').dataset.repo!==repo.id;$('inspector').dataset.repo=repo.id;
   const g=groupMap.get(repo.group),url=safeUrl(repo.url),destination=destinationStatus(repo,state.deployments),updated=repo.updated?new Date(repo.updated).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'Not available',created=repo.created?new Date(repo.created).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'Not available',size=repo.size<1024?repo.size.toLocaleString()+' KB':(repo.size/1024).toFixed(1)+' MB',days=Math.floor(ageInDays(repo)),atlas=atlasLink(state.atlas,repo),hasChapter=state.atlas?.chapters?.includes(projectId(repo)),published=publishedAtlasLink(state.atlasPublished,state.repos,repo),publishedSite=publishedAtlasWebsite(state.atlasPublished,state.repos,repo);
   $('inspectorCaption').textContent=spotlight?'IN THE SPOTLIGHT':'A POINT IN THE FIELD';
-  $('inspectorContent').innerHTML=`<div class="inspector-body" style="--repo-color:${repoTint(repo)}"><div class="repo-orb" aria-hidden="true"></div><div class="repo-category"><i></i>${escape(g.name)}</div><h2>${escape(repo.name)}</h2><p class="repo-description" title="${escape(repo.description)}">${escape(repo.description||'No description has been added on GitHub yet. Explore the repository to see what is taking shape.')}</p><div class="repo-tags"><span>${escape(repo.language)}</span><span>Public</span>${repo.pages?'<span>Pages enabled</span>':''}${repo.fork?'<span>Fork</span>':''}${state.quest.discoveredIds.includes(projectId(repo))?'<span>Quest: discovered</span>':''}${repo.archived?'<span class="archived-badge">Archived</span>':''}${hasChapter?'<span class="atlas-reviewed-tag">In reviewed Atlas</span>':''}${published?'<span class="atlas-published-tag">Atlas public Pages inventory</span>':''}</div>${repo.topics.length?`<div class="repo-topics" aria-label="Repository topics">${repo.topics.slice(0,16).map(t=>`<span>${escape(t)}</span>`).join('')}</div>`:''}${relatedProjects(repo,state.relationships).length?'<button id="traceProject" class="trace-project" title="Clears search and filters to show directly connected projects">Trace this world’s connections ↗</button>':''}<dl class="repo-meta"><div><dt>Stars</dt><dd>${repo.stars.toLocaleString()}</dd></div><div><dt>License</dt><dd>${escape(repo.license&&repo.license!=='NOASSERTION'?repo.license:'Not specified')}</dd></div><div><dt>Repository size</dt><dd>${size}</dd></div><div><dt>Forks</dt><dd>${repo.forks.toLocaleString()}</dd></div><div class="wide"><dt>Last code push</dt><dd>${updated} · ${Number.isFinite(days)?days===0?'today':days+'d ago':'date unavailable'}</dd></div></dl><section class="destination-state ${destination.state}"><b>${destination.label}</b><p>${escape(destination.detail)}</p>${destination.check?.checkedAt?`<small>Checked ${new Date(destination.check.checkedAt).toLocaleString()}</small>`:''}</section><div class="repo-links">${destination.url?`<a href="${escape(destination.url)}" target="_blank" rel="noopener noreferrer">Explore This World ${svg('arrow')}</a>`:''}${!destination.url&&publishedSite?`<a href="${escape(publishedSite)}" target="_blank" rel="noopener noreferrer" title="Published HTML verified by the dated Field Atlas manifest; app controls and VR are not tested">Open Atlas-listed website ${svg('arrow')}</a>`:''}${url?`<a class="secondary" href="${escape(url)}" target="_blank" rel="noopener noreferrer"><span>View on GitHub</span>${svg('github')}</a>`:''}${atlas?`<a class="secondary" href="${escape(hasChapter?atlas:published||atlas)}" target="_blank" rel="noopener noreferrer">${hasChapter?'Read in Field Atlas':published?'Find published Atlas project':'Visit Field Atlas'} ${svg('arrow')}</a>`:''}<button class="secondary" id="passportToggle" aria-pressed="${state.passport.favoriteIds.includes(projectId(repo))}">${state.passport.favoriteIds.includes(projectId(repo))?'★ Saved in Passport':'☆ Save to Passport'}</button><button class="secondary" id="shareProject">Copy project link ${svg('arrow')}</button><input id="shareFallback" class="share-fallback" aria-label="Project permalink" readonly hidden value="${escape(projectLink(location.href,repo))}"></div>${destination.candidate&&!destination.url?`<a class="unverified-link" href="${escape(destination.candidate)}" target="_blank" rel="noopener noreferrer">Declared destination · unverified ↗</a>`:''}<details class="repo-facts"><summary>Repository facts & documentation <span>+</span></summary><dl><div><dt>Created</dt><dd>${created}</dd></div><div><dt>Open issues / PRs</dt><dd>${repo.issues==null?'Not available':repo.issues.toLocaleString()}</dd></div><div><dt>GitHub Pages flag</dt><dd>${repo.pages?'Enabled; availability checked separately':'Not enabled'}</dd></div><div><dt>Default branch</dt><dd>${escape(repo.branch)}</dd></div></dl><a href="${escape(repo.url+'#readme')}" target="_blank" rel="noopener noreferrer">Repository README ↗</a><p class="project-identity">${escape(projectId(repo))}</p><small>Repository facts: public GitHub snapshot, ${new Date(state.publicUpdated||state.snapshot.fetchedAt).toLocaleString()}.</small></details>${relationshipCards(repo)}</div><div class="inspector-footer"><span>${spotlight?'ONE OF '+state.repos.length+' PUBLIC WORLDS':'KEEP EXPLORING'}</span><button id="surprise">Another world ↗</button></div>`;
+  const dossier=dossierExpanded?planetDossierFor(state.repos,repo,state.relationships,state.visible,state.publicUpdated||state.snapshot?.fetchedAt):null;
+  updatePlanetDossierToggle();
+  $('inspectorContent').innerHTML=`<div class="inspector-body" style="--repo-color:${repoTint(repo)}"><div class="repo-orb" aria-hidden="true"></div><div class="repo-category"><i></i>${escape(g.name)}</div><h2>${escape(repo.name)}</h2><p class="repo-description" title="${escape(repo.description)}">${escape(repo.description||'No description has been added on GitHub yet. Explore the repository to see what is taking shape.')}</p><div class="repo-tags"><span>${escape(repo.language)}</span><span>Public</span>${repo.pages?'<span>Pages enabled</span>':''}${repo.fork?'<span>Fork</span>':''}${state.quest.discoveredIds.includes(projectId(repo))?'<span>Quest: discovered</span>':''}${repo.archived?'<span class="archived-badge">Archived</span>':''}${hasChapter?'<span class="atlas-reviewed-tag">In reviewed Atlas</span>':''}${published?'<span class="atlas-published-tag">Atlas public Pages inventory</span>':''}</div>${repo.topics.length?`<div class="repo-topics" aria-label="Repository topics">${repo.topics.slice(0,16).map(t=>`<span>${escape(t)}</span>`).join('')}</div>`:''}${relatedProjects(repo,state.relationships).length?'<button id="traceProject" class="trace-project" title="Clears search and filters to show directly connected projects">Trace this world’s connections ↗</button>':''}<dl class="repo-meta"><div><dt>Stars</dt><dd>${repo.stars.toLocaleString()}</dd></div><div><dt>License</dt><dd>${escape(repo.license&&repo.license!=='NOASSERTION'?repo.license:'Not specified')}</dd></div><div><dt>Repository size</dt><dd>${size}</dd></div><div><dt>Forks</dt><dd>${repo.forks.toLocaleString()}</dd></div><div class="wide"><dt>Last code push</dt><dd>${updated} · ${Number.isFinite(days)?days===0?'today':days+'d ago':'date unavailable'}</dd></div></dl>${dossierExpanded?renderPlanetDossier(dossier,repo):''}<section class="destination-state ${destination.state}"><b>${destination.label}</b><p>${escape(destination.detail)}</p>${destination.check?.checkedAt?`<small>Checked ${new Date(destination.check.checkedAt).toLocaleString()}</small>`:''}</section><div class="repo-links">${destination.url?`<a href="${escape(destination.url)}" target="_blank" rel="noopener noreferrer">Explore This World ${svg('arrow')}</a>`:''}${!destination.url&&publishedSite?`<a href="${escape(publishedSite)}" target="_blank" rel="noopener noreferrer" title="Published HTML verified by the dated Field Atlas manifest; app controls and VR are not tested">Open Atlas-listed website ${svg('arrow')}</a>`:''}${url?`<a class="secondary" href="${escape(url)}" target="_blank" rel="noopener noreferrer"><span>View on GitHub</span>${svg('github')}</a>`:''}${atlas?`<a class="secondary" href="${escape(hasChapter?atlas:published||atlas)}" target="_blank" rel="noopener noreferrer">${hasChapter?'Read in Field Atlas':published?'Find published Atlas project':'Visit Field Atlas'} ${svg('arrow')}</a>`:''}<button class="secondary" id="passportToggle" aria-pressed="${state.passport.favoriteIds.includes(projectId(repo))}">${state.passport.favoriteIds.includes(projectId(repo))?'★ Saved in Passport':'☆ Save to Passport'}</button><button class="secondary" id="shareProject">Copy project link ${svg('arrow')}</button><input id="shareFallback" class="share-fallback" aria-label="Project permalink" readonly hidden value="${escape(projectLink(location.href,repo))}"></div>${destination.candidate&&!destination.url?`<a class="unverified-link" href="${escape(destination.candidate)}" target="_blank" rel="noopener noreferrer">Declared destination · unverified ↗</a>`:''}<details class="repo-facts"><summary>Repository facts & documentation <span>+</span></summary><dl><div><dt>Created</dt><dd>${created}</dd></div><div><dt>Open issues / PRs</dt><dd>${repo.issues==null?'Not available':repo.issues.toLocaleString()}</dd></div><div><dt>GitHub Pages flag</dt><dd>${repo.pages?'Enabled; availability checked separately':'Not enabled'}</dd></div><div><dt>Default branch</dt><dd>${escape(repo.branch)}</dd></div></dl><a href="${escape(repo.url+'#readme')}" target="_blank" rel="noopener noreferrer">Repository README ↗</a><p class="project-identity">${escape(projectId(repo))}</p><small>Repository facts: public GitHub snapshot, ${new Date(state.publicUpdated||state.snapshot.fetchedAt).toLocaleString()}.</small></details>${relationshipCards(repo)}</div><div class="inspector-footer"><span>${spotlight?'ONE OF '+state.repos.length+' PUBLIC WORLDS':'KEEP EXPLORING'}</span><button id="surprise">Another world ↗</button></div>`;
   if(changed)$('inspector').scrollTop=0;
   $('surprise').onclick=()=>{const available=state.repos.filter(r=>state.visible.has(r.id)&&r.id!==repo.id);if(available.length)selectRepo(available[Math.floor(Math.random()*available.length)].id,true);else toast('This is the only world matching your filters.');};
   if($('traceProject'))$('traceProject').onclick=()=>{resetFilters();setArchitecture(true);selectRepo(repo.id,true,false);};
   $('passportToggle').onclick=()=>{state.passport=toggleFavorite(state.passport,repo,state.repos);savePassport();updatePassportCount();showInspector(repo,spotlight);};
   $('shareProject').onclick=async()=>{try{await navigator.clipboard.writeText(projectLink(location.href,repo));toast('Project link copied.');}catch{$('shareFallback').hidden=false;$('shareFallback').focus();$('shareFallback').select();toast('Copy the selected project link.');}};
   document.querySelectorAll('[data-related]').forEach(button=>button.onclick=()=>{resetFilters();setArchitecture(true);selectRepo(button.dataset.related,true);});
+  document.querySelectorAll('[data-dossier-repo]').forEach(button=>button.onclick=()=>{
+    const target=button.dataset.dossierRepo;
+    if(state.visible.has(target))selectRepo(target,true);
+  });
   setCameraOffset();
 }
 
