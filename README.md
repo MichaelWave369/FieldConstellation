@@ -1,10 +1,20 @@
-# The Phitarium · Field Constellation 18
+# The Phitarium · Field Constellation
 
 An interactive observatory for [MichaelWave369’s public GitHub ecosystem](https://github.com/MichaelWave369?tab=repositories), continuing Edition 02 and the user-supplied Grok Field Lattice.
 
 [Open the production map](https://michaelwave369.github.io/FieldConstellation/) · [Build and deployment status](https://github.com/MichaelWave369/FieldConstellation/actions) · [Read the Field Atlas](https://michaelwave369.github.io/FieldAtlas/)
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
+
+## Edition 25 · Planet Dossier (November 4, 2026)
+
+The Phitarium now includes an **opt-in expanded Planet Dossier** in the existing repository inspector. Choose a public star and select **Dossier ⤢** to widen the inspector for source-aware discovery, or choose **Compact ⤡** to return to the usual narrow view.
+
+The expanded dossier displays the currently shown public inventory reconciliation date, separate counts of **Verified in source** and **Documented contract** connections from the separately reviewed relationship ledger, and up to three *nearby public stars* within the same editorial project category. Nearby buttons respect the current visibility filters and open the existing inspector, preserving normal project-link, Passport and Quest interactions. Matching category/language is explicitly not an integration claim.
+
+It does not replace the existing commit-pinned source citations and scope notes under **Related worlds**, or the independently dated destination-reachability receipts. If the relationship ledger cannot be loaded, the dossier says coverage is unavailable instead of reporting a misleading zero. The compact inspector remains the default; expanded state is local to the current tab session, without a persistent preference or extra network requests.
+
+Tests cover public-only filters, ledger status counts, empty/missing states, 650-plus project scale, desktop and mobile layout, neighbor navigation, and Canvas fallback. Physical Quest-browser acceptance remains outstanding. See the [Edition 25 dossier contract](docs/EDITION_25_PLANET_DOSSIER.md).
 
 ## Edition 24 · Solar System Discovery (November 4, 2026)
 

@@ -75,6 +75,32 @@ try{
   await saveFavorite(page,first);
   await saveFavorite(page,second);
 
+  // Dossier navigation is a real project visit. Isolate this acceptance check
+  // in its own browser context so it cannot seed the later Quest/Passport fixtures.
+  log('desktop: optional expanded Planet Dossier and public neighbor navigation');
+  const dossierContext=await browser.newContext({viewport:{width:1440,height:960}});
+  await dossierContext.addInitScript(disableAuto);
+  const dossierPage=await dossierContext.newPage();
+  const dossierErrors=[];
+  dossierPage.on('pageerror',error=>dossierErrors.push(error.message));
+  await ready(dossierPage,base+'?repo='+encodeURIComponent(canonical(second)));
+  assert.equal(await dossierPage.locator('#toggleDossier').getAttribute('aria-pressed'),'false');
+  await dossierPage.locator('#toggleDossier').click();
+  assert.equal(await dossierPage.locator('#inspector').evaluate(element=>element.classList.contains('dossier-open')),true);
+  assert.equal(await dossierPage.locator('#toggleDossier').getAttribute('aria-pressed'),'true');
+  assert.equal(await dossierPage.locator('#planetDossierTitle').textContent(),'Source & neighborhood');
+  assert.match(await dossierPage.locator('.dossier-evidence').textContent(),/Reviewed connection coverage/);
+  assert(await dossierPage.locator('[data-dossier-repo]').count()>0,'Public neighboring stars must be navigable');
+  await capture(dossierPage,'desktop-planet-dossier');
+  const dossierBefore=await dossierPage.locator('#inspector').getAttribute('data-repo');
+  await dossierPage.locator('[data-dossier-repo]').first().click();
+  assert.notEqual(await dossierPage.locator('#inspector').getAttribute('data-repo'),dossierBefore,'Neighbor opens normal inspector');
+  await dossierPage.locator('#toggleDossier').click();
+  assert.equal(await dossierPage.locator('#toggleDossier').getAttribute('aria-pressed'),'false');
+  assert.equal(await dossierPage.locator('.planet-dossier').count(),0,'Compact inspector contains no expanded dossier');
+  assert.deepEqual(dossierErrors,[],'Dossier navigation must not produce uncaught browser errors');
+  await dossierContext.close();
+
   log('desktop: repository index sort controls and the public-only auto-check preference');
   assert.equal(await page.locator('#autoRefresh').count(),1,'Auto-check toggle exists.');
   await page.locator('#reposTab').click();
@@ -412,6 +438,14 @@ try{
   await ready(mobilePage,base);
   assert.equal(await mobilePage.locator('#showtimeButton').isVisible(),true,'Mobile visitors must be able to start the Dome Show.');
   await capture(mobilePage,'mobile-phitarium-observatory');
+  log('mobile: Planet Dossier remains readable and focusable');
+  await ready(mobilePage,base+'?repo='+encodeURIComponent(canonical(first)));
+  await mobilePage.locator('#toggleDossier').click();
+  assert.equal(await mobilePage.locator('#planetDossierTitle').isVisible(),true);
+  const mobileDossierRect=await mobilePage.locator('#inspector').boundingBox();
+  assert(mobileDossierRect&&mobileDossierRect.width<=390,'Expanded inspector must fit mobile width');
+  await capture(mobilePage,'mobile-planet-dossier');
+  await ready(mobilePage,base);
   await mobilePage.locator('[data-layout="solar"]').click();
   assert.equal(await mobilePage.locator('#solarNavigator').isVisible(),true);
   await mobilePage.locator('#solarSystemSelect').selectOption('creative');
@@ -463,6 +497,10 @@ try{
   const fallbackErrors=[];
   fallbackPage.on('pageerror',e=>fallbackErrors.push(e.message));
   await ready(fallbackPage,base);
+  assert.equal(await fallbackPage.locator('#inspector').isVisible(),true);
+  await fallbackPage.locator('#toggleDossier').click();
+  assert.equal(await fallbackPage.locator('#planetDossierTitle').isVisible(),true,'Dossier works in Canvas fallback');
+  await fallbackPage.locator('#toggleDossier').click();
   await fallbackPage.locator('#directoryButton').click();
   assert.equal(await fallbackPage.locator('#directoryDialog').isVisible(),true,'Directory must stay accessible without WebGL2.');
   assert.equal(await fallbackPage.locator('#domeOverlay').count(),1,'Planetarium frame remains visible with Canvas fallback.');
