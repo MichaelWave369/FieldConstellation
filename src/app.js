@@ -11,6 +11,7 @@ import {resolveRelationships,relationshipEdges,neighborhood,relatedProjects,RELA
 import {destinationStatus} from './destinations.js';
 import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.js';
 import {availableTrails} from './trails.js';
+import {solarDiscoveryFor} from './solar-discovery.js';
 import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
 import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite,recordVisit,clearPassportSection,passportRepos,exportFavorites,importFavorites} from './passport.js';
 import {QUEST_KEY,emptyQuest,readQuest,sanitizeQuest,discover,questProgress} from './quest.js';
@@ -27,6 +28,7 @@ const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',sortMode:'name',autoRefresh:true,activityNow:Date.now(),layout:'constellation',solarMotion:false,selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
 let autoRefreshTimer=null,solarPhase=0,solarSuns=[];
+let solarDiscoveryGroup=null,solarDiscoveryRoute=[],solarDiscoveryIndex=0;
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,dome=null,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 let showtimeIndex=-1,showtimeTimer=null,showtimeStops=[],showtimeWasOrbit=false,showtimeInspectorWasVisible=false;
 let immersiveActive=false,immersiveStops=[],immersiveIndex=0,immersiveRestore=null;
@@ -106,6 +108,13 @@ function bindUI(){
   document.querySelectorAll('[data-layout]').forEach(button=>button.onclick=()=>setLayout(button.dataset.layout));
   $('solarSystemSelect').onchange=event=>focusSolarSystem(event.target.value||null);
   $('solarSystemReset').onclick=()=>focusSolarSystem(null);
+  $('solarDiscover').onclick=openSolarDiscovery;
+  $('solarDiscoveryClose').onclick=()=>$('solarDiscoveryDialog').close();
+  $('solarTourPrev').onclick=()=>moveSolarDiscovery(-1);
+  $('solarTourNext').onclick=()=>moveSolarDiscovery(1);
+  $('solarTourVisit').onclick=visitSolarDiscovery;
+  $('solarDiscoveryFeatured').onclick=event=>openSolarProjectFromClick(event);
+  $('solarDiscoveryNewest').onclick=event=>openSolarProjectFromClick(event);
   $('solarMotion').onchange=event=>{state.solarMotion=event.target.checked&&!reducedMotion;};
   $('solarMotion').disabled=reducedMotion;
   $('solarMotion').title=reducedMotion?'Animation disabled by reduced-motion preference':'Animate repository orbits in Solar Systems view';
@@ -457,10 +466,54 @@ function updateSolarNavigator(){
   if(chooser.innerHTML!==options)chooser.innerHTML=options;
   chooser.value=state.group||'';
   $('solarSystemReset').disabled=!state.group;
+  $('solarDiscover').disabled=state.layout!=='solar'||!state.group||state.visible.size===0;
   const current=GROUPS.find(group=>group.id===state.group);
   $('solarSystemStatus').textContent=current
     ?`${state.visible.size} matching planets in ${current.name}. Other filters remain applied.`
     :`${state.visible.size} public planets in view across eight systems.`;
+}
+
+function openSolarDiscovery(){
+  const group=GROUPS.find(g=>g.id===state.group);
+  if(state.layout!=='solar'||!group||!state.visible.size)return;
+  const data=solarDiscoveryFor(state.repos,group.id,state.visible);
+  if(!data.route.length)return;
+  solarDiscoveryGroup=group.id;
+  solarDiscoveryRoute=data.route;
+  solarDiscoveryIndex=0;
+  $('solarDiscoveryTitle').textContent=group.name+' · Planet discovery';
+  $('solarDiscoverySummary').textContent=`${data.count} public planets match your current filters. Most starred and newest reflect the displayed inventory snapshot, not software quality or deployability.`;
+  const list=(repos,kind)=>repos.map(repo=>`<button type="button" class="solar-discovery-item" data-solar-repo="${escape(repo.id)}"><strong>${escape(repo.name)}</strong><span>${kind==='stars'?escape(String(repo.stars||0))+' GitHub stars':'Created '+escape(repo.created?new Date(repo.created).toLocaleDateString():'date unknown')}</span></button>`).join('');
+  $('solarDiscoveryFeatured').innerHTML=list(data.featured,'stars');
+  $('solarDiscoveryNewest').innerHTML=list(data.newest,'created');
+  renderSolarDiscoveryStop();
+  $('solarDiscoveryDialog').showModal();
+}
+function renderSolarDiscoveryStop(){
+  const repo=solarDiscoveryRoute[solarDiscoveryIndex];
+  $('solarTourProgress').textContent=repo?`Stop ${solarDiscoveryIndex+1} of ${solarDiscoveryRoute.length}`:'No route available';
+  $('solarTourName').textContent=repo?.name||'No matching planet';
+  $('solarTourDescription').textContent=repo?.description||'Explore the public repository record for more information.';
+  $('solarTourPrev').disabled=!repo||solarDiscoveryIndex===0;
+  $('solarTourNext').disabled=!repo||solarDiscoveryIndex===solarDiscoveryRoute.length-1;
+  $('solarTourVisit').disabled=!repo;
+}
+function moveSolarDiscovery(delta){
+  const next=solarDiscoveryIndex+delta;
+  if(next<0||next>=solarDiscoveryRoute.length)return;
+  solarDiscoveryIndex=next;renderSolarDiscoveryStop();
+}
+function visitSolarDiscovery(){
+  const repo=solarDiscoveryRoute[solarDiscoveryIndex];
+  if(!repo||repo.group!==solarDiscoveryGroup||!state.visible.has(repo.id))return;
+  $('solarDiscoveryDialog').close();selectRepo(repo.id,true);
+}
+function openSolarProjectFromClick(event){
+  const button=event.target.closest('[data-solar-repo]');
+  if(!button)return;
+  const repo=state.repos.find(r=>r.id===button.dataset.solarRepo);
+  if(!repo||repo.group!==solarDiscoveryGroup||!state.visible.has(repo.id))return;
+  $('solarDiscoveryDialog').close();selectRepo(repo.id,true);
 }
 function focusSolarSystem(id){
   if(state.layout!=='solar')return;
