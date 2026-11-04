@@ -412,3 +412,43 @@ body.phitarium.lattice-theme{
 @media(max-width:760px){.phitarium .inspector.dossier-open{right:15px;width:min(365px,calc(100vw - 30px));max-height:60dvh;bottom:148px;top:auto}.phitarium .planet-dossier{padding:13px}}
 @media(max-width:400px){.phitarium .inspector.dossier-open{max-height:55dvh}.phitarium .inspector-heading{gap:5px}.phitarium #toggleDossier{font-size:9px;padding:5px 6px}}
 @media(prefers-reduced-motion:reduce){.phitarium .inspector.dossier-open .inspector-heading{backdrop-filter:none}}
+
+/* Edition 26: sourced Planet Connections Explorer; thematic browse links stay separate. */
+.phitarium .connection-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
+.phitarium #connectionExplorerButton,.phitarium #dossierConnections{padding:8px 10px;border:1px solid #93d6ed;border-radius:7px;background:#153e57;color:#e6f7ff;font-size:11px;cursor:pointer}
+.phitarium #connectionExplorerButton:hover:not(:disabled),.phitarium #dossierConnections:hover{background:#285875}
+.phitarium #connectionExplorerButton:disabled{opacity:.52;cursor:not-allowed}
+.phitarium #dossierConnections{display:block;margin:11px 0 2px;width:100%;text-align:center}
+.phitarium .connection-explorer-dialog{width:min(880px,calc(100vw - 26px));max-height:min(90dvh,940px);box-sizing:border-box;padding:25px;overflow-y:auto;color:#edf8ff;background:linear-gradient(155deg,#152d48,#081526 70%);border:1px solid #709cca;border-radius:16px;box-shadow:0 26px 95px #000d}
+.phitarium .connection-explorer-dialog::backdrop{background:#020816d9}
+.phitarium .connection-explorer-dialog :is(button,input,select,a,summary):focus-visible{outline:3px solid #b7efff;outline-offset:3px}
+.phitarium .connection-explorer-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.phitarium .connection-kicker{margin:0;color:#a7d6f3;font-size:10px;font-weight:700;letter-spacing:1.4px}
+.phitarium #connectionExplorerTitle{margin:9px 0;font-size:clamp(24px,4vw,34px);font-weight:680;line-height:1.2;color:#f0faff}
+.phitarium #connectionExplorerClose{background:#244665;border:1px solid #7097c0;color:#e5f4ff;border-radius:8px;padding:9px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+.phitarium #connectionExplorerClose:hover{background:#315b7d}
+.phitarium .connection-scope{font-size:12px;line-height:1.7;color:#bcdaeb;margin:11px 0 20px}
+.phitarium .connection-explorer-controls{display:grid;grid-template-columns:1.05fr .9fr 1.25fr auto;align-items:end;gap:10px;padding:15px 0;border-top:1px solid #668ab264;border-bottom:1px solid #668ab264}
+.phitarium .connection-explorer-controls label{display:grid;gap:6px;min-width:0;color:#c7e2f7;font-size:11px}
+.phitarium .connection-explorer-controls :is(select,input){box-sizing:border-box;width:100%;min-height:40px;min-width:0;border:1px solid #6289af;border-radius:7px;padding:8px 10px;color:#edf8ff;background:#0b1d33;font:inherit;font-size:12px}
+.phitarium #connectionClear{min-height:40px;border-radius:7px;border:1px solid #7ca3c3;padding:8px 12px;color:#e5f7ff;background:#254a6a;font-size:12px;cursor:pointer}
+.phitarium #connectionClear:hover{background:#336285}
+.phitarium .connection-result-count{font-size:12px;margin:17px 0 12px;color:#c0dbee}
+.phitarium .connection-results{display:grid;gap:12px}
+.phitarium .connection-card{min-width:0;border:1px solid #7a9eba80;border-left:4px solid #82d9bd;border-radius:10px;background:#11263d;padding:17px;overflow-wrap:anywhere}
+.phitarium .connection-card.documented{border-left-color:#e6bc78}
+.phitarium .connection-status{margin:0 0 10px;color:#acdbcc;font-size:10px;letter-spacing:.25px}
+.phitarium .connection-card.documented .connection-status{color:#f0d09a}
+.phitarium .connection-endpoints{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:9px 0}
+.phitarium .connection-endpoints button{font-size:14px;font-weight:700;color:#eaf8ff;background:#254b6c;border:1px solid #658cb4;border-radius:8px;padding:8px 10px;cursor:pointer;max-width:100%;overflow-wrap:anywhere}
+.phitarium .connection-endpoints button:hover{background:#356489}
+.phitarium .connection-endpoints span{color:#a8e5f4;font-size:22px}
+.phitarium .connection-summary{font-size:12px;color:#d0e2f1;line-height:1.7;margin:10px 0}
+.phitarium .connection-card details{border-top:1px solid #6385a057;padding-top:10px}
+.phitarium .connection-card summary{font-size:11px;font-weight:700;color:#b7e5ff;cursor:pointer}
+.phitarium .connection-card details p{font-size:11px;line-height:1.7;color:#bcd3e7}
+.phitarium .connection-card details ul{margin:8px 0 1px;padding-left:19px;display:grid;gap:8px}
+.phitarium .connection-card details a{font-size:11px;color:#c3e9ff;text-underline-offset:3px}
+.phitarium .connection-footnote,.phitarium .connection-empty{font-size:11px;line-height:1.8;color:#acc4d9;margin:18px 0 0}
+@media(max-width:800px){.phitarium .connection-explorer-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.phitarium #connectionClear{align-self:end}}
+@media(max-width:530px){.phitarium .connection-explorer-dialog{padding:15px;max-height:93dvh}.phitarium .connection-explorer-controls{grid-template-columns:1fr;gap:10px}.phitarium .connection-endpoints button{font-size:12px}.phitarium #connectionExplorerTitle{font-size:25px}.phitarium .connection-kicker{font-size:9px}}
