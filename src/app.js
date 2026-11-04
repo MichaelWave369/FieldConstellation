@@ -459,7 +459,7 @@ function setLayout(mode){
   $('solarMotionControl').hidden=mode!=='solar';
   $('solarLegend').hidden=mode!=='solar';
   if(mode==='orbits')setLens('language');
-  if(mode==='solar'){solarPhase=0;setLens('world');}
+  if(mode==='solar'){solarPhase=0;setOrbit(false);setLens('world');}
   updateRelationshipUI();
   if(sceneReady){targets=layoutPositions(state.repos,mode).map(p=>new THREE.Vector3(...p));if(reducedMotion)positions=targets.map(p=>p.clone());buildEdges();refreshGuides();buildLabels();fitField(true);}
 }
@@ -561,7 +561,7 @@ function animate(now){
   requestAnimationFrame(animate);if(document.hidden||contextLost)return;const delta=Math.min(.05,lastTime?(now-lastTime)/1000:.016);lastTime=now;frame++;
   if(flight){const t=reducedMotion?1:Math.min(1,(now-flight.start)/950),e=1-Math.pow(1-t,3);camera.position.lerpVectors(flight.from,flight.to,e);controls.target.lerpVectors(flight.fromTarget,flight.toTarget,e);if(t===1)flight=null;}
   if(state.layout==='solar'&&state.solarMotion&&!reducedMotion&&frame%3===0){
-    solarPhase+=delta*2.25;
+    solarPhase+=delta*.5;
     const next=solarSystemPositions(state.repos,solarPhase,state.activityNow);
     next.forEach((p,i)=>targets[i].set(...p));
   }
