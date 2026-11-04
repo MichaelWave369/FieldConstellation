@@ -6,6 +6,14 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 21 · Field Gateway (November 4, 2026)
+
+A new **Field Constellation gateway** is staged at `/gateway/index.html`, designed to become the future `enterthefield.org` entrance only after explicit release approval. The standalone, static HTML/CSS page has three entry routes: the **Phitarium**, its **full project Directory**, and **Other Fields / the Six Houses**. The PhiOS-centered architecture points to real public repository stars for PhiOS, Infinite Porch, and Infinite Commons, with separate PhiOS Mobile and XR source links. These thematic routes do **not** claim native installers, production integration or live peer networks.
+
+The Phitarium now spotlights the PhiOS source record by default and supports an explicitly requested `?directory=1` deep link without opening the Directory on ordinary visits. Original games, Passport, dated reachability records, existing deep links, and Six Houses are preserved. The gateway references `phi-field.com` as the dedicated PhiOS entry and does not modify that website.
+
+The [Edition 21 migration audit](docs/EDITION_21_FIELD_GATEWAY.md) documents the current Parallax-era `enterthefield.org` navigation, the legacy 47-project registry, preservation of deep URL families and historical material, and **unverified manual Quest headset acceptance**. No Netlify deployment, domain switch, redirects or release were performed for this PR.
+
 ## Edition 20 · Browser-local auto-updates and sortable discoveries (November 4, 2026)
 
 The constellation can now **check for updated public GitHub inventory automatically once per day per browser**, subject to its bundled snapshot age and the most recent attempt. It uses the existing fully paginated, public-only anonymous GitHub REST check. Auto-check can be switched off in the sidebar. It is deliberately **not** a scheduled GitHub commit or a Netlify build; visitors without public GitHub API access retain the last valid complete snapshot. Manual Refresh always remains available.

@@ -104,6 +104,22 @@ try{
   await housesPage.waitForFunction(()=>document.getElementById('loading')?.hidden===true,{timeout:30000});
   assert.equal(new URL(housesPage.url()).pathname,'/FieldConstellation/index.html','Return to Phitarium must work under Pages subpath.');
   await housesPage.close();
+  log('gateway: desktop destinations and explicit Directory deep link');
+  const gatewayPage=await desktop.newPage();
+  await gatewayPage.goto(base+'gateway/index.html',{waitUntil:'domcontentloaded'});
+  assert.equal(await gatewayPage.getByRole('heading',{level:1}).count(),1);
+  assert.equal(await gatewayPage.locator('article.system-card').count(),3);
+  await capture(gatewayPage,'desktop-field-gateway');
+  await gatewayPage.locator('a[href="../index.html?directory=1"]').click();
+  await gatewayPage.waitForFunction(()=>document.getElementById('loading')?.hidden===true,{timeout:30000});
+  assert.equal(await gatewayPage.locator('#directoryDialog').isVisible(),true,'Explicit directory route opens Directory');
+  assert(Number((await gatewayPage.locator('#directoryCount').textContent()).split(' ')[0])>0);
+  await gatewayPage.locator('#directoryDialog').evaluate(dialog=>dialog.close());
+  await gatewayPage.locator('header.map-header a[href="./gateway/index.html"]').click();
+  assert.equal(new URL(gatewayPage.url()).pathname,'/FieldConstellation/gateway/index.html');
+  await gatewayPage.locator('a[href="../other-fields/index.html"]').first().click();
+  assert.equal(await gatewayPage.locator('article.house').count(),6);
+  await gatewayPage.close();
   const beforeShowQuest=await page.locator('#questCount').textContent();
   const beforeShowPassport=await page.locator('#passportCount').textContent();
   const beforeShowUrl=page.url();
@@ -374,6 +390,12 @@ try{
   await capture(mobilePage,'mobile-phitarium-dome-show');
   await mobilePage.locator('#showtimeStop').click();
   assert.equal(await mobilePage.locator('#showtimeHud').isVisible(),false);
+  log('mobile: gateway layout and links remain in the viewport');
+  await mobilePage.goto(base+'gateway/index.html',{waitUntil:'domcontentloaded'});
+  assert.equal(await mobilePage.locator('article.system-card').count(),3);
+  const gatewayWidth=await mobilePage.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth}));
+  assert(gatewayWidth.scroll<=gatewayWidth.width+2,'Gateway overflows 390px mobile viewport');
+  await capture(mobilePage,'mobile-field-gateway');
   await mobile.close();
 
   log('graphics fallback: canvas renderer and public directory are usable without WebGL2');

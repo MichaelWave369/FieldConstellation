@@ -68,12 +68,13 @@ async function boot(){
     const linked=sharedTrail?.repo||readProjectLink(location.href,state.repos);
     if(linked)selectRepo(linked.id,true,false);
     else{
-      const spotlight=state.repos.find(r=>r.name==='SuperPhiVessel')||state.repos[0];if(spotlight)showInspector(spotlight,true);
+      const spotlight=state.repos.find(r=>r.name==='PhiOS')||state.repos[0];if(spotlight)showInspector(spotlight,true);
       if(new URL(location.href).searchParams.has('trail'))toast('This shared journey is no longer available in the current public inventory.');
       else if(new URL(location.href).searchParams.has('repo'))toast('This shared project is not in the current public inventory.');
       if(innerWidth<761)$('inspector').hidden=true;
     }
     setCameraOffset();$('loading').hidden=true;
+    if(new URL(location.href).searchParams.get('directory')==='1'){renderDirectory();$('directoryDialog').showModal();}
     if(sharedPostcard){state.postcardView=sharedPostcard;renderPostcard();$('postcardDialog').showModal();}
     else if(new URL(location.href).searchParams.has('postcard'))toast('This Field Postcard contains no available public worlds.');
     if(!state.relationshipLedger)toast('Relationship evidence is unavailable. The five layouts and directory remain usable.');
