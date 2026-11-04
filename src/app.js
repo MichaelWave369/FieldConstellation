@@ -782,7 +782,7 @@ function renderPlanetDossier(data,selected){
   return `<section class="planet-dossier" aria-labelledby="planetDossierTitle">
     <p class="dossier-eyebrow">PUBLIC PLANET DOSSIER</p>
     <h3 id="planetDossierTitle">Source & neighborhood</h3>
-    <p class="dossier-explain">Repository snapshot ${escape(inventory)}. Code and social metrics are not independent verification of app readiness.</p>
+    <p class="dossier-explain">Displayed inventory reconciliation: ${escape(inventory)}. Individual metadata fields may be older; code and social metrics are not proof of app readiness.</p>
     <div class="dossier-evidence"><h4>Reviewed connection coverage</h4><div class="dossier-stats">${evidence}</div><small>${escape(reviewed)} · Counts cover only the separately reviewed relationship ledger, not all possible connections.</small></div>
     <div class="dossier-neighbors"><h4>Nearby public stars</h4><p>Other projects in this curated category matching current filters. Proximity does not prove integration.</p>${neighbors||'<p class="dossier-empty">No other public planets match the current filters.</p>'}</div>
     <p class="dossier-footnote">Detailed connection scope and commit-pinned source citations remain in <b>Related worlds</b> below. Site reachability is independently dated.</p>
