@@ -104,6 +104,8 @@ function bindUI(){
   $('atlasAuditRefresh').onclick=async()=>{const button=$('atlasAuditRefresh');button.disabled=true;try{await refreshPublic();renderAtlasAudit();}finally{button.disabled=false;}};
   $('fitMatches').onclick=fitMatches;
   document.querySelectorAll('[data-layout]').forEach(button=>button.onclick=()=>setLayout(button.dataset.layout));
+  $('solarSystemSelect').onchange=event=>focusSolarSystem(event.target.value||null);
+  $('solarSystemReset').onclick=()=>focusSolarSystem(null);
   $('solarMotion').onchange=event=>{state.solarMotion=event.target.checked&&!reducedMotion;};
   $('solarMotion').disabled=reducedMotion;
   $('solarMotion').title=reducedMotion?'Animation disabled by reduced-motion preference':'Animate repository orbits in Solar Systems view';
@@ -233,7 +235,7 @@ function updateInventoryUI(){
   $('aboutAtlasLens').textContent=atlasIds.size?'Atlas Lens shows '+atlasIds.size+' public projects in this independently dated reviewed chapter map. It does not claim the live Atlas is complete or up-to-date. Only reviewed public chapter links are opened.':'Atlas Lens is unavailable because its reviewed public chapter map could not be validated.';
 
   $('categories').innerHTML=GROUPS.map(g=>`<button class="category${state.group===g.id?' selected':''}" style="--category:${g.color}" data-group="${g.id}" aria-pressed="${state.group===g.id}"><span class="category-dot"></span><span>${g.name}</span><span class="category-count">${state.repos.filter(r=>r.group===g.id).length}</span></button>`).join('');
-  document.querySelectorAll('[data-group]').forEach(button=>button.onclick=()=>{state.group=state.group===button.dataset.group?null:button.dataset.group;applyFilters();});
+  document.querySelectorAll('[data-group]').forEach(button=>button.onclick=()=>{const id=state.group===button.dataset.group?null:button.dataset.group;if(state.layout==='solar')focusSolarSystem(id);else{state.group=id;applyFilters();}});
   renderLensLegend();renderSidebarIndex();
 }
 
@@ -249,6 +251,7 @@ function applyFilters(){
   if(sceneReady)updateAppearance();
   if($('directoryDialog').open)renderDirectory();
   $('pagesOnly').setAttribute('aria-pressed',String(state.pagesOnly));$('hideForks').setAttribute('aria-pressed',String(state.hideForks));$('atlasOnly').setAttribute('aria-pressed',String(state.atlasOnly));$('atlasPublishedOnly').setAttribute('aria-pressed',String(state.atlasPublishedOnly));renderSidebarIndex();renderLensLegend();
+  updateSolarNavigator();
   $('tooltip').hidden=true;updateRelationshipUI();
 }
 function resetFilters(){state.query='';state.group=null;state.language='';state.visibility='';state.pagesOnly=false;state.hideForks=false;state.atlasOnly=false;state.atlasPublishedOnly=false;$('search').value='';$('language').value='';$('visibility').value='';clearSelection();applyFilters();if(sceneReady)fitField(true);}
@@ -447,6 +450,49 @@ function updateShowtime(){
 function setTheme(theme){state.theme=theme;document.body.classList.toggle('lattice-theme',theme==='lattice');$('themeToggle').setAttribute('aria-pressed',String(theme==='lattice'));document.querySelector('meta[name="theme-color"]').content=theme==='lattice'?'#15101c':'#050a15';if(scene){scene.background.set(theme==='lattice'?'#15101c':'#060d1f');scene.fog.color.copy(scene.background);dome?.setPalette(theme==='lattice');for(const child of core.children)if(child.material?.color)child.material.color.set(theme==='lattice'?'#e0b15a':'#a5d9f6');}}
 function setSidebar(open){$('sidebar').classList.toggle('open',open);$('sidebar').inert=innerWidth<761&&!open;$('mobileMenu').setAttribute('aria-expanded',String(open));}
 function setOrbit(value){state.orbit=value;if(controls)controls.autoRotate=value;$('orbitToggle').classList.toggle('active',value);$('orbitToggle').setAttribute('aria-pressed',String(value));}
+function updateSolarNavigator(){
+  const chooser=$('solarSystemSelect');
+  if(!chooser)return;
+  const options='<option value="">All eight systems</option>'+GROUPS.map(group=>`<option value="${group.id}">${escape(group.name)} (${state.repos.filter(repo=>repo.group===group.id).length})</option>`).join('');
+  if(chooser.innerHTML!==options)chooser.innerHTML=options;
+  chooser.value=state.group||'';
+  $('solarSystemReset').disabled=!state.group;
+  const current=GROUPS.find(group=>group.id===state.group);
+  $('solarSystemStatus').textContent=current
+    ?`${state.visible.size} matching planets in ${current.name}. Other filters remain applied.`
+    :`${state.visible.size} public planets in view across eight systems.`;
+}
+function focusSolarSystem(id){
+  if(state.layout!=='solar')return;
+  const group=id?GROUPS.find(g=>g.id===id):null;
+  if(id&&!group)return;
+  state.group=group?.id||null;
+  setOrbit(false);
+  applyFilters();
+  if(!sceneReady)return;
+  if(!group){fitField(true);return;}
+  if(!state.visible.size){toast('This system has no planets matching your other filters. Clear filters or choose another system.');return;}
+  const center=new THREE.Vector3(...group.center);
+  const distance=Math.max(37,32/Math.max(.5,Math.min(1,camera.aspect)));
+  const position=center.clone().add(new THREE.Vector3(0,distance*.67,distance));
+  flyTo(position,center);
+  setSidebar(false);
+}
+function pickSolarSun(event){
+  if(state.layout!=='solar'||!camera)return null;
+  const rect=$('scene').getBoundingClientRect();
+  const x=event.clientX-rect.left,y=event.clientY-rect.top;
+  let best=null,limit=22;
+  for(const group of GROUPS){
+    if(!state.repos.some(repo=>repo.group===group.id&&state.visible.has(repo.id)))continue;
+    tempProjection.set(...group.center).project(camera);
+    if(tempProjection.z<=-1||tempProjection.z>=1)continue;
+    const px=(tempProjection.x*.5+.5)*rect.width,py=(-tempProjection.y*.5+.5)*rect.height;
+    const d=Math.hypot(x-px,y-py);
+    if(d<limit){best=group;limit=d;}
+  }
+  return best;
+}
 function setLayout(mode){
   if(showtimeIndex>=0)stopShowtime(false);
   if(state.layout===mode)return;
@@ -458,6 +504,8 @@ function setLayout(mode){
   $('linksCaption').textContent=chronological()?'Creation thread':mode==='orbits'?'Orbit links':mode==='solar'?'Orbit guides':'World links';
   $('solarMotionControl').hidden=mode!=='solar';
   $('solarLegend').hidden=mode!=='solar';
+  $('solarNavigator').hidden=mode!=='solar';
+  updateSolarNavigator();
   if(mode==='orbits')setLens('language');
   if(mode==='solar'){solarPhase=0;setOrbit(false);setLens('world');}
   updateRelationshipUI();
@@ -491,8 +539,8 @@ function initScene(){
   const selectionGeo=new THREE.RingGeometry(.9,1.0,48);selectionRing=new THREE.Mesh(selectionGeo,new THREE.MeshBasicMaterial({color:'#c9efff',side:THREE.DoubleSide,transparent:true,opacity:.85,depthWrite:false}));selectionRing.visible=false;scene.add(selectionRing);
   let down=null;
   host.addEventListener('pointerdown',event=>{if(showtimeIndex>=0)stopShowtime(false);down={x:event.clientX,y:event.clientY,time:performance.now()};});
-  host.addEventListener('pointerup',event=>{if(down&&Math.hypot(event.clientX-down.x,event.clientY-down.y)<6&&performance.now()-down.time<650){const repo=pickRepo(event);if(repo)selectRepo(repo.id,false);else clearSelection();}down=null;});
-  host.addEventListener('pointermove',event=>{if(performance.now()-lastHover<35||down)return;lastHover=performance.now();const repo=pickRepo(event);if(state.hovered!==(repo?.id||null)){state.hovered=repo?.id||null;updateAppearance();}host.style.cursor=repo?'pointer':'grab';if(repo){const rect=host.getBoundingClientRect();$('tooltip').innerHTML=`<strong>${escape(repo.name)}</strong><span>${escape(groupMap.get(repo.group).name)} · ${escape(repo.language)}</span>`;$('tooltip').hidden=false;$('tooltip').style.left=Math.max(5,Math.min(rect.width-230,event.clientX-rect.left+16))+'px';$('tooltip').style.top=Math.max(65,Math.min(rect.height-90,event.clientY-rect.top+16))+'px';}else $('tooltip').hidden=true;});
+  host.addEventListener('pointerup',event=>{if(down&&Math.hypot(event.clientX-down.x,event.clientY-down.y)<6&&performance.now()-down.time<650){const repo=pickRepo(event);if(repo)selectRepo(repo.id,false);else{const sun=pickSolarSun(event);if(sun)focusSolarSystem(sun.id);else clearSelection();}}down=null;});
+  host.addEventListener('pointermove',event=>{if(performance.now()-lastHover<35||down)return;lastHover=performance.now();const repo=pickRepo(event),sun=repo?null:pickSolarSun(event);if(state.hovered!==(repo?.id||null)){state.hovered=repo?.id||null;updateAppearance();}host.style.cursor=repo||sun?'pointer':'grab';if(repo||sun){const rect=host.getBoundingClientRect();$('tooltip').innerHTML=repo?`<strong>${escape(repo.name)}</strong><span>${escape(groupMap.get(repo.group).name)} · ${escape(repo.language)}</span>`:`<strong>${escape(sun.name)} · Solar System</strong><span>Focus ${state.repos.filter(r=>r.group===sun.id).length} public planets</span>`;$('tooltip').hidden=false;$('tooltip').style.left=Math.max(5,Math.min(rect.width-230,event.clientX-rect.left+16))+'px';$('tooltip').style.top=Math.max(65,Math.min(rect.height-90,event.clientY-rect.top+16))+'px';}else $('tooltip').hidden=true;});
   host.addEventListener('pointerleave',()=>{state.hovered=null;$('tooltip').hidden=true;updateAppearance();});
   renderer.domElement.addEventListener('keydown',event=>{if(['+','=','-','Home','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();flight=null;setOrbit(false);if(event.key==='Home')fitField(true);else if(event.key==='+'||event.key==='=')zoom(.85);else if(event.key==='-')zoom(1.18);else{const offset=camera.position.clone().sub(controls.target),s=new THREE.Spherical().setFromVector3(offset);if(event.key==='ArrowLeft')s.theta-=.12;if(event.key==='ArrowRight')s.theta+=.12;if(event.key==='ArrowUp')s.phi=Math.max(.08,s.phi-.12);if(event.key==='ArrowDown')s.phi=Math.min(Math.PI-.08,s.phi+.12);camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(s));controls.update();}}});
   resize();
