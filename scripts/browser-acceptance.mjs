@@ -76,7 +76,20 @@ try{
   assert.equal(await page.locator('body').getAttribute('class'),'phitarium');
   assert.equal(await page.locator('#domeOverlay').count(),1);
   assert.equal(await page.locator('.dome-rim').count(),1);
-  assert.equal(await page.locator('.brand b').textContent(),'PHITARIUM');
+  assert.equal(await page.locator('.brand b').textContent(),'CONSTELLATION','The site brand is Field Constellation; the dome remains the Phitarium.');
+  log('other fields: six independent houses and return navigation');
+  const housesPage=await desktop.newPage();
+  await ready(housesPage,base);
+  await housesPage.locator('header.map-header a[href="./other-fields/index.html"]').click();
+  assert.equal(new URL(housesPage.url()).pathname,'/FieldConstellation/other-fields/index.html');
+  assert.equal(await housesPage.locator('article.house').count(),6,'Six Houses must be visible.');
+  for(const name of ['ChipsHouse','XiHouse','OmegaHouse','WAREHouse','QuillHouse','QEFHouse']){
+    assert.equal(await housesPage.getByRole('heading',{name,exact:true}).count(),1,'Missing House: '+name);
+  }
+  await housesPage.locator('header nav a[href="../index.html"]').click();
+  await housesPage.waitForFunction(()=>document.getElementById('loading')?.hidden===true,{timeout:30000});
+  assert.equal(new URL(housesPage.url()).pathname,'/FieldConstellation/index.html','Return to Phitarium must work under Pages subpath.');
+  await housesPage.close();
   const beforeShowQuest=await page.locator('#questCount').textContent();
   const beforeShowPassport=await page.locator('#passportCount').textContent();
   const beforeShowUrl=page.url();
