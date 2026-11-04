@@ -345,3 +345,41 @@ body.phitarium.lattice-theme{
 @media(max-width:760px){.phitarium .solar-navigator{top:163px;left:15px;width:min(296px,calc(100% - 30px));padding:10px 12px}}
 @media(max-width:480px){.phitarium .solar-navigator{top:153px;width:min(272px,calc(100% - 30px))}.phitarium .solar-nav-heading{font-size:9px}.phitarium .solar-nav-controls label,.phitarium .solar-navigator #solarSystemStatus{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.phitarium .solar-navigator{backdrop-filter:none}}
+
+/* Edition 24 · Solar Discovery: on-demand, public-only and keyboard-accessible. */
+.phitarium .solar-discover-button{width:100%;margin-top:10px;border:1px solid #7ac1e6;border-radius:7px;min-height:38px;padding:8px 10px;color:#06172a;background:#b5e8ff;font-weight:700;font-size:11px;text-align:center;cursor:pointer}
+.phitarium .solar-discover-button:hover:not(:disabled){background:#ebf9ff}
+.phitarium .solar-discover-button:disabled{opacity:.5;cursor:not-allowed}
+.phitarium .solar-discover-button:focus-visible{outline:2px solid #b5e8ff;outline-offset:3px}
+.phitarium .solar-discovery-dialog{width:min(800px,calc(100vw - 24px));max-height:min(88dvh,850px);overflow-y:auto;box-sizing:border-box;border-radius:17px;border:1px solid #7399c5;color:#e8f5ff;background:linear-gradient(155deg,#132b46,#071527 72%);padding:24px;box-shadow:0 35px 120px #000c}
+.phitarium .solar-discovery-dialog::backdrop{background:#030815d9;backdrop-filter:blur(4px)}
+.phitarium .solar-discovery-dialog button:focus-visible{outline:3px solid #b7edff;outline-offset:3px}
+.phitarium .solar-discovery-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.phitarium .solar-discovery-kicker{font-size:10px;letter-spacing:1.5px;color:#b4d5ef;margin:0}
+.phitarium .solar-discovery-head h2{font-size:clamp(24px,4vw,32px);margin:7px 0 0;color:#f2faff}
+.phitarium #solarDiscoveryClose{padding:7px 12px;border:1px solid #638bb4;border-radius:7px;color:#d9f3ff;background:#1b3654;cursor:pointer;white-space:nowrap}
+.phitarium .solar-discovery-summary{font-size:12px;line-height:1.7;color:#bdd1e8;margin:12px 0 22px}
+.phitarium .solar-discovery-lists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.phitarium .solar-discovery-lists section{min-width:0;background:#10253d;border:1px solid #537da371;padding:15px;border-radius:11px}
+.phitarium .solar-discovery-lists h3{margin:0;font-size:16px;color:#e2f5ff}
+.phitarium .solar-discovery-lists section>p{margin:3px 0 13px;font-size:11px;color:#abc6db}
+.phitarium .solar-discovery-items{display:grid;gap:8px}
+.phitarium .solar-discovery-item{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;border:1px solid #527aa5;border-radius:8px;padding:10px 11px;background:#1a3554;color:#e5f5ff;cursor:pointer}
+.phitarium .solar-discovery-item:hover{background:#275176;border-color:#a7dfff}
+.phitarium .solar-discovery-item strong{font-size:12px;overflow-wrap:anywhere;min-width:0}
+.phitarium .solar-discovery-item span{font-size:10px;color:#b8d3ec;white-space:nowrap}
+.phitarium .solar-tour{border:1px solid #7ac1e66e;border-radius:12px;padding:17px;margin-top:18px;background:linear-gradient(145deg,#173e5a,#0c223b)}
+.phitarium .solar-tour-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.phitarium .solar-tour-heading h3{margin:0;font-size:17px}
+.phitarium .solar-tour-heading span{font-size:11px;color:#9fddf9;white-space:nowrap}
+.phitarium .solar-tour>p{font-size:11px;color:#b5d0e6;line-height:1.65;margin:10px 0}
+.phitarium .solar-tour h4{font-size:20px;letter-spacing:-.3px;color:#f3faff;margin:17px 0 4px}
+.phitarium .solar-tour .solar-tour-description{min-height:30px;font-size:12px;color:#c6dcec}
+.phitarium .solar-tour-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.phitarium .solar-tour-actions button{border:1px solid #7397bf;background:#173b57;color:#e8f6ff;border-radius:8px;padding:10px 13px;font-size:12px;cursor:pointer;min-height:39px}
+.phitarium #solarTourVisit{background:#b5e8ff;color:#07182a;border-color:#b5e8ff;font-weight:700}
+.phitarium .solar-tour-actions button:disabled{opacity:.48;cursor:not-allowed}
+.phitarium .solar-tour-actions button:not(:disabled):hover{filter:brightness(1.18)}
+.phitarium .solar-discovery-footnote{font-size:11px;color:#a9c4db;line-height:1.6;margin:18px 0 0}
+@media(max-width:640px){.phitarium .solar-discovery-dialog{padding:15px;max-height:92dvh}.phitarium .solar-discovery-lists{grid-template-columns:1fr;gap:12px}.phitarium .solar-discovery-lists section{padding:12px}.phitarium .solar-discovery-head{gap:8px}.phitarium #solarDiscoveryClose{padding:8px}.phitarium .solar-tour{padding:13px}.phitarium .solar-tour-actions button{flex:1 1 80px}}
+@media(prefers-reduced-motion:reduce){.phitarium .solar-discovery-dialog::backdrop{backdrop-filter:none}}
