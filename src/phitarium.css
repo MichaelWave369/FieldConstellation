@@ -452,3 +452,37 @@ body.phitarium.lattice-theme{
 .phitarium .connection-footnote,.phitarium .connection-empty{font-size:11px;line-height:1.8;color:#acc4d9;margin:18px 0 0}
 @media(max-width:800px){.phitarium .connection-explorer-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.phitarium #connectionClear{align-self:end}}
 @media(max-width:530px){.phitarium .connection-explorer-dialog{padding:15px;max-height:93dvh}.phitarium .connection-explorer-controls{grid-template-columns:1fr;gap:10px}.phitarium .connection-endpoints button{font-size:12px}.phitarium #connectionExplorerTitle{font-size:25px}.phitarium .connection-kicker{font-size:9px}}
+
+/* Edition 27: evidence journeys are a bounded visitor walk, never an inferred dependency. */
+.phitarium .evidence-journey-panel{margin:18px 0 20px;border:1px solid #668fbb;border-radius:10px;background:#10283f;padding:13px 15px}
+.phitarium .evidence-journey-panel>summary{font-size:13px;font-weight:700;color:#c8f1ff;cursor:pointer;min-height:24px;line-height:1.7}
+.phitarium .evidence-journey-panel:focus-within{border-color:#94dafa}
+.phitarium .evidence-journey-panel :is(select,button,a,summary):focus-visible{outline:3px solid #b4edff;outline-offset:3px}
+.phitarium .evidence-journey-panel .journey-boundary,.phitarium .evidence-journey-panel .journey-grade-note{font-size:11px;line-height:1.75;color:#b2cadd;margin:10px 0}
+.phitarium .journey-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end;margin:16px 0 8px}
+.phitarium .journey-controls label{display:grid;gap:6px;font-size:11px;color:#c5e1f7;min-width:0}
+.phitarium .journey-controls select{box-sizing:border-box;min-height:40px;width:100%;min-width:0;background:#091d32;color:#effaff;border:1px solid #779cc3;border-radius:7px;padding:7px 9px;font:inherit;font-size:12px}
+.phitarium .journey-controls button,.phitarium .journey-actions button{min-height:40px;border:1px solid #8ab9d6;border-radius:8px;background:#284d6d;color:#effaff;padding:9px 12px;font-size:11px;cursor:pointer;white-space:nowrap}
+.phitarium .journey-controls #journeyTrace{background:#b5e8ff;color:#0a2035;font-weight:700}
+.phitarium .journey-controls button:disabled,.phitarium .journey-actions button:disabled{opacity:.48;cursor:not-allowed}
+.phitarium .journey-controls button:not(:disabled):hover,.phitarium .journey-actions button:not(:disabled):hover{filter:brightness(1.12)}
+.phitarium .journey-status{font-size:12px;line-height:1.7;color:#b5e2ee;margin:11px 0}
+.phitarium .journey-display{border-top:1px solid #779ac16e;padding-top:12px;margin-top:11px}
+.phitarium .journey-progress{font-size:11px;letter-spacing:.7px;color:#a3d7ef;font-weight:700;margin:0 0 11px}
+.phitarium .journey-step{border:1px solid #6089b6;border-left:4px solid #83d9bf;background:#0d2037;border-radius:10px;padding:15px}
+.phitarium .journey-endpoints{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:15px;color:#e9f9ff}
+.phitarium .journey-endpoints strong{overflow-wrap:anywhere}
+.phitarium .journey-endpoints span{font-size:22px;color:#a4e0f6}
+.phitarium .journey-direction{font-size:10px;color:#f6d89b;line-height:1.6;margin:9px 0 3px}
+.phitarium .journey-evidence-grade{font-size:10px;color:#b0d9e6;line-height:1.6;margin:5px 0 11px}
+.phitarium .journey-summary{font-size:12px;color:#deecf7;line-height:1.7;margin:11px 0}
+.phitarium .journey-step details{border-top:1px solid #5e8ab168;padding-top:10px}
+.phitarium .journey-step summary{font-size:11px;font-weight:700;color:#b9e7ff;cursor:pointer}
+.phitarium .journey-step details p,.phitarium .journey-step details li{font-size:11px;color:#bdd3e8;line-height:1.7;overflow-wrap:anywhere}
+.phitarium .journey-step details ul{padding-left:20px;display:grid;gap:7px;margin-bottom:0}
+.phitarium .journey-step details a{color:#c3ebff;text-underline-offset:3px}
+.phitarium .journey-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.phitarium #journeyInspect{background:#b5e8ff;color:#082039;font-weight:700}
+@media(max-width:800px){.phitarium .journey-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.phitarium #journeyTrace{grid-column:1/-1}}
+@media(max-width:520px){.phitarium .evidence-journey-panel{padding:11px 12px}.phitarium .journey-controls{grid-template-columns:1fr}.phitarium #journeyTrace{grid-column:1}.phitarium .journey-actions button{flex:1 1 110px;white-space:normal}.phitarium .journey-endpoints{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.phitarium .evidence-journey-panel,.phitarium .journey-step{scroll-behavior:auto}}
