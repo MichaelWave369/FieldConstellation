@@ -32,6 +32,8 @@ test('entire bundled public catalog gets one role; counts never imply installati
   assert.equal(Object.values(counts).reduce((a,b)=>a+b,0),snapshot.repos.length);
   assert.equal(Object.keys(counts).length,10);
   assert(snapshot.repos.every(r=>architectureFor(r).integration==='cataloged'));
+  const incomplete=snapshot.repos.filter(r=>!r.archived&&architectureFor(r).basis!=='curated');
+  assert.deepEqual(incomplete.map(r=>r.name),[],'Current public snapshot must have explicit placement; newly discovered repos may be queued for review');
   assert.equal(new Set(snapshot.repos.map(r=>r.id)).size,snapshot.repos.length);
 });
 test('architectural coordinates are deterministic across input reorder and inventory growth',()=>{
