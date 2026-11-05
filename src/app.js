@@ -187,6 +187,7 @@ function bindUI(){
   $('architectureToggle').onclick=()=>setArchitecture(!state.architecture);
   $('fitConnections').onclick=fitConnections;
   $('connectionExplorerButton').onclick=()=>openConnectionExplorer();
+  $('connectionSidebarButton').onclick=()=>{setSidebar(false);openConnectionExplorer();};
   $('connectionExplorerClose').onclick=()=>$('connectionExplorerDialog').close();
   ['connectionProject','connectionGrade'].forEach(id=>$(id).onchange=renderConnectionExplorer);
   $('connectionQuery').oninput=renderConnectionExplorer;
@@ -1295,6 +1296,7 @@ function fitConnections(){
 function updateRelationshipUI(){
   $('architectureToggle').setAttribute('aria-pressed',String(state.architecture));$('architectureToggle').disabled=!state.relationshipLedger;
   $('connectionExplorerButton').disabled=!state.relationshipLedger;
+  $('connectionSidebarButton').disabled=!state.relationshipLedger;
   $('architecturePanel').hidden=!state.architecture;$('includeThematic').checked=state.includeThematic;
   $('linksCaption').textContent=state.architecture?'Relationship links':chronological()?'Creation thread':state.layout==='orbits'?'Orbit links':'World links';
   const counts={verified:0,documented:0,conceptual:0};
