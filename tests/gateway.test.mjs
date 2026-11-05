@@ -40,3 +40,24 @@ test('Static public gateway has no remote scripts or invented installations',()=
   assert(css.includes('prefers-reduced-motion'));
   assert(page.includes('viewport'));
 });
+
+
+test('Six Houses open only four creator-supplied external doors; two are still pending',()=>{
+  const destinations=new Map([
+    ['ChipsHouse','https://larrinamsalva.github.io/larrina-creator-hub/'],
+    ['XiHouse','https://www.xi-field.com/'],
+    ['OmegaHouse','https://omegav6.jeffdeweyeljefe.workers.dev/'],
+    ['WAREHouse','https://ware-portal-nicwitahole311.replit.app/']
+  ]);
+  assert.equal((houses.match(/class="house (chips|xi|omega|ware|quill|qef)"/g)||[]).length,6);
+  assert.equal((houses.match(/class="house-link"/g)||[]).length,4,'exactly four creator-supplied outbound links');
+  for(const [house,url] of destinations){
+    assert(houses.includes('href="'+url+'"'),house+' must link to creator-provided URL');
+    assert(houses.includes('aria-label="Visit '+house+' in a new tab"'),house+' needs accessible label');
+    assert(houses.includes('target="_blank" rel="noopener noreferrer"'),'external House doors must not get opener access');
+  }
+  assert.equal((houses.match(/Portal awaiting its creator's link/g)||[]).length,2,'QuillHouse and QEFHouse must remain pending');
+  for(const label of ['QuillHouse','QEFHouse']){
+    assert(houses.includes('<h2 id="house-'+(label==='QuillHouse'?'quill':'qef')+'">'+label+'</h2>'));
+  }
+});

@@ -11,11 +11,19 @@ test('Phitarium links to the static Other Fields page', () => {
  assert.ok(page.includes('href="../index.html"'));
  assert.ok(page.includes('href="./houses.css"'));
 });
-test('all six canonical Houses and creators are present without fake links', () => {
+test('all six canonical Houses and creators are present; only approved destinations are linked', () => {
  assert.equal(page.split('<article class="house ').length-1, 6);
  for(const [house,owner] of expected){ assert.ok(page.includes('>'+house+'</h2>'),house); assert.ok(page.includes('A world by '+owner),owner); }
- assert.equal(page.split('Portal awaiting its creator').length-1, 6);
- assert.ok(!page.includes('https://') && !page.includes('http://'));
+ assert.equal(page.split('Portal awaiting its creator').length-1, 2,'Unconfirmed Quill and QEF portals remain pending');
+ const urls=[
+   'https://larrinamsalva.github.io/larrina-creator-hub/',
+   'https://www.xi-field.com/',
+   'https://ware-portal-nicwitahole311.replit.app/',
+   'https://omegav6.jeffdeweyeljefe.workers.dev/'
+ ];
+ for(const url of urls)assert.ok(page.includes('href="'+url+'"'),url);
+ assert.equal((page.match(/class="house-link"/g)||[]).length,4);
+ assert.equal((page.match(/rel="noopener noreferrer"/g)||[]).length,4);
 });
 test('privacy and accessibility defaults', () => {
  assert.ok(page.includes('Each House belongs to its creator'));

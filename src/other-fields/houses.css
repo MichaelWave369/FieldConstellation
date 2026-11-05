@@ -9,3 +9,11 @@ main{padding:60px clamp(18px,4vw,44px) 55px}.intro{text-align:center;margin:auto
 .note{text-align:center;margin:38px auto 0;max-width:850px;color:var(--muted);font-size:12px;line-height:1.8}footer{padding:25px clamp(18px,4vw,44px) 35px;border-top:1px solid #ffffff23;display:flex;justify-content:space-between;align-items:center;gap:16px;color:#99aec7;font-size:11px}footer span:first-child{letter-spacing:.12em}footer a{text-decoration:none;color:#c6e5ff}
 @media(max-width:950px){.house-grid{grid-template-columns:repeat(2,minmax(0,1fr))}footer{flex-wrap:wrap}}@media(max-width:540px){main{padding-top:40px}.house-grid{grid-template-columns:1fr}.art{height:170px}.intro{margin-bottom:35px}nav span{display:none}footer{display:grid;gap:9px}.brand{font-size:9px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.house{transition:none}.house:hover{transform:none}}
+
+
+/* Creator-approved external doors; keep pending Houses visually distinct. */
+.house-link{display:inline-flex;align-items:center;gap:9px;margin-top:21px;padding:11px 15px;min-height:44px;border:1px solid var(--tone);border-radius:9px;color:var(--ink);background:linear-gradient(110deg,#173652bb,#1d2e4ab8);font-size:12px;font-weight:650;letter-spacing:.025em;text-decoration:none;transition:background .16s,transform .16s,box-shadow .16s}
+.house-link span{font-size:18px;line-height:1;color:var(--tone)}
+.house-link:hover{background:#2b4468;transform:translateY(-2px);box-shadow:0 0 22px color-mix(in srgb,var(--tone) 22%,transparent)}
+.house-link:focus-visible{outline:3px solid var(--tone);outline-offset:4px}
+@media(prefers-reduced-motion:reduce){.house-link{transition:none}.house-link:hover{transform:none}}
