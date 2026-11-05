@@ -28,4 +28,14 @@ const newRoute="const overviewUrl=repo=>'./phitarium/index.html?repo=github:'+en
 if(!overview.includes(oldRoute))throw Error('Unexpected overview routing, refusing domain staging');
 overview=overview.replace(oldRoute,newRoute);
 await writeFile(new URL('gateway/overview-domain.js',target),overview);
+
+/* Preserve /gateway/ as a working alternate route in the future root preview. */
+let aliasHtml=await readFile(new URL('gateway/index.html',source),'utf8');
+aliasHtml=aliasHtml.replaceAll('../index.html','../phitarium/index.html');
+aliasHtml=aliasHtml.replace('src="./overview.js"','src="./overview-domain-gateway.js"');
+await writeFile(new URL('gateway/index.html',target),aliasHtml);
+const gatewayRoute="const overviewUrl=repo=>'../phitarium/index.html?repo=github:'+encodeURIComponent(repo.id);";
+const aliasOverview=(await readFile(new URL('gateway/overview.js',source),'utf8')).replace(oldRoute,gatewayRoute);
+await writeFile(new URL('gateway/overview-domain-gateway.js',target),aliasOverview);
+
 console.log('Prepared local dist-domain/ root gateway + /phitarium/ sky. No deployment or DNS changes.');
