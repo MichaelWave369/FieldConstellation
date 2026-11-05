@@ -301,6 +301,20 @@ try{
   for(const name of ['ChipsHouse','XiHouse','OmegaHouse','WAREHouse','QuillHouse','QEFHouse']){
     assert.equal(await housesPage.getByRole('heading',{name,exact:true}).count(),1,'Missing House: '+name);
   }
+  // Live House destinations remain creator-owned, with no navigation attempted during tests.
+  for(const [house,href] of [
+    ['ChipsHouse','https://larrinamsalva.github.io/larrina-creator-hub/'],
+    ['XiHouse','https://www.xi-field.com/'],
+    ['OmegaHouse','https://omegav6.jeffdeweyeljefe.workers.dev/'],
+    ['WAREHouse','https://ware-portal-nicwitahole311.replit.app/']
+  ]){
+    const link=housesPage.getByRole('link',{name:'Visit '+house+' in a new tab'});
+    assert.equal(await link.count(),1,house+' link exists');
+    assert.equal(await link.getAttribute('href'),href,house+' exact creator URL');
+    assert.equal(await link.getAttribute('rel'),'noopener noreferrer');
+  }
+  assert.equal(await housesPage.locator('.house .pending').count(),2,'Two unlinked Houses stay pending');
+
   await housesPage.locator('header nav a[href="../index.html"]').click();
   await housesPage.waitForFunction(()=>document.getElementById('loading')?.hidden===true,{timeout:30000});
   assert.equal(new URL(housesPage.url()).pathname,'/FieldConstellation/index.html','Return to Phitarium must work under Pages subpath.');
