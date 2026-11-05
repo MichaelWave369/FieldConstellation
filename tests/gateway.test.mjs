@@ -30,7 +30,8 @@ test('PhiOS and both ecosystem neighbors use verified public GitHub IDs',()=>{
 });
 
 test('Static public gateway has no remote scripts or invented installations',()=>{
-  assert(!/<script\b/i.test(page));
+  assert.equal((page.match(/<script\b/gi)||[]).length,1,'Gateway must load only its own local module');
+  assert(page.includes('<script type="module" src="./overview.js"></script>'),'Gateway must not load remote executable scripts');
   assert(!/<iframe\b/i.test(page));
   assert(!/<img\b/i.test(page));
   assert(!/https?:\/\/(?!phi-field\.com\/)/i.test(page));
