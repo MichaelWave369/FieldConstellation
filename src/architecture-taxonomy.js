@@ -50,11 +50,11 @@ const suggestions=[
 export function architectureFor(repo){
   const name=String(repo?.name||'').toLowerCase();
   if(repo?.archived||/(^|[-_])archive($|[-_])/.test(name))return {id:'ARCHIVE',basis:'repository-archive',integration:'cataloged'};
-  const named=exact.get(name);
-  if(named)return {id:named,basis:'curated',integration:'cataloged'};
   const tagged=[...new Set((repo?.topics||[]).map(t=>byTopic.get(String(t).toLowerCase())).filter(Boolean))];
   if(tagged.length>1)return {id:'EXPERIMENT',basis:'conflicting-owner-topics',integration:'cataloged'};
   if(tagged.length===1)return {id:tagged[0],basis:'owner-topic',integration:'cataloged'};
+  const named=exact.get(name);
+  if(named)return {id:named,basis:'curated',integration:'cataloged'};
   const description=String(repo?.description||'');
   const matches=suggestions.filter(([,rule])=>rule.test(description));
   if(matches.length===1)return {id:matches[0][0],basis:'suggested-needs-review',integration:'cataloged'};
