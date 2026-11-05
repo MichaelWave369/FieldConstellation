@@ -101,6 +101,83 @@ try{
   assert.deepEqual(dossierErrors,[],'Dossier navigation must not produce uncaught browser errors');
   await dossierContext.close();
 
+  // Connection Explorer is also an explicit project visit. Keep its effects out
+  // of the main Quest/Passport fixture, as with the Planet Dossier acceptance.
+  log('connections: source-backed ledger explorer, project and grade filters, endpoint inspection');
+  const connectionContext=await browser.newContext({viewport:{width:1440,height:960}});
+  await connectionContext.addInitScript(disableAuto);
+  const connectionPage=await connectionContext.newPage();
+  const connectionErrors=[];
+  connectionPage.on('pageerror',error=>connectionErrors.push(error.message));
+  await ready(connectionPage,base+'?repo='+encodeURIComponent(canonical(first)));
+  await connectionPage.locator('#architectureToggle').click();
+  assert.equal(await connectionPage.locator('#connectionExplorerButton').isDisabled(),false);
+  await connectionPage.locator('#connectionExplorerButton').click();
+  assert.equal(await connectionPage.locator('#connectionExplorerDialog').isVisible(),true);
+  assert.equal(await connectionPage.locator('#connectionProject').inputValue(),canonical(first));
+  assert.match(await connectionPage.locator('#connectionExplorerScope').textContent(),/reviewed source connections/);
+  assert(Number((await connectionPage.locator('#connectionResultCount').textContent()).match(/^[0-9]+/)?.[0])>0);
+  await connectionPage.locator('#connectionProject').selectOption('all');
+  await connectionPage.locator('#connectionGrade').selectOption('documented');
+  const documentedCards=connectionPage.locator('.connection-card.documented');
+  assert(await documentedCards.count()>0,'Documented contracts should be discoverable');
+  assert.equal(await connectionPage.locator('.connection-card.verified').count(),0);
+  await connectionPage.locator('#connectionClear').click();
+  await connectionPage.locator('#connectionQuery').fill('Auralith');
+  assert(await connectionPage.locator('.connection-card').count()>0,'Evidence search finds public source');
+  await connectionPage.locator('.connection-card details').first().evaluate(details=>{details.open=true;});
+  const href=await connectionPage.locator('.connection-card details a').first().getAttribute('href');
+  assert.match(href,/^https:\/\/github\.com\/MichaelWave369\/[^/]+\/blob\/[a-f0-9]{40}\//,'Sources are commit-pinned GitHub lines');
+  await capture(connectionPage,'desktop-connections-explorer');
+  await connectionPage.locator('#connectionClear').click();
+  await connectionPage.locator('#connectionProject').selectOption(canonical(first));
+  const inspectId=await connectionPage.locator('.connection-card .connection-endpoints button').last().getAttribute('data-connection-repo');
+  await connectionPage.locator('.connection-card .connection-endpoints button').last().click();
+  assert.equal(await connectionPage.locator('#connectionExplorerDialog').isVisible(),false);
+  assert.equal(await connectionPage.locator('#inspector').getAttribute('data-repo'),inspectId,'Endpoint inspection opens the normal inspector');
+  await connectionPage.locator('#toggleDossier').click();
+  assert.equal(await connectionPage.locator('#dossierConnections').count(),1);
+  await connectionPage.locator('#dossierConnections').click();
+  assert.equal(await connectionPage.locator('#connectionExplorerDialog').isVisible(),true,'Dossier provides source explorer entry');
+  await connectionPage.keyboard.press('Escape');
+  assert.equal(await connectionPage.locator('#connectionExplorerDialog').isVisible(),false);
+  assert.deepEqual(connectionErrors,[],'Connection Explorer navigation must not produce browser errors');
+  await connectionContext.close();
+
+  log('connections: narrow mobile and no-WebGL Canvas keep the source explorer accessible');
+  const connectionMobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  await connectionMobile.addInitScript(disableAuto);
+  const connectionMobilePage=await connectionMobile.newPage();
+  await ready(connectionMobilePage,base);
+  assert.equal(await connectionMobilePage.locator('#architectureToggle').isVisible(),false,'Mobile header intentionally hides Relationships.');
+  await connectionMobilePage.locator('#mobileMenu').click();
+  assert.equal(await connectionMobilePage.locator('#sidebar').evaluate(el=>el.classList.contains('open')),true,'Mobile navigation opens.');
+  assert.equal(await connectionMobilePage.locator('#connectionSidebarButton').isEnabled(),true,'Public source evidence can be opened from the mobile sidebar.');
+  await connectionMobilePage.locator('#connectionSidebarButton').click();
+  assert.equal(await connectionMobilePage.locator('#mobileMenu').getAttribute('aria-expanded'),'false','Navigation closes before opening source dialog.');
+  assert.equal(await connectionMobilePage.locator('#connectionExplorerDialog').isVisible(),true);
+  const connectionWidth=await connectionMobilePage.locator('#connectionExplorerDialog').boundingBox();
+  assert(connectionWidth&&connectionWidth.width<=390,'Connection dialog fits portrait viewport');
+  await capture(connectionMobilePage,'mobile-connections-explorer');
+  await connectionMobilePage.locator('#connectionExplorerClose').click();
+  await connectionMobile.close();
+  const connectionCanvas=await browser.newContext({viewport:{width:1280,height:800}});
+  await connectionCanvas.addInitScript(disableAuto);
+  await connectionCanvas.addInitScript(()=>{
+    const original=HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext=function(kind,...args){
+      if(kind==='webgl2')return null;
+      return original.call(this,kind,...args);
+    };
+  });
+  const connectionCanvasPage=await connectionCanvas.newPage();
+  await ready(connectionCanvasPage,base);
+  await connectionCanvasPage.locator('#architectureToggle').click();
+  await connectionCanvasPage.locator('#connectionExplorerButton').click();
+  assert((await connectionCanvasPage.locator('.connection-card').count())>0,'Canvas fallback supports source explorer');
+  await connectionCanvasPage.locator('#connectionExplorerClose').click();
+  await connectionCanvas.close();
+
   log('desktop: repository index sort controls and the public-only auto-check preference');
   assert.equal(await page.locator('#autoRefresh').count(),1,'Auto-check toggle exists.');
   await page.locator('#reposTab').click();

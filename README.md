@@ -6,6 +6,16 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 26 · Planet Connections Explorer (November 4, 2026)
+
+The Phitarium's source-backed **Relationships** mode now offers **Explore sourced connections**, a keyboard-operable, responsive **Planet Connections Explorer**. It displays only the previously validated public, commit-pinned relationship ledger (not automatically inferred relationships). Select a project, filter **Verified in source** versus **Documented contracts**, or search project names and evidence claims. Every card shows the reviewed relationship direction, kind, summary, explicit scope limits and original commit-pinned GitHub citations.
+
+Project endpoints are normal **Inspect** actions. Choosing one closes the explorer, reveals the project in the existing inspector and highlights its source-grade architecture neighbors; any blocking map filters are cleared deliberately. This explicit visit can count as a Passport/Quest discovery. The expanded Planet Dossier also links to the explorer in the context of that project. Empty results are described as **not recorded in this bounded review**, never as evidence that no dependency exists.
+
+This stage adds **no source relationships or claim upgrades**, network requests, Netlify usage, DNS operations, or deployments. Thematic category neighbors remain editorial discovery aids, entirely separate from the source explorer. Unit tests cover 650 additional public repos, private endpoint exclusions, duplicates, text/status/project filters, and stable source ordering; browser tests exercise desktop, mobile and Canvas fallback in isolated contexts. Physical Quest 3 browser testing remains pending.
+
+See [Edition 26 source explorer contract](docs/EDITION_26_CONNECTIONS_EXPLORER.md).
+
 ## Edition 25 · Planet Dossier (November 4, 2026)
 
 The Phitarium now includes an **opt-in expanded Planet Dossier** in the existing repository inspector. Choose a public star and select **Dossier ⤢** to widen the inspector for source-aware discovery, or choose **Compact ⤡** to return to the usual narrow view.
