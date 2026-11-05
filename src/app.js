@@ -7,6 +7,7 @@ import {GROUPS,ageInDays,hash,prepareRepos,layoutPositions,solarSystemPositions,
 
 import {parseSnapshot,newerPublicCache,fetchPublicInventory,CACHE_KEY,AUTO_REFRESH_KEY,AUTO_CHECK_KEY,autoRefreshDue} from './inventory.js';
 import {SORT_MODES,normalizeSortMode,sortRepositoryList} from './sort.js';
+import {ARCHITECTURE_GROUPS,architectureFor,architectureCounts} from './architecture-taxonomy.js';
 import {resolveRelationships,relationshipEdges,neighborhood,relatedProjects,RELATIONSHIP_STYLES,RELATIONSHIP_KINDS} from './relationships.js';
 import {destinationStatus} from './destinations.js';
 import {projectId,readProjectLink,projectLink,atlasLink} from './project-links.js';
@@ -29,7 +30,7 @@ const $=id=>document.getElementById(id);
 const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',sortMode:'name',autoRefresh:true,activityNow:Date.now(),layout:'constellation',solarMotion:false,selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
+const state={repos:[],query:'',group:null,archGroup:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',sortMode:'name',autoRefresh:true,activityNow:Date.now(),layout:'constellation',solarMotion:false,selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
 let autoRefreshTimer=null,solarPhase=0,solarSuns=[],dossierExpanded=false;
 let solarDiscoveryGroup=null,solarDiscoveryRoute=[],solarDiscoveryIndex=0;
 let journeyRoute=null,journeyIndex=0;
@@ -38,8 +39,9 @@ let showtimeIndex=-1,showtimeTimer=null,showtimeStops=[],showtimeWasOrbit=false,
 let immersiveActive=false,immersiveStops=[],immersiveIndex=0,immersiveRestore=null;
 const tempMatrix=new THREE.Matrix4(),tempScale=new THREE.Vector3(),tempColor=new THREE.Color(),tempProjection=new THREE.Vector3();
 const groupMap=new Map(GROUPS.map(g=>[g.id,g]));
+const architectureGroupMap=new Map(ARCHITECTURE_GROUPS.map(g=>[g.id,g]));
 const featured=['BTM','SparkTheSubstrate','EchoesOfTheNine','TweedleVerse','LENZ','FieldStoryForge','BackyardProductionCompany','GenEWrist','SuperPhiVessel','BrainC','PhiLearn','Agentora','Domistika','SiliconLouvre','FramefieldStudio','RastaPhi','PhiCade','GitPorch','FieldAtlas','Pulse369','MoreBounceLabs','NestedBubbleGear','MRIPHI','RegenerationAtlas','Phithon','Vibe','WhiteHatLedger369','PhiOS','CommonTable','FamilyVault','FieldAccord','axiomforge-ledger','Infinite-Commons'];
-const repoTint=repo=>state.lens==='quest'?(state.quest.discoveredIds.includes(projectId(repo))?'#d0f29b':'#66736a'):colorFor(repo,state.lens,state.activityNow);
+const repoTint=repo=>state.lens==='quest'?(state.quest.discoveredIds.includes(projectId(repo))?'#d0f29b':'#66736a'):state.layout==='architecture'&&state.lens==='world'?architectureGroupMap.get(architectureFor(repo).id).color:colorFor(repo,state.lens,state.activityNow);
 const repoGlow=repo=>{
   if(state.layout!=='solar')return activityWeight(repo,state.activityNow);
   const attention=Math.log1p(Math.max(0,(repo.stars||0)+(repo.forks||0)));
@@ -263,12 +265,20 @@ function updateInventoryUI(){
 
   $('categories').innerHTML=GROUPS.map(g=>`<button class="category${state.group===g.id?' selected':''}" style="--category:${g.color}" data-group="${g.id}" aria-pressed="${state.group===g.id}"><span class="category-dot"></span><span>${g.name}</span><span class="category-count">${state.repos.filter(r=>r.group===g.id).length}</span></button>`).join('');
   document.querySelectorAll('[data-group]').forEach(button=>button.onclick=()=>{const id=state.group===button.dataset.group?null:button.dataset.group;if(state.layout==='solar')focusSolarSystem(id);else{state.group=id;applyFilters();}});
-  renderLensLegend();renderSidebarIndex();
+  renderLensLegend();renderSidebarIndex();renderArchitectureNavigator();
+}
+
+function renderArchitectureNavigator(){
+  const host=$('architectureCategories');if(!host)return;
+  const counts=architectureCounts(state.repos);
+  host.innerHTML=ARCHITECTURE_GROUPS.map(g=>`<button type="button" data-arch-group="${g.id}" class="arch-category${state.archGroup===g.id?' selected':''}" aria-pressed="${state.archGroup===g.id}" style="--arch-color:${g.color}"><i aria-hidden="true"></i><span>${escape(g.short)}</span><b>${counts[g.id]}</b></button>`).join('');
+  for(const button of host.querySelectorAll('[data-arch-group]'))button.onclick=()=>{state.archGroup=state.archGroup===button.dataset.archGroup?null:button.dataset.archGroup;applyFilters();if(sceneReady)fitMatches();};
+  const status=$('architectureStatus');if(status)status.textContent=state.archGroup?`${counts[state.archGroup]} cataloged public projects in ${state.archGroup}. Category is editorial; installation unverified.`:`${state.repos.length} public repositories in ten PhiOS roles. Select a role to filter. Placement is not an install or dependency claim.`;
 }
 
 function applyFilters(){
   const atlasIds=state.atlasOnly?reviewedAtlasIds(state.atlas,state.repos):state.atlasPublishedOnly?publishedAtlasIds(state.atlasPublished,state.repos):null;
-  state.visible=new Set(filterRepos(state.repos,state).filter(r=>!atlasIds||atlasIds.has(projectId(r))).map(r=>r.id));
+  state.visible=new Set(filterRepos(state.repos,state).filter(r=>(state.layout!=='architecture'||!state.archGroup||architectureFor(r).id===state.archGroup)&&(!atlasIds||atlasIds.has(projectId(r)))).map(r=>r.id));
   $('visibleCount').textContent=`${state.visible.size} / ${state.repos.length} worlds`;
   $('emptyState').hidden=state.visible.size!==0;
   document.querySelectorAll('[data-group]').forEach(b=>{const selected=state.group===b.dataset.group;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
@@ -279,10 +289,10 @@ function applyFilters(){
   if(sceneReady)updateAppearance();
   if($('directoryDialog').open)renderDirectory();
   $('pagesOnly').setAttribute('aria-pressed',String(state.pagesOnly));$('hideForks').setAttribute('aria-pressed',String(state.hideForks));$('atlasOnly').setAttribute('aria-pressed',String(state.atlasOnly));$('atlasPublishedOnly').setAttribute('aria-pressed',String(state.atlasPublishedOnly));renderSidebarIndex();renderLensLegend();
-  updateSolarNavigator();
+  updateSolarNavigator();renderArchitectureNavigator();
   $('tooltip').hidden=true;updateRelationshipUI();
 }
-function resetFilters(){state.query='';state.group=null;state.language='';state.visibility='';state.pagesOnly=false;state.hideForks=false;state.atlasOnly=false;state.atlasPublishedOnly=false;$('search').value='';$('language').value='';$('visibility').value='';clearSelection();applyFilters();if(sceneReady)fitField(true);}
+function resetFilters(){state.query='';state.group=null;state.archGroup=null;state.language='';state.visibility='';state.pagesOnly=false;state.hideForks=false;state.atlasOnly=false;state.atlasPublishedOnly=false;$('search').value='';$('language').value='';$('visibility').value='';clearSelection();applyFilters();if(sceneReady)fitField(true);}
 function setSidebarMode(mode){state.sidebarMode=mode;$('worldPanel').hidden=mode!=='worlds';$('repoPanel').hidden=mode!=='repos';$('worldsTab').setAttribute('aria-selected',String(mode==='worlds'));$('reposTab').setAttribute('aria-selected',String(mode==='repos'));$('worldsTab').tabIndex=mode==='worlds'?0:-1;$('reposTab').tabIndex=mode==='repos'?0:-1;$('browseHeading').textContent=mode==='worlds'?'CONSTELLATIONS':'REPOSITORIES';if(mode==='repos')renderSidebarIndex();}
 function sortedVisibleRepos(){return sortRepositoryList(state.repos.filter(repo=>state.visible.has(repo.id)),state.sortMode);}
 function updateSortControls(){
@@ -322,7 +332,7 @@ function renderLensLegend(){
   if(state.lens==='language'){const counts=new Map();for(const r of visible)counts.set(r.language,(counts.get(r.language)||0)+1);$('lensLegend').innerHTML=[...counts.entries()].sort((a,b)=>b[1]-a[1]).map(([language,count])=>`<button class="legend-language" data-key-language="${escape(language)}" title="${escape(language)} · ${count} matching repositories" aria-label="Filter ${escape(language)}"><i style="background:${languageColor(language)}"></i><span>${escape(language)}</span></button>`).join('');document.querySelectorAll('[data-key-language]').forEach(button=>button.onclick=()=>{state.language=state.language===button.dataset.keyLanguage?'':button.dataset.keyLanguage;$('language').value=state.language;applyFilters();});}
   else if(state.lens==='quest')$('lensLegend').innerHTML='<span><i style="background:#d0f29b"></i>Discovered</span><span><i style="background:#66736a"></i>Undiscovered</span><span>Exploration, not build status</span>';
   else if(state.lens==='activity')$('lensLegend').innerHTML='<span title="Age of the last code push"><i style="background:#f5d68b"></i>≤7d</span><span><i style="background:#d7a866"></i>30d</span><span><i style="background:#8ba58b"></i>90d</span><span><i style="background:#6d7884"></i>Older</span>';
-  else $('lensLegend').innerHTML='<span>COLOR: WORLD</span><span class="legend-dots">'+GROUPS.map(g=>`<i style="background:${g.color}" title="${g.name}"></i>`).join('')+'</span>';
+  else $('lensLegend').innerHTML='<span>COLOR: '+(state.layout==='architecture'?'PHIOS ROLE':'WORLD')+'</span><span class="legend-dots">'+(state.layout==='architecture'?ARCHITECTURE_GROUPS:GROUPS).map(g=>`<i style="background:${g.color}" title="${g.name}"></i>`).join('')+'</span>';
 }
 /**
  * Phitarium Immersive Mode is an opt-in visual visitor walk-through.
@@ -571,17 +581,21 @@ function setLayout(mode){
   if(state.layout===mode)return;
   if(state.layout==='solar'){state.solarMotion=false;$('solarMotion').checked=false;}
   state.layout=mode;
+  state.archGroup=null;
+  if(mode==='architecture')state.group=null;
   document.querySelectorAll('[data-layout]').forEach(b=>{b.classList.toggle('selected',b.dataset.layout===mode);b.setAttribute('aria-pressed',String(b.dataset.layout===mode));});
-  $('layoutLabel').textContent={constellation:'CONSTELLATION SPACE',helix:'CHRONOLOGICAL HELIX',sphere:'FIBONACCI SPHERE',orbits:'LANGUAGE ORBITS',spiral:'GOLDEN-ANGLE TIMELINE',solar:'CATEGORY SOLAR SYSTEMS'}[mode];
-  $('viewDescription').textContent={constellation:'Eight worlds of ideas. One shared field.',helix:'Follow the order in which your projects began.',sphere:'Every world, a place on the same Fibonacci shell.',orbits:'One orbit per programming language. Inspired by Grok’s Field Lattice.',spiral:'A widening golden-angle spiral, ordered by creation. From Grok’s Field Lattice.',solar:'Eight suns. Every public repository is a planet. Distance represents last push, not project health.'}[mode];
-  $('linksCaption').textContent=chronological()?'Creation thread':mode==='orbits'?'Orbit links':mode==='solar'?'Orbit guides':'World links';
+  $('layoutLabel').textContent={constellation:'CONSTELLATION SPACE',helix:'CHRONOLOGICAL HELIX',sphere:'FIBONACCI SPHERE',orbits:'LANGUAGE ORBITS',spiral:'GOLDEN-ANGLE TIMELINE',solar:'CATEGORY SOLAR SYSTEMS',architecture:'PHIOS ARCHITECTURE'}[mode];
+  $('viewDescription').textContent={constellation:'Eight worlds of ideas. One shared field.',helix:'Follow the order in which your projects began.',sphere:'Every world, a place on the same Fibonacci shell.',orbits:'One orbit per programming language. Inspired by Grok’s Field Lattice.',spiral:'A widening golden-angle spiral, ordered by creation. From Grok’s Field Lattice.',solar:'Eight suns. Every public repository is a planet. Distance represents last push, not project health.',architecture:'Ten PhiOS roles. Public repos are cataloged, not verified installed or integrated.'}[mode];
+  $('linksCaption').textContent=chronological()?'Creation thread':mode==='orbits'?'Orbit links':mode==='solar'?'Orbit guides':mode==='architecture'?'Source links only':'World links';
   $('solarMotionControl').hidden=mode!=='solar';
   $('solarLegend').hidden=mode!=='solar';
   $('solarNavigator').hidden=mode!=='solar';
-  updateSolarNavigator();
+  $('architectureNavigator').hidden=mode!=='architecture';
+  updateSolarNavigator();renderArchitectureNavigator();
   if(mode==='orbits')setLens('language');
   if(mode==='solar'){solarPhase=0;setOrbit(false);setLens('world');}
-  updateRelationshipUI();
+  if(mode==='architecture'){setOrbit(false);setLens('world');}
+  applyFilters();updateRelationshipUI();
   if(sceneReady){targets=layoutPositions(state.repos,mode).map(p=>new THREE.Vector3(...p));if(reducedMotion)positions=targets.map(p=>p.clone());buildEdges();refreshGuides();buildLabels();fitField(true);}
 }
 
@@ -663,7 +677,7 @@ function updateGeometry(){
 
 function buildLabels(){
   $('labels').replaceChildren();labelNodes=state.repos.map(r=>{const el=document.createElement('div');el.className='node-label'+(featured.includes(r.name)?' featured':'');el.textContent=r.name;$('labels').append(el);return{el,repo:r};});
-  const groups=state.layout==='orbits'?languageOrbits(state.repos).map((ring,i)=>{const angle=-2.5+i*.25;return{id:'language-'+ring.language,name:ring.language,short:`${ring.language.toUpperCase()} · ${ring.count}`,color:ring.color,center:[Math.cos(angle)*ring.radius,ring.y-8,Math.sin(angle)*ring.radius],language:ring.language};}):GROUPS;
+  const groups=state.layout==='orbits'?languageOrbits(state.repos).map((ring,i)=>{const angle=-2.5+i*.25;return{id:'language-'+ring.language,name:ring.language,short:`${ring.language.toUpperCase()} · ${ring.count}`,color:ring.color,center:[Math.cos(angle)*ring.radius,ring.y-8,Math.sin(angle)*ring.radius],language:ring.language};}):state.layout==='architecture'?ARCHITECTURE_GROUPS:GROUPS;
   clusterLabels=groups.map(g=>{const el=document.createElement('div');el.className='cluster-label';el.textContent=g.short;el.style.color=g.color;$('labels').append(el);return{el,group:g};});
   centerLabel=document.createElement('div');centerLabel.className='center-label';centerLabel.innerHTML='<b>THE FIELD</b>Φ369';$('labels').append(centerLabel);
 }
@@ -674,7 +688,7 @@ function updateLabels(){
   const blocked=(x,y,width)=>y<86||y>h-143||x<60||x+width>w-15||(x+width>caption.left-sceneRect.left-10&&x<caption.right-sceneRect.left+10&&y+14>caption.top-sceneRect.top-10&&y<caption.bottom-sceneRect.top+12)||(inspectorVisible&&x+width>inspectorRect.left-sceneRect.left-12&&x<inspectorRect.right-sceneRect.left+12&&y>inspectorRect.top-sceneRect.top-15&&y<inspectorRect.bottom-sceneRect.top+15);
   const ordered=labelNodes.map((l,i)=>({...l,i,priority:l.repo.id===state.selected?0:l.repo.id===state.hovered?1:state.architecture&&state.selected&&state.neighbors.has(l.repo.id)?2:featured.includes(l.repo.name)?2:3})).sort((a,b)=>a.priority-b.priority);let count=0;
   for(const label of ordered){const {el,repo,i}=label;el.style.display='none';if(!nodeActive(repo.id))continue;const allow=label.priority<3||state.query||state.visible.size<50||camera.position.distanceTo(positions[i])<48;if(!allow||count>42)continue;tempProjection.copy(positions[i]).project(camera);if(tempProjection.z>1||tempProjection.z<-1)continue;const x=(tempProjection.x*.5+.5)*w+9,y=(-tempProjection.y*.5+.5)*h-5,width=repo.name.length*(label.priority===0?6:5.4);if(blocked(x,y,width))continue;const box={x,y,w:width,h:14};if(occupied.some(o=>x<o.x+o.w+10&&x+width>o.x-10&&y<o.y+o.h+5&&y+14>o.y-5))continue;occupied.push(box);el.style.display='';el.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;el.classList.toggle('selected',repo.id===state.selected);el.style.color=repo.id===state.selected?'':state.lens==='world'?'':repoTint(repo);count++;}
-  for(const {el,group}of clusterLabels){el.style.display='none';if(group.language){if(state.layout!=='orbits'||!state.repos.some(r=>r.language===group.language&&state.visible.has(r.id)))continue;}else if(!['constellation','solar'].includes(state.layout)||(state.group&&state.group!==group.id)||!state.repos.some(r=>r.group===group.id&&state.visible.has(r.id)))continue;tempProjection.set(group.center[0],group.center[1]+(state.layout==='solar'?3.5:11),group.center[2]).project(camera);const x=(tempProjection.x*.5+.5)*w,y=(-tempProjection.y*.5+.5)*h,width=group.short.length*5.5;if(tempProjection.z>1||blocked(x-width/2,y,width)||occupied.some(o=>x-width/2<o.x+o.w+8&&x+width/2>o.x-8&&y<o.y+o.h+14&&y+10>o.y-8))continue;el.style.display='';el.style.left=x+'px';el.style.top=y+'px';occupied.push({x:x-width/2,y,w:width,h:14});}
+  for(const {el,group}of clusterLabels){el.style.display='none';if(group.language){if(state.layout!=='orbits'||!state.repos.some(r=>r.language===group.language&&state.visible.has(r.id)))continue;}else if(!['constellation','solar','architecture'].includes(state.layout)||(state.layout==='architecture'?(state.archGroup&&state.archGroup!==group.id)||!state.repos.some(r=>architectureFor(r).id===group.id&&state.visible.has(r.id)):(state.group&&state.group!==group.id)||!state.repos.some(r=>r.group===group.id&&state.visible.has(r.id))))continue;tempProjection.set(group.center[0],group.center[1]+(state.layout==='solar'?3.5:11),group.center[2]).project(camera);const x=(tempProjection.x*.5+.5)*w,y=(-tempProjection.y*.5+.5)*h,width=group.short.length*5.5;if(tempProjection.z>1||blocked(x-width/2,y,width)||occupied.some(o=>x-width/2<o.x+o.w+8&&x+width/2>o.x-8&&y<o.y+o.h+14&&y+10>o.y-8))continue;el.style.display='';el.style.left=x+'px';el.style.top=y+'px';occupied.push({x:x-width/2,y,w:width,h:14});}
   tempProjection.set(0,-2,0).project(camera);centerLabel.style.left=((tempProjection.x*.5+.5)*w)+'px';centerLabel.style.top=((-tempProjection.y*.5+.5)*h+12)+'px';centerLabel.style.display=state.selected||state.query||state.group?'none':'';
 }
 
