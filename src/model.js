@@ -1,3 +1,4 @@
+import {architecturePositions} from './architecture-taxonomy.js';
 export const GROUPS = [
   {id:'intelligence',name:'Intelligence & agents',short:'INTELLIGENCE',color:'#d0f29b',center:[-24,11,4]},
   {id:'creative',name:'Art & creative studios',short:'CREATIVE STUDIOS',color:'#c1a5ed',center:[-7,19,-15]},
@@ -68,6 +69,7 @@ export function solarSystemPositions(repos,phase=0,now=Date.now()){
 }
 export function layoutPositions(repos,mode){
   if(mode==='solar')return solarSystemPositions(repos);
+  if(mode==='architecture')return architecturePositions(repos);
 
   const buckets=new Map(GROUPS.map(g=>[g.id,repos.filter(r=>r.group===g.id)]));
   const order=chronologicalOrder(repos),chronology=order.map(i=>repos[i]),orbits=languageOrbits(repos);
@@ -94,7 +96,7 @@ export function layoutPositions(repos,mode){
   });
 }
 export function layoutEdges(repos,points,mode){
-  if(mode==='solar')return []; // Orbital rings are visual guides, not claims of source dependencies.
+  if(mode==='solar'||mode==='architecture')return []; // Editorial placement is not a source dependency.
   if(mode==='helix'||mode==='spiral'){const order=chronologicalOrder(repos);return order.slice(1).map((i,k)=>[order[k],i]);}
   if(mode==='orbits'){
     const edges=[];for(const ring of languageOrbits(repos)){const members=repos.map((r,i)=>({r,i})).filter(x=>x.r.language===ring.language);if(members.length>1)for(let i=0;i<members.length-(members.length===2?1:0);i++)edges.push([members[i].i,members[(i+1)%members.length].i]);}return edges;
