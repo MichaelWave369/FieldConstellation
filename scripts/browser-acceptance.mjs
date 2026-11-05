@@ -272,6 +272,16 @@ try{
   await page.locator('#solarMotion').uncheck();
   await page.locator('[data-layout="constellation"]').click();
   assert.equal(await page.locator('#solarLegend').isVisible(),false);
+  log('desktop: PhiOS architecture separates editorial roles from original eight thematic houses');
+  await page.locator('[data-layout="architecture"]').click();
+  assert.equal(await page.locator('#architectureNavigator').isVisible(),true);
+  assert.equal(await page.locator('#architectureCategories .arch-category').count(),10);
+  await page.locator('[data-arch-group="AI_HOME"]').click();
+  assert.equal(await page.locator('[data-arch-group="AI_HOME"]').getAttribute('aria-pressed'),'true');
+  assert(Number((await page.locator('#visibleCount').textContent()).split(' ')[0])>0,'AI home must contain public projects');
+  await page.locator('[data-arch-group="AI_HOME"]').click();
+  await page.locator('[data-layout="constellation"]').click();
+  assert.equal(await page.locator('#architectureNavigator').isVisible(),false);
   // Focusing a different category intentionally clears an out-of-system selection.
   // Restore the fixture before the next Dome Show's selected-project preservation checks.
   await ready(page,base+'?repo='+encodeURIComponent(canonical(second)));
@@ -300,6 +310,15 @@ try{
   await gatewayPage.goto(base+'gateway/index.html',{waitUntil:'domcontentloaded'});
   assert.equal(await gatewayPage.getByRole('heading',{level:1}).count(),1);
   assert.equal(await gatewayPage.locator('article.system-card').count(),3);
+  await gatewayPage.waitForFunction(()=>Number(document.getElementById('gatewayCount')?.textContent)>0,{timeout:12000});
+  assert.equal(await gatewayPage.locator('#gatewayCategories .system-filter').count(),10);
+  assert(Number(await gatewayPage.locator('#gatewayCount').textContent())>=200,'Gateway has a real public inventory count');
+  await gatewayPage.locator('[data-category="CORE_OS"]').click();
+  assert.equal(await gatewayPage.locator('[data-category="CORE_OS"]').getAttribute('aria-pressed'),'true');
+  await gatewayPage.locator('#gatewaySearch').fill('PhiOS');
+  assert.match(await gatewayPage.locator('#gatewayShown').textContent(),/of \d+ public repositories/);
+  await gatewayPage.locator('#gatewaySort').selectOption('stars');
+  await gatewayPage.locator('#gatewayReset').click();
   await capture(gatewayPage,'desktop-field-gateway');
   await gatewayPage.locator('a[href="../index.html?directory=1"]').click();
   await gatewayPage.waitForFunction(()=>document.getElementById('loading')?.hidden===true,{timeout:30000});
