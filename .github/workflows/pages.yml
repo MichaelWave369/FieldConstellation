@@ -23,6 +23,9 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run build:verify
+      # Validate the local-only apex-domain package; only dist/ may be deployed on main.
+      - run: npm run build:domain
+      - run: npm run domain:verify
       # Edition 11 runs Chromium against the actual static preview before deploy.
       # Playwright is CI-only: never bundled into the visitor app or package lock.
       - run: npm install --no-save --package-lock=false playwright@1.56.1
