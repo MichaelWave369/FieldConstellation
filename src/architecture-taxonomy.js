@@ -33,17 +33,17 @@ const curated=Object.freeze({
   ARCHIVE:'EVIE-private-archive ravedial-archive-explorer'
 });
 const exact=new Map();
-for(const [id,names] of Object.entries(curated))for(const name of names.split(/\\s+/))if(name)exact.set(name.toLowerCase(),id);
+for(const [id,names] of Object.entries(curated))for(const name of names.split(/\s+/))if(name)exact.set(name.toLowerCase(),id);
 const byTopic=new Map(ARCHITECTURE_GROUPS.map(group=>['phios-'+group.id.toLowerCase().replaceAll('_','-'),group.id]));
 const suggestions=[
-  ['CORE_OS',/\\boperating system\\b|\\bos kernel\\b|\\bbootloader\\b|\\bphios runtime\\b/i],
-  ['AI_HOME',/\\blocal.first ai home\\b|\\bpersonal ai home\\b|\\bmodel identity\\b/i],
-  ['CREATIVE_PIPELINE',/\\b(glb|gltf) export\\b|\\bkeyframe editor\\b|\\bvideo edit(or|ing)\\b|\\b3d asset pipeline\\b/i],
-  ['WORLD_PORTAL',/\\b(webxr|virtual reality|vr game|shared world|world portal)\\b/i],
-  ['LOCAL_SERVICE',/\\blocal inference server\\b|\\bon.device service\\b|\\bdaemon\\b/i],
-  ['BRIDGE',/\\b(interoperability bridge|governed bridge|transport bridge)\\b/i],
-  ['RESEARCH_LIBRARY',/\\breference framework\\b|\\bscientific research\\b|\\bexperimental physics\\b/i],
-  ['APP',/\\b(browser app|desktop app|web app|midi plugin)\\b/i]
+  ['CORE_OS',/\boperating system\b|\bos kernel\b|\bbootloader\b|\bphios runtime\b/i],
+  ['AI_HOME',/\blocal.first ai home\b|\bpersonal ai home\b|\bmodel identity\b/i],
+  ['CREATIVE_PIPELINE',/\b(glb|gltf) export\b|\bkeyframe editor\b|\bvideo edit(or|ing)\b|\b3d asset pipeline\b/i],
+  ['WORLD_PORTAL',/\b(webxr|virtual reality|vr game|shared world|world portal)\b/i],
+  ['LOCAL_SERVICE',/\blocal inference server\b|\bon.device service\b|\bdaemon\b/i],
+  ['BRIDGE',/\b(interoperability bridge|governed bridge|transport bridge)\b/i],
+  ['RESEARCH_LIBRARY',/\breference framework\b|\bscientific research\b|\bexperimental physics\b/i],
+  ['APP',/\b(browser app|desktop app|web app|midi plugin)\b/i]
 ];
 
 /** A category is a placement, NEVER evidence of installation or source dependency. */
