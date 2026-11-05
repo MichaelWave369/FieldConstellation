@@ -116,7 +116,7 @@ try{
   assert.equal(await connectionPage.locator('#connectionExplorerDialog').isVisible(),true);
   assert.equal(await connectionPage.locator('#connectionProject').inputValue(),canonical(first));
   assert.match(await connectionPage.locator('#connectionExplorerScope').textContent(),/reviewed source connections/);
-  assert(Number((await connectionPage.locator('#connectionResultCount').textContent()).match(/^\\d+/)?.[0])>0);
+  assert(Number((await connectionPage.locator('#connectionResultCount').textContent()).match(/^[0-9]+/)?.[0])>0);
   await connectionPage.locator('#connectionProject').selectOption('all');
   await connectionPage.locator('#connectionGrade').selectOption('documented');
   const documentedCards=connectionPage.locator('.connection-card.documented');
