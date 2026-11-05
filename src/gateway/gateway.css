@@ -37,3 +37,23 @@ main{padding:0 clamp(18px,4vw,50px) 65px}.hero{text-align:center;max-width:870px
 .gateway-empty{color:#b1cada;font-size:13px}
 @media(max-width:940px){.catalog-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.catalog{padding:24px 14px}.catalog-head{grid-template-columns:1fr}.catalog-metrics{max-width:250px}.catalog-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-list{grid-template-columns:1fr;max-height:520px}.catalog-toolbar label{min-width:100%}}
+
+
+/* Field Constellation cosmic gateway: self-hosted background, no third-party image requests. */
+body { background: #060d20; }
+.starfield {
+  opacity: 1;
+  background-image:
+    linear-gradient(180deg,
+      rgba(3, 8, 23, .60) 0%,
+      rgba(3, 8, 23, .46) 37%,
+      rgba(5, 11, 27, .60) 69%,
+      rgba(5, 11, 27, .77) 100%),
+    url('./cosmic-field.webp');
+  background-size: cover, cover;
+  background-position: center center, center center;
+  background-repeat: no-repeat;
+}
+@media (max-width: 650px) {
+  .starfield { background-position: center center, center 48%; }
+}
