@@ -32,7 +32,7 @@
   </defs></svg>
   <aside class="sidebar" id="sidebar">
     <button id="closeMobileMenu" class="icon-button mobile-only sidebar-close" aria-label="Close navigation"><svg><use href="#i-close"/></svg></button>
-    <a class="brand" href="./" aria-label="Field Constellation, home of the Phitarium"><span class="brand-symbol">Φ</span><span>FIELD<br><b>CONSTELLATION</b></span><span class="edition">26</span></a>
+    <a class="brand" href="./" aria-label="Field Constellation, home of the Phitarium"><span class="brand-symbol">Φ</span><span>FIELD<br><b>CONSTELLATION</b></span><span class="edition">27</span></a>
     <div class="intro"><p class="eyebrow">FIELD CONSTELLATION · DOME 369</p><h1>Every repo,<br>another star<span>.</span></h1><p class="intro-copy">Follow a PhiOS-centered constellation of public projects.<br>Explore the stars, stories, and source evidence.</p></div>
     <div class="stats"><div><strong id="totalCount">—</strong><span>public repos</span></div><div><strong id="groupCount">8</strong><span>constellations</span></div><div><strong id="liveCount">—</strong><span id="liveCountLabel" title="Only independently recorded, fresh HTTPS HTML checks are counted. Expired data never means a site is broken.">Recent HTML checks</span></div></div>
     <label class="search-box"><svg><use href="#i-search"/></svg><input id="search" type="search" placeholder="Find a world…" autocomplete="off" aria-label="Search repositories"><kbd>/</kbd></label>
@@ -100,6 +100,30 @@
       <button id="connectionExplorerClose" type="button" aria-label="Close Planet Connections Explorer">Close ×</button>
     </div>
     <p id="connectionExplorerScope" class="connection-scope"></p>
+    <details id="journeyPanel" class="evidence-journey-panel">
+      <summary>Trace an evidence journey · project to project</summary>
+      <p class="journey-boundary">Explore up to six hops through the reviewed public ledger. Reverse traversal is allowed for browsing and explicitly labeled. A chain of source records does not demonstrate end-to-end integration.</p>
+      <div class="journey-controls">
+        <label for="journeyStart">Start project
+          <select id="journeyStart"><option value="">Choose a reviewed project</option></select>
+        </label>
+        <label for="journeyEnd">Destination project
+          <select id="journeyEnd"><option value="">Choose a destination</option></select>
+        </label>
+        <button id="journeyTrace" type="button" disabled>Trace reviewed path</button>
+      </div>
+      <p class="journey-grade-note">Uses the Source grade filter below. The project and text filters affect the card list only.</p>
+      <p id="journeyStatus" class="journey-status" role="status" aria-live="polite">Choose two reviewed public projects to explore.</p>
+      <div id="journeyDisplay" class="journey-display" hidden>
+        <p id="journeyProgress" class="journey-progress" aria-live="polite"></p>
+        <div id="journeyStep" class="journey-step"></div>
+        <div class="journey-actions">
+          <button id="journeyPrev" type="button">← Previous link</button>
+          <button id="journeyInspect" type="button">Inspect visited planet ↗</button>
+          <button id="journeyNext" type="button">Next link →</button>
+        </div>
+      </div>
+    </details>
     <div class="connection-explorer-controls">
       <label for="connectionProject">Project
         <select id="connectionProject"><option value="all">All reviewed projects</option></select>

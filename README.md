@@ -6,6 +6,16 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 27 · Evidence Journeys (November 4, 2026)
+
+The **Planet Connections Explorer** now includes a collapsible **Trace an evidence journey** section: select any two *public projects present in the reviewed source ledger*, then follow the **shortest recorded walk**, up to six links. **Previous link** and **Next link** move through the route, showing the actual edge grade, reviewed date, scope, and existing commit-pinned source citations. **Inspect visited planet** opens that stop through the normal Phitarium inspector, preserving local Passport/Quest visit semantics.
+
+The route is a *visitor walk*, **not** a transitive code dependency or verified end-to-end integration. A traveler may browse a directed relation backwards, but those steps are explicitly marked as reverse traversals; original source direction and cited claim remain unchanged. **No reviewed path** means only that the current bounded ledger does not record a route, not that the projects are incompatible or unrelated. The explorer's existing source-grade filter (all / verified / documented) also constrains the route. Project and evidence-text filters continue to control the card list independently.
+
+This stage uses only the existing eight reviewed source relationships, the public-only inventory, and the validated source-record index. No new evidence claims, GitHub API requests, tokens, telemetry, external dependencies, deployments, scheduled actions, DNS changes, or Netlify usage were added. Tests cover shortest mixed-grade routes, reversed directed walks, disconnected components, grade limits, a 650-star catalog, and desktop/mobile/Canvas browser acceptance. Physical Quest 3 testing remains manual and unverified.
+
+See [Edition 27 Evidence Journeys contract](docs/EDITION_27_EVIDENCE_JOURNEYS.md).
+
 ## Edition 26 · Planet Connections Explorer (November 4, 2026)
 
 The Phitarium's source-backed **Relationships** mode now offers **Explore sourced connections**, a keyboard-operable, responsive **Planet Connections Explorer**. It displays only the previously validated public, commit-pinned relationship ledger (not automatically inferred relationships). Select a project, filter **Verified in source** versus **Documented contracts**, or search project names and evidence claims. Every card shows the reviewed relationship direction, kind, summary, explicit scope limits and original commit-pinned GitHub citations.

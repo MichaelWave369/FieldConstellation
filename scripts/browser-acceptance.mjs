@@ -17,6 +17,10 @@ const inventory=JSON.parse(await readFile(new URL('../src/repos.json',import.met
 const first=inventory.find(r=>r.name==='Domistika'&&r.visibility==='public');
 const second=inventory.find(r=>r.name==='SuperPhiVessel'&&r.visibility==='public');
 assert(first&&second,'Public acceptance fixtures must resolve to displayed repos.');
+const journeyFrom=inventory.find(r=>r.name==='SiliconLouvre'&&r.visibility==='public');
+const journeyTo=inventory.find(r=>r.name==='WaveForgeStudio'&&r.visibility==='public');
+const journeyDisconnected=inventory.find(r=>r.name==='PhiCade'&&r.visibility==='public');
+assert(journeyFrom&&journeyTo&&journeyDisconnected,'Source journey acceptance projects must remain public.');
 const canonical=repo=>'github:'+repo.id;
 let server,browser;
 
@@ -139,8 +143,44 @@ try{
   assert.equal(await connectionPage.locator('#dossierConnections').count(),1);
   await connectionPage.locator('#dossierConnections').click();
   assert.equal(await connectionPage.locator('#connectionExplorerDialog').isVisible(),true,'Dossier provides source explorer entry');
-  await connectionPage.keyboard.press('Escape');
+
+  log('connections: trace shortest reviewed evidence journeys without transitive integration claims');
+  await connectionPage.locator('#journeyPanel > summary').click();
+  await connectionPage.locator('#journeyStart').selectOption(canonical(journeyFrom));
+  await connectionPage.locator('#journeyEnd').selectOption(canonical(journeyTo));
+  assert.equal(await connectionPage.locator('#journeyTrace').isEnabled(),true);
+  await connectionPage.locator('#journeyTrace').click();
+  assert.equal(await connectionPage.locator('#journeyProgress').textContent(),'Link 1 of 4');
+  assert.match(await connectionPage.locator('#journeyStatus').textContent(),/do not demonstrate an end-to-end integration/);
+  assert.match(await connectionPage.locator('#journeyStep').textContent(),/SiliconLouvre/);
+  await connectionPage.locator('#journeyStep details').evaluate(details=>{details.open=true;});
+  assert.match(await connectionPage.locator('#journeyStep details a').first().getAttribute('href'),/^https:\/\/github\.com\/MichaelWave369\/[^/]+\/blob\/[a-f0-9]{40}\//);
+  await connectionPage.locator('#journeyNext').click();
+  await connectionPage.locator('#journeyNext').click();
+  await connectionPage.locator('#journeyNext').click();
+  assert.equal(await connectionPage.locator('#journeyProgress').textContent(),'Link 4 of 4');
+  assert.equal(await connectionPage.locator('#journeyNext').isDisabled(),true);
+  await capture(connectionPage,'desktop-evidence-journey');
+
+  await connectionPage.locator('#journeyStart').selectOption(canonical(journeyTo));
+  await connectionPage.locator('#journeyEnd').selectOption(canonical(journeyFrom));
+  await connectionPage.locator('#journeyTrace').click();
+  assert.match(await connectionPage.locator('.journey-direction').textContent(),/Reverse visitor traversal/);
+  await connectionPage.locator('#journeyStart').selectOption(canonical(journeyDisconnected));
+  await connectionPage.locator('#journeyEnd').selectOption(canonical(journeyTo));
+  await connectionPage.locator('#journeyTrace').click();
+  assert.match(await connectionPage.locator('#journeyStatus').textContent(),/No reviewed source path is recorded/);
+  assert.equal(await connectionPage.locator('#journeyDisplay').isVisible(),false);
+
+  await connectionPage.locator('#journeyStart').selectOption(canonical(journeyFrom));
+  await connectionPage.locator('#connectionGrade').selectOption('verified');
+  await connectionPage.locator('#journeyTrace').click();
+  assert.match(await connectionPage.locator('#journeyStatus').textContent(),/No reviewed source path is recorded/);
+  await connectionPage.locator('#connectionGrade').selectOption('all');
+  await connectionPage.locator('#journeyTrace').click();
+  await connectionPage.locator('#journeyInspect').click();
   assert.equal(await connectionPage.locator('#connectionExplorerDialog').isVisible(),false);
+  assert.equal(await connectionPage.locator('#inspector').getAttribute('data-repo'),String(inventory.find(r=>r.name==='Domistika').id),'Visitor explicitly inspects next documented planet');
   assert.deepEqual(connectionErrors,[],'Connection Explorer navigation must not produce browser errors');
   await connectionContext.close();
 
@@ -156,6 +196,11 @@ try{
   await connectionMobilePage.locator('#connectionSidebarButton').click();
   assert.equal(await connectionMobilePage.locator('#mobileMenu').getAttribute('aria-expanded'),'false','Navigation closes before opening source dialog.');
   assert.equal(await connectionMobilePage.locator('#connectionExplorerDialog').isVisible(),true);
+  await connectionMobilePage.locator('#journeyPanel > summary').click();
+  await connectionMobilePage.locator('#journeyStart').selectOption(canonical(journeyFrom));
+  await connectionMobilePage.locator('#journeyEnd').selectOption(canonical(journeyTo));
+  await connectionMobilePage.locator('#journeyTrace').click();
+  assert.equal(await connectionMobilePage.locator('#journeyProgress').textContent(),'Link 1 of 4');
   const connectionWidth=await connectionMobilePage.locator('#connectionExplorerDialog').boundingBox();
   assert(connectionWidth&&connectionWidth.width<=390,'Connection dialog fits portrait viewport');
   await capture(connectionMobilePage,'mobile-connections-explorer');
@@ -175,6 +220,11 @@ try{
   await connectionCanvasPage.locator('#architectureToggle').click();
   await connectionCanvasPage.locator('#connectionExplorerButton').click();
   assert((await connectionCanvasPage.locator('.connection-card').count())>0,'Canvas fallback supports source explorer');
+  await connectionCanvasPage.locator('#journeyPanel > summary').click();
+  await connectionCanvasPage.locator('#journeyStart').selectOption(canonical(journeyFrom));
+  await connectionCanvasPage.locator('#journeyEnd').selectOption(canonical(journeyTo));
+  await connectionCanvasPage.locator('#journeyTrace').click();
+  assert.equal(await connectionCanvasPage.locator('#journeyProgress').textContent(),'Link 1 of 4','Canvas fallback traces the same reviewed graph.');
   await connectionCanvasPage.locator('#connectionExplorerClose').click();
   await connectionCanvas.close();
 

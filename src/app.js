@@ -14,6 +14,7 @@ import {availableTrails} from './trails.js';
 import {solarDiscoveryFor} from './solar-discovery.js';
 import {planetDossierFor} from './planet-dossier.js';
 import {connectionExplorerIndex,filterConnections} from './connection-explorer.js';
+import {findEvidenceJourney} from './evidence-journeys.js';
 import {readTrailLink,trailLink,withoutTrail} from './trail-links.js';
 import {PASSPORT_KEY,emptyPassport,parsePassport,sanitizePassport,toggleFavorite,recordVisit,clearPassportSection,passportRepos,exportFavorites,importFavorites} from './passport.js';
 import {QUEST_KEY,emptyQuest,readQuest,sanitizeQuest,discover,questProgress} from './quest.js';
@@ -31,6 +32,7 @@ const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state={repos:[],query:'',group:null,language:'',visibility:'',pagesOnly:false,hideForks:false,atlasOnly:false,atlasPublishedOnly:false,lens:'world',theme:'field',sidebarMode:'worlds',sortMode:'name',autoRefresh:true,activityNow:Date.now(),layout:'constellation',solarMotion:false,selected:null,hovered:null,orbit:!reducedMotion,links:true,labels:true,visible:new Set(),snapshot:null,publicUpdated:null,architecture:false,includeThematic:false,relationshipLedger:null,relationships:[],deployments:null,atlas:null,atlasPublished:null,neighbors:new Set(),trail:null,trailStop:0,passport:emptyPassport(),quest:emptyQuest(),missionSave:emptyMissionSave(),missionReview:null,missionFeedback:'',outerSave:emptyOuter(),outerReview:null,outerFeedback:'',outerNeedVisit:null,postcardView:null,postcardDraft:[]};
 let autoRefreshTimer=null,solarPhase=0,solarSuns=[],dossierExpanded=false;
 let solarDiscoveryGroup=null,solarDiscoveryRoute=[],solarDiscoveryIndex=0;
+let journeyRoute=null,journeyIndex=0;
 let renderer,scene,camera,controls,instanced,glowPoints,lineMesh,selectionRing,core,coreGlow,starfield,dome=null,groupHalos=[],orbitLines=[],layoutGuides=[],positions=[],targets=[],edges=[],labelNodes=[],clusterLabels=[],centerLabel,frame=0,fitDistance=105,flight=null,toastTimeout,lastHover=0,lastTime=0,sceneReady=false,contextLost=false;
 let showtimeIndex=-1,showtimeTimer=null,showtimeStops=[],showtimeWasOrbit=false,showtimeInspectorWasVisible=false;
 let immersiveActive=false,immersiveStops=[],immersiveIndex=0,immersiveRestore=null;
@@ -189,7 +191,13 @@ function bindUI(){
   $('connectionExplorerButton').onclick=()=>openConnectionExplorer();
   $('connectionSidebarButton').onclick=()=>{setSidebar(false);openConnectionExplorer();};
   $('connectionExplorerClose').onclick=()=>$('connectionExplorerDialog').close();
-  ['connectionProject','connectionGrade'].forEach(id=>$(id).onchange=renderConnectionExplorer);
+  $('connectionProject').onchange=renderConnectionExplorer;
+  $('connectionGrade').onchange=()=>{renderConnectionExplorer();resetEvidenceJourney('Source grade changed. Trace again to use this evidence filter.');};
+  ['journeyStart','journeyEnd'].forEach(id=>$(id).onchange=()=>resetEvidenceJourney());
+  $('journeyTrace').onclick=traceEvidenceJourney;
+  $('journeyPrev').onclick=()=>moveEvidenceJourney(-1);
+  $('journeyNext').onclick=()=>moveEvidenceJourney(1);
+  $('journeyInspect').onclick=visitEvidenceJourney;
   $('connectionQuery').oninput=renderConnectionExplorer;
   $('connectionClear').onclick=()=>{ $('connectionProject').value='all';$('connectionGrade').value='all';$('connectionQuery').value='';renderConnectionExplorer();};
   $('connectionResults').onclick=handleConnectionExplorerClick;
@@ -806,6 +814,13 @@ function openConnectionExplorer(focusId=null){
   $('connectionProject').value=available?project:'all';
   $('connectionGrade').value='all';
   $('connectionQuery').value='';
+  const choices='<option value="">Choose a reviewed project</option>'+index.projects.map(repo=>`<option value="${escape(projectId(repo))}">${escape(repo.name)}</option>`).join('');
+  $('journeyStart').innerHTML=choices;
+  $('journeyEnd').innerHTML=choices.replace('Choose a reviewed project','Choose a destination');
+  $('journeyStart').value=available?project:'';
+  $('journeyEnd').value='';
+  $('journeyPanel').open=false;
+  resetEvidenceJourney();
   renderConnectionExplorer();
   $('connectionExplorerDialog').showModal();
 }
@@ -837,15 +852,72 @@ function renderConnectionExplorer(){
     </article>`;
   }).join(''):'<p class="connection-empty">No recorded sourced connections match these filters. Try All reviewed projects or clear your search; this is not proof that unlisted projects are unrelated.</p>';
 }
-function handleConnectionExplorerClick(event){
-  const button=event.target.closest('button[data-connection-repo]');
-  if(!button)return;
-  const repo=state.repos.find(item=>item.visibility==='public'&&item.id===button.dataset.connectionRepo);
+function resetEvidenceJourney(message=null){
+  journeyRoute=null;journeyIndex=0;
+  $('journeyDisplay').hidden=true;
+  const start=$('journeyStart').value,end=$('journeyEnd').value;
+  $('journeyTrace').disabled=!start||!end||start===end||!state.relationshipLedger;
+  $('journeyStatus').textContent=message||(start&&start===end
+    ?'Choose a different destination project.'
+    :'Choose two reviewed public projects, then trace their source-recorded links.');
+}
+function traceEvidenceJourney(){
+  if(!state.relationshipLedger)return;
+  const start=$('journeyStart').value,end=$('journeyEnd').value;
+  if(!start||!end||start===end){resetEvidenceJourney();return;}
+  const grade=$('connectionGrade').value;
+  const route=findEvidenceJourney(connectionExplorerIndex(state.repos,state.relationships),start,end,{grade,maxHops:6});
+  if(!route||!route.steps.length){
+    resetEvidenceJourney('No reviewed source path is recorded between these projects under the chosen grade. This does not establish incompatibility or absence of other relationships.');
+    return;
+  }
+  journeyRoute=route;journeyIndex=0;
+  $('journeyDisplay').hidden=false;
+  $('journeyStatus').textContent=`${route.steps.length} reviewed hop${route.steps.length===1?'':'s'} connect ${route.startRepo.name} and ${route.endRepo.name} for exploration only. Consecutive links do not demonstrate an end-to-end integration.`;
+  renderEvidenceJourneyStep();
+}
+function renderEvidenceJourneyStep(){
+  const step=journeyRoute?.steps[journeyIndex];
+  if(!step)return;
+  const relation=step.relation;
+  const reviewed=new Date(relation.reviewedAt).toLocaleDateString();
+  const reverse=step.reversed&&relation.direction==='directed';
+  const direction=reverse?'Reverse visitor traversal of a directed source record':relation.direction==='undirected'?'Shared source record · browsable both directions':'With recorded source direction';
+  $('journeyProgress').textContent=`Link ${journeyIndex+1} of ${journeyRoute.steps.length}`;
+  $('journeyStep').innerHTML=`<div class="journey-endpoints">
+    <strong>${escape(step.fromRepo.name)}</strong><span aria-hidden="true">→</span><strong>${escape(step.toRepo.name)}</strong>
+  </div>
+  <p class="journey-direction">${escape(direction)}</p>
+  <p class="journey-evidence-grade">${escape(RELATIONSHIP_STYLES[relation.status]?.label||'Source grade unavailable')} · ${escape(RELATIONSHIP_KINDS[relation.kind]||'Reviewed relation')} · Reviewed ${escape(reviewed)}</p>
+  <p class="journey-summary">${escape(relation.summary)}</p>
+  <details><summary>Source scope and evidence</summary><p>${escape(relation.scope)}</p>
+    <ul>${relation.evidence.map((e,i)=>`<li><a href="${escape(e.url)}" target="_blank" rel="noopener noreferrer">Pinned source ${i+1}: ${escape(e.claim)} ↗</a></li>`).join('')}</ul>
+  </details>`;
+  $('journeyPrev').disabled=journeyIndex===0;
+  $('journeyNext').disabled=journeyIndex===journeyRoute.steps.length-1;
+}
+function moveEvidenceJourney(delta){
+  if(!journeyRoute)return;
+  const next=journeyIndex+delta;
+  if(next<0||next>=journeyRoute.steps.length)return;
+  journeyIndex=next;renderEvidenceJourneyStep();
+}
+function inspectReviewedConnectionRepo(id){
+  const repo=state.repos.find(item=>item.visibility==='public'&&item.id===id);
   if(!repo)return;
   $('connectionExplorerDialog').close();
   if(!state.visible.has(repo.id))resetFilters();
   setArchitecture(true);
   selectRepo(repo.id,true);
+}
+function visitEvidenceJourney(){
+  const step=journeyRoute?.steps[journeyIndex];
+  if(step)inspectReviewedConnectionRepo(step.toRepo.id);
+}
+function handleConnectionExplorerClick(event){
+  const button=event.target.closest('button[data-connection-repo]');
+  if(!button)return;
+  inspectReviewedConnectionRepo(button.dataset.connectionRepo);
 }
 function relationshipCards(repo){
   if(!state.relationshipLedger)return '<section class="related-projects"><h3>Related worlds</h3><p class="discovery-note">Relationship evidence could not load. Reload the page to review sourced connections; the public repository directory remains available.</p></section>';
