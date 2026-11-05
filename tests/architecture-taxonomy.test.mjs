@@ -21,6 +21,7 @@ test('central ecosystem nodes and creative handoffs have explicit placements',()
 test('new owner-tagged projects route directly; uncertainty remains visible',()=>{
   assert.deepEqual(architectureFor(repo('NewOne',{topics:['phios-creative-pipeline']})),{id:'CREATIVE_PIPELINE',basis:'owner-topic',integration:'cataloged'});
   assert.deepEqual(architectureFor(repo('FreshAsset',{description:'A keyframe editor for imported models'})),{id:'CREATIVE_PIPELINE',basis:'suggested-needs-review',integration:'cataloged'});
+  assert.deepEqual(architectureFor(repo('Conflicted',{topics:['phios-app','phios-bridge']})),{id:'EXPERIMENT',basis:'conflicting-owner-topics',integration:'cataloged'});
   assert.equal(architectureFor(repo('UndocumentedThing')).id,'EXPERIMENT');
   assert.equal(architectureFor(repo('UndocumentedThing')).basis,'unreviewed');
   assert.equal(architectureFor(repo('Ambiguous',{description:'A desktop app and virtual reality world portal'})).id,'EXPERIMENT');
