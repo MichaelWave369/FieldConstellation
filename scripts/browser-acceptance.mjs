@@ -174,7 +174,7 @@ try{
   await ready(connectionCanvasPage,base);
   await connectionCanvasPage.locator('#architectureToggle').click();
   await connectionCanvasPage.locator('#connectionExplorerButton').click();
-  assert.equal(await connectionCanvasPage.locator('.connection-card').count()>0,'Canvas fallback supports source explorer');
+  assert((await connectionCanvasPage.locator('.connection-card').count())>0,'Canvas fallback supports source explorer');
   await connectionCanvasPage.locator('#connectionExplorerClose').click();
   await connectionCanvas.close();
 
