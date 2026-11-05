@@ -149,8 +149,12 @@ try{
   await connectionMobile.addInitScript(disableAuto);
   const connectionMobilePage=await connectionMobile.newPage();
   await ready(connectionMobilePage,base);
-  await connectionMobilePage.locator('#architectureToggle').click();
-  await connectionMobilePage.locator('#connectionExplorerButton').click();
+  assert.equal(await connectionMobilePage.locator('#architectureToggle').isVisible(),false,'Mobile header intentionally hides Relationships.');
+  await connectionMobilePage.locator('#mobileMenu').click();
+  assert.equal(await connectionMobilePage.locator('#sidebar').evaluate(el=>el.classList.contains('open')),true,'Mobile navigation opens.');
+  assert.equal(await connectionMobilePage.locator('#connectionSidebarButton').isEnabled(),true,'Public source evidence can be opened from the mobile sidebar.');
+  await connectionMobilePage.locator('#connectionSidebarButton').click();
+  assert.equal(await connectionMobilePage.locator('#mobileMenu').getAttribute('aria-expanded'),'false','Navigation closes before opening source dialog.');
   assert.equal(await connectionMobilePage.locator('#connectionExplorerDialog').isVisible(),true);
   const connectionWidth=await connectionMobilePage.locator('#connectionExplorerDialog').boundingBox();
   assert(connectionWidth&&connectionWidth.width<=390,'Connection dialog fits portrait viewport');
