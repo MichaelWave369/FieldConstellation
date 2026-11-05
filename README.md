@@ -6,6 +6,14 @@ An interactive observatory for [MichaelWave369’s public GitHub ecosystem](http
 
 ![Edition 03 relationship view](docs/images/edition03.jpg)
 
+## Edition 28 · PhiOS Systems Gateway (November 5, 2026)
+
+A **staged, non-deployed** update prepares FieldConstellation to be the future `enterthefield.org` entrance and, after explicit approval, the `enterthefield.com` homepage. The Gateway now has a validated public-repository count, browser-local automatic refresh (at most daily when stale), ten searchable and sortable architectural roles, and a manual refresh button. New repositories can be placed by curated identity or owner-provided `phios-*` topics; unreviewed or ambiguous entries remain visibly provisional.
+
+The Phitarium adds an optional **PhiOS Systems** layout. It preserves all eight creative houses and all prior layouts, while placing planets by intended architectural role around PhiOS. These placements are **not** claims of native installation, source dependencies, CI health, peer networking, or live deployment. A separate `npm run build:domain && npm run domain:verify` creates a local-only root-gateway preview with the Phitarium under `/phitarium/`. Neither custom domain, Netlify, scheduled builds, DNS, GitHub Pages settings nor live deployments are touched.
+
+See [Edition 28 release and architecture gates](docs/EDITION_28_PHIO_SYSTEMS_GATEWAY.md).
+
 ## Edition 27 · Evidence Journeys (November 4, 2026)
 
 The **Planet Connections Explorer** now includes a collapsible **Trace an evidence journey** section: select any two *public projects present in the reviewed source ledger*, then follow the **shortest recorded walk**, up to six links. **Previous link** and **Next link** move through the route, showing the actual edge grade, reviewed date, scope, and existing commit-pinned source citations. **Inspect visited planet** opens that stop through the normal Phitarium inspector, preserving local Passport/Quest visit semantics.
