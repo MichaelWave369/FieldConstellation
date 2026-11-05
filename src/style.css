@@ -404,3 +404,20 @@ button.postcard-world:hover,button.postcard-world:focus-visible{background:#2d3c
 @media(max-width:800px){.outer-dialog{padding:18px}.outer-ledger{grid-template-columns:repeat(2,minmax(0,1fr))}.outer-track{grid-template-columns:repeat(2,minmax(0,1fr))}.outer-encounter{padding:15px}.outer-controls #outerReset{margin-left:0}}
 @media(max-width:450px){.outer-dialog{max-width:calc(100% - 10px)}.outer-encounter h3{font-size:21px}.outer-victory{padding:15px 4px}}
 @media(prefers-reduced-motion:reduce){.outer-portal-graphic,.outer-portal-graphic:before,.outer-portal-graphic:after,.spiral-arrival:not([hidden]){animation:none!important}.spiral-arrival:not([hidden]){opacity:1}}
+
+
+/* PhiOS architecture is a separate, source-honest layout; eight artistic houses remain intact. */
+.architecture-navigator{position:absolute;z-index:4;top:192px;left:32px;width:min(375px,calc(100% - 48px));padding:14px;border:1px solid #50758a;border-radius:10px;background:#0c1b2be8;backdrop-filter:blur(15px);box-shadow:0 12px 42px #0008;max-height:min(45vh,430px);overflow-y:auto}
+.architecture-navigator[hidden]{display:none}
+.architecture-nav-title{margin:0 0 7px;letter-spacing:.15em;font-size:10px;color:#b9e3ed;font-weight:750}
+.architecture-navigator #architectureStatus,.architecture-nav-note{margin:0 0 10px;color:#c1d5dc;font-size:11px;line-height:1.5}
+.architecture-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.arch-category{min-width:0;display:flex;align-items:center;gap:7px;padding:8px 7px;background:#162636;color:#dcecf1;border:1px solid #406171;border-radius:5px;cursor:pointer;font-size:9px;text-align:left}
+.arch-category i{display:block;flex:0 0 8px;height:8px;border-radius:50%;background:var(--arch-color)}
+.arch-category span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch-category b{font-variant-numeric:tabular-nums;color:#c2d7df}
+.arch-category:hover,.arch-category.selected{border-color:#a5e0ef;background:#29425a}
+.arch-category:focus-visible{outline:2px solid #b6e8ff;outline-offset:2px}
+.architecture-nav-note{font-size:10px;margin:11px 0 0}
+@media(max-width:760px){.architecture-navigator{left:12px;top:180px;max-height:36vh;width:min(360px,calc(100% - 24px))}.architecture-category-grid{gap:4px}.arch-category{padding:7px 5px;font-size:8px}}
+@media(max-height:650px){.architecture-navigator{top:150px;max-height:35vh}}
