@@ -1,6 +1,7 @@
 import {parseSnapshot,newerPublicCache,fetchPublicInventory,CACHE_KEY,AUTO_REFRESH_KEY,AUTO_CHECK_KEY,autoRefreshDue} from '../inventory.js';
 import {ARCHITECTURE_GROUPS,architectureFor,architectureCounts} from '../architecture-taxonomy.js';
 import {sortRepositoryList} from '../sort.js';
+import {renderHierarchy} from './hierarchy.js';
 
 const $=id=>document.getElementById(id);
 const escape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -24,6 +25,7 @@ function render(){
     const placement=architectureFor(repo),haystack=[repo.name,repo.description,...(repo.topics||[]),placement.id].join(' ').toLowerCase();
     return (!category||category===placement.id)&&(!query||haystack.includes(query));
   }),sort);
+  renderHierarchy($('gatewayHierarchy'),repos,visible,overviewUrl,Boolean(category||query));
   $('gatewayShown').textContent=visible.length+' of '+repos.length+' public repositories';
   const byGroup=new Map(ARCHITECTURE_GROUPS.map(g=>[g.id,[]]));
   for(const repo of visible)byGroup.get(architectureFor(repo).id).push(repo);
