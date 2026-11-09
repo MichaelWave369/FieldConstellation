@@ -129,3 +129,40 @@ body { background: #060d20; }
 .handoff-tools button{background:#23445d;color:#e2f5ff;border:1px solid #9cc6de;border-radius:8px;cursor:pointer;padding:9px}
 .handoff-tools button[hidden]{display:none}
 .handoff-status{font-size:11px;min-height:17px;margin-bottom:0}
+
+
+/* Φ Ecosystem Health: evidence/unknown-first, no global green-state implication. */
+.health-panel{margin:27px 0;padding:29px clamp(16px,3vw,31px);border:1px solid #769fc188;border-radius:21px;background:radial-gradient(ellipse at 0% 0%,#2a406a8c,transparent 75%),#0e2034e6}
+.health-header .eyebrow{margin:0}
+.health-header h3{font-size:clamp(27px,3.2vw,38px);letter-spacing:-.045em;line-height:1.18;margin:9px 0 14px}
+.health-header p:not(.eyebrow){color:#bfd5e6;font-size:13px;line-height:1.7;max-width:770px}
+.health-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}
+.health-stat{padding:19px 14px;background:#172e49d9;border:1px solid #527c9e;border-radius:12px;min-width:0;display:grid;gap:5px;align-content:start}
+.health-stat strong{font-size:clamp(27px,4vw,39px);line-height:1.15;font-variant-numeric:tabular-nums;color:#d6effc}
+.health-stat span{font-size:12px;font-weight:700;line-height:1.4;color:#d8ecf9}
+.health-stat small{font-size:10px;color:#aac9db;line-height:1.5}
+.health-release{margin-top:15px;padding:17px 19px;border-left:4px solid #e0bc83;background:#2d3040b0;border-radius:0 10px 10px 0}
+.health-release h4,.health-layout h4,.health-checker h4{font-size:15px;margin:0 0 9px;color:#f3f7ff}
+.health-release p,.health-layout p,.health-checker p{font-size:12px;color:#c7d9e9;line-height:1.75;margin:8px 0}
+.health-panel a{color:#cfedff;text-underline-offset:3px}
+.health-layout{display:grid;grid-template-columns:1.1fr 1fr;gap:13px;margin-top:15px}
+.health-layout>section{background:#152a40b0;border:1px solid #52758f;border-radius:12px;padding:17px 18px}
+.health-tasks{list-style:none;margin:0;padding:0}
+.health-tasks li{display:flex;gap:10px;align-items:baseline;margin:10px 0 0;color:#cfdeea;font-size:12px}
+.health-tasks li span{display:grid;flex:0 0 23px;height:23px;place-items:center;background:#365571;border-radius:8px;color:#e6f2ff;font-size:11px}
+.health-ci{margin-top:15px;border:1px solid #52778f;border-radius:9px;background:#132940a8;padding:12px 16px}
+.health-ci>summary{cursor:pointer;font-size:12px;font-weight:700}
+.health-ci ul{padding-left:17px}
+.health-ci li{font-size:12px;margin:12px 0;line-height:1.65}
+.health-ci li small{display:block;font-size:10px;color:#b2c9d9}
+.health-footnote{font-size:11px;color:#abc5d9;line-height:1.7}
+.health-checker{margin-top:17px;padding:19px;border:1px solid #5d7f9a;border-radius:12px;background:#10253bb5}
+.health-check-tools{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.health-check-tools label{font-size:12px;font-weight:700}
+.health-check-tools select{flex:1;min-width:170px;max-width:370px;background:#20394e;border:1px solid #7a9ab4;border-radius:7px;color:#e8f5ff;padding:10px;font-size:12px}
+.health-check-tools button{background:#c9eaff;color:#0d2435;font-size:12px;font-weight:700;border:1px solid #c9eaff;border-radius:8px;cursor:pointer;padding:11px 14px}
+.health-check-tools button[disabled]{opacity:.6;cursor:wait}
+#gatewayHealthResult{margin-top:13px;font-size:12px;color:#c7deeb;min-height:22px}
+#gatewayHealthResult small{font-size:11px}
+@media(max-width:910px){.health-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.health-panel{padding:22px 14px}.health-stats,.health-layout{grid-template-columns:1fr}.health-check-tools{display:grid;justify-items:stretch}.health-check-tools select{min-width:0;width:100%;max-width:none}}

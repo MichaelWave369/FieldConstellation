@@ -31,6 +31,25 @@
   <div class="catalog-head"><div><p class="eyebrow">THE LIVING PUBLIC CATALOG</p><h2 id="catalogHeading">Every project has a place.</h2><p>Explore the PhiOS-centered architecture without confusing public source code with installed software. New repositories are discovered by a safe, paginated public GitHub check.</p></div>
   <div class="catalog-metrics"><strong id="gatewayCount" aria-live="polite">…</strong><span>PUBLIC REPOSITORIES</span><small id="gatewayDate">Loading snapshot</small><small><b id="gatewayCategoryCount">10</b> editorial roles</small></div></div>
   <p id="gatewayInventoryStatus" class="catalog-status" role="status" aria-live="polite">Loading complete public snapshot…</p>
+
+  <section class="health-panel" aria-labelledby="healthTitle">
+    <div class="health-header">
+      <p class="eyebrow">Φ ECOSYSTEM HEALTH · EVIDENCE FIRST</p>
+      <h3 id="healthTitle">What's verified? What needs a closer look?</h3>
+      <p>Read-only public observations, not a magical verdict on every app. CI runs, destination checks, source links and publication status are separate signals. Unknown is not a failure or a pass.</p>
+    </div>
+    <div id="gatewayHealth" aria-live="polite">Preparing the public evidence overview…</div>
+    <div class="health-checker">
+      <h4>Check a repository's public GitHub Actions</h4>
+      <p>Choose one public project and request its latest matching workflow run. No credentials, bulk scanning or automatic checks. A successful run does not certify the current deployment.</p>
+      <div class="health-check-tools">
+        <label for="gatewayHealthRepo">Public project</label>
+        <select id="gatewayHealthRepo" aria-label="Project to inspect CI"><option value="">Load the public inventory first</option></select>
+        <button type="button" id="gatewayHealthCheck">Check public CI</button>
+      </div>
+      <div id="gatewayHealthResult" role="status" aria-live="polite">No live CI lookup requested.</div>
+    </div>
+  </section>
   <section class="hierarchy-panel" aria-labelledby="hierarchyTitle">
     <div class="hierarchy-intro">
       <p class="eyebrow">THE Φ SYSTEMS HIERARCHY</p>

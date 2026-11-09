@@ -64,12 +64,25 @@ export async function loadProjectEvidence(publicRepos,fetcher=fetch){
 }
 
 export function renderProjectIntelligence(repo,context={}){
-  const {snapshotAt,relationships=null,deployments=null,handoff=null}=context;
+  const {snapshotAt,relationships=null,deployments=null,handoff=null,healthObservations=null}=context;
   const placement=architectureFor(repo);
   const group=ARCHITECTURE_GROUPS.find(item=>item.id===placement.id);
   const discovered=relationships===null?null:relatedProjects(repo,relationships);
   const destination=deployments===null?null:destinationStatus(repo,deployments);
   const local=handoff?.rows.get(String(repo.id))??null;
+
+  const lastReviewedCI=(healthObservations?.ci??[]).find(item=>
+    item.repositoryId===String(repo.id)&&item.repository===repo.name);
+  const ciAge=lastReviewedCI?Date.now()-Date.parse(lastReviewedCI.observedAt):Infinity;
+  const scopedCi=lastReviewedCI?
+    'Reviewed pull-request run '+lastReviewedCI.runId+' ended '+escape(lastReviewedCI.conclusion)+
+    ' for commit '+escape(lastReviewedCI.headSha.slice(0,12))+
+    (ciAge<0||ciAge>14*86400000?' (old observation).':' (recently reviewed).')+
+    ' Not a current main-branch or deployment guarantee. '+
+    '<a href="https://github.com/MichaelWave369/'+escape(repo.name)+'/actions/runs/'+lastReviewedCI.runId+
+    '" target="_blank" rel="noopener noreferrer">CI run source</a>':
+    'No reviewed CI run matched this public snapshot. Status unknown.';
+
   const found=discovered===null?
     '<p>Relationship ledger unavailable. No integration conclusion can be drawn.</p>':
     discovered.length?
@@ -104,6 +117,7 @@ export function renderProjectIntelligence(repo,context={}){
       '<div><dt>Inventory observation</dt><dd>'+escape(dateText(snapshotAt))+' · Public GitHub snapshot; not a build report</dd></div>'+
       '<div><dt>Public destination</dt><dd>'+destinationLabel+'</dd></div>'+
       '<div><dt>CI / installed application</dt><dd>Not verified by this public intelligence view</dd></div>'+
+      '<div><dt>Sample CI evidence</dt><dd>'+scopedCi+'</dd></div>'+
     '</dl>'+
     '<h5>Source-reviewed connections</h5>'+found+
     '<h5>Optional local fleet observation</h5>'+localSection+
