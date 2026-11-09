@@ -338,7 +338,7 @@ try{
   let explicitCiRequests=0;
   await gatewayPage.route(url=>url.href.includes('/repos/MichaelWave369/FieldConstellation/actions/runs?'),async route=>{
     explicitCiRequests++;
-    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({workflow_runs:[{
+    await route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({workflow_runs:[{
       id:91001,name:'CI fixture',status:'completed',conclusion:'success',head_branch:'main',
       head_sha:'a'.repeat(40),event:'pull_request',
       repository:{full_name:'MichaelWave369/FieldConstellation'}
