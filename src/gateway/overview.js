@@ -31,7 +31,7 @@ function render(){
     return (!category||category===placement.id)&&(!query||haystack.includes(query));
   }),sort);
   renderHierarchy($('gatewayHierarchy'),repos,visible,overviewUrl,Boolean(category||query),
-    (repo,panel)=>{panel.innerHTML=renderProjectIntelligence(repo,{snapshotAt:snapshot.fetchedAt,...evidence,handoff});});
+    (repo,panel)=>{panel.innerHTML=renderProjectIntelligence(repo,{snapshotAt:snapshot.fetchedAt,...evidence,handoff,healthObservations});});
   $('gatewayShown').textContent=visible.length+' of '+repos.length+' public repositories';
   const byGroup=new Map(ARCHITECTURE_GROUPS.map(g=>[g.id,[]]));
   for(const repo of visible)byGroup.get(architectureFor(repo).id).push(repo);
