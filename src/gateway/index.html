@@ -38,6 +38,16 @@
       <p>Core, Web, Mobile and XR form the visible platform family. Expand the ten editorial branches to find public projects beneath them. Search and role filters also narrow the branches.</p>
     </div>
     <div id="gatewayHierarchy" class="tree-view" aria-live="polite">Loading the public systems hierarchy…</div>
+    <section class="intelligence-handoff" aria-labelledby="repoNerveTitle">
+      <h4 id="repoNerveTitle">Optional private-to-public observation handoff</h4>
+      <p>RepoNerve remains private. You may import its intentionally filtered <strong>public-ID-only</strong> JSON file to see a last-scan push observation on matching public projects. The file stays in this browser session: no upload, localhost API access, or persistence.</p>
+      <div class="handoff-tools">
+        <label for="gatewayRepoNerveFile">Choose reviewed public export (.json)</label>
+        <input id="gatewayRepoNerveFile" type="file" accept=".json,application/json">
+        <button id="gatewayRepoNerveClear" type="button" hidden>Clear imported observations</button>
+      </div>
+      <p id="gatewayRepoNerveStatus" class="handoff-status" role="status" aria-live="polite">No local handoff loaded.</p>
+    </section>
   </section>
   <div id="gatewayCategories" class="catalog-category-grid" aria-label="Filter the PhiOS architecture roles"></div>
   <div class="catalog-toolbar"><label for="gatewaySearch">Find a project<input id="gatewaySearch" type="search" placeholder="Search names, descriptions, roles…" autocomplete="off"></label>
