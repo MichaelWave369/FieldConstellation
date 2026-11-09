@@ -3,11 +3,13 @@ import {ARCHITECTURE_GROUPS,architectureFor,architectureCounts} from '../archite
 import {sortRepositoryList} from '../sort.js';
 import {renderHierarchy} from './hierarchy.js';
 import {validateRepoNerveHandoff,loadProjectEvidence,renderProjectIntelligence} from './intelligence.js';
+import {validateHealthObservations,summarizeHealth,renderHealthBoard,inspectPublicCi,renderCiLookup} from './health.js';
 
 const $=id=>document.getElementById(id);
 const escape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let snapshot=null,category='',query='',sort='name',refreshing=false;
 let evidence={relationships:null,deployments:null},handoff=null;
+let healthObservations=null,healthLoadMessage='Loading reviewed public observations…';
 const overviewUrl=repo=>'../index.html?repo=github:'+encodeURIComponent(repo.id);
 const groupName=new Map(ARCHITECTURE_GROUPS.map(g=>[g.id,g.name]));
 
@@ -17,6 +19,7 @@ function render(){
   $('gatewayCount').textContent=String(repos.length);
   $('gatewayDate').textContent='As of '+new Date(snapshot.fetchedAt).toLocaleString();
   $('gatewayCategoryCount').textContent=String(ARCHITECTURE_GROUPS.length);
+  $('gatewayHealth').innerHTML=renderHealthBoard(summarizeHealth(repos,{...evidence,observations:healthObservations,snapshotAt:snapshot.fetchedAt}));
   $('gatewayCategories').innerHTML=ARCHITECTURE_GROUPS.map(g=>
     '<button type="button" class="system-filter'+(g.id===category?' selected':'')+'" data-category="'+g.id+'" aria-pressed="'+(g.id===category)+'" style="--group-color:'+g.color+'"><i aria-hidden="true"></i><span>'+escape(g.id)+'</span><b>'+counts[g.id]+'</b></button>'
   ).join('');
@@ -43,6 +46,49 @@ function render(){
   $('gatewayReset').hidden=!category&&!query;
 }
 function status(message){$('gatewayInventoryStatus').textContent=message;}
+
+function setHealthRepoOptions(){
+  if(!snapshot)return;
+  const select=$('gatewayHealthRepo'),previous=select.value;
+  const publicRepos=snapshot.repos.filter(repo=>repo.visibility==='public').slice()
+    .sort((a,b)=>a.name.localeCompare(b.name));
+  select.innerHTML='<option value="">Choose a public project…</option>'+
+    publicRepos.map(repo=>'<option value="'+escape(repo.id)+'">'+escape(repo.name)+'</option>').join('');
+  if(publicRepos.some(repo=>repo.id===previous))select.value=previous;
+}
+async function loadHealthFor(currentSnapshot){
+  try{
+    const response=await fetch('../health-observations.json',{signal:AbortSignal.timeout(12000)});
+    if(!response.ok)throw Error('No reviewed health observation ledger');
+    const parsed=validateHealthObservations(await response.json());
+    if(snapshot===currentSnapshot){
+      healthObservations=parsed;
+      healthLoadMessage='Reviewed public observations loaded. All signals are time-scoped.';
+      render();
+    }
+  }catch{
+    if(snapshot===currentSnapshot){
+      healthObservations=null;
+      healthLoadMessage='Reviewed CI and release observations unavailable. Showing only source-independent categories.';
+      render();
+    }
+  }
+}
+async function checkHealthCi(){
+  const id=$('gatewayHealthRepo').value;
+  const repo=snapshot?.repos.find(item=>item.id===id&&item.visibility==='public');
+  if(!repo){$('gatewayHealthResult').textContent='Select a public project first.';return;}
+  const button=$('gatewayHealthCheck');
+  button.disabled=true;
+  $('gatewayHealthResult').textContent='Checking one public GitHub Actions branch…';
+  try{
+    const result=await inspectPublicCi(repo);
+    $('gatewayHealthResult').innerHTML=renderCiLookup(result);
+  }catch{
+    $('gatewayHealthResult').textContent='CI unavailable or rate limited. No pass or failure inferred.';
+  }finally{button.disabled=false;}
+}
+
 async function loadEvidenceFor(currentSnapshot){
   const observed=await loadProjectEvidence(currentSnapshot.repos);
   if(snapshot===currentSnapshot){evidence=observed;render();}
@@ -80,6 +126,8 @@ async function refreshPublic(manual=false){
     evidence={relationships:null,deployments:null};
     clearHandoff('Public snapshot refreshed. Previous local observations cleared; import a newly reviewed public handoff if needed.');
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(next));}catch{}
+    setHealthRepoOptions();
+    $('gatewayHealthResult').textContent='Public inventory updated. Choose a project to check its CI.';
     render();
     void loadEvidenceFor(next);
     status('Public catalog refreshed from GitHub. All pages validated; private repositories excluded.');
@@ -93,6 +141,7 @@ async function boot(){
   $('gatewaySort').addEventListener('change',event=>{sort=event.target.value;render();});
   $('gatewayReset').onclick=()=>{category='';query='';$('gatewaySearch').value='';render();};
   $('gatewayRefresh').onclick=()=>void refreshPublic(true);
+  $('gatewayHealthCheck').onclick=()=>void checkHealthCi();
   $('gatewayRepoNerveFile').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)void importHandoff(file);});
   $('gatewayRepoNerveClear').onclick=()=>{clearHandoff();render();};
   try{
@@ -101,8 +150,10 @@ async function boot(){
     const bundled=parseSnapshot(await response.json());
     let saved=null;try{saved=localStorage.getItem(CACHE_KEY);}catch{}
     snapshot=newerPublicCache(saved,bundled)||bundled;
+    setHealthRepoOptions();
     render();
     void loadEvidenceFor(snapshot);
+    void loadHealthFor(snapshot);
     status('Complete public snapshot loaded. Browser checks GitHub at most daily when stale.');
     let lastAttempt=null,enabled=true;
     try{lastAttempt=localStorage.getItem(AUTO_CHECK_KEY);enabled=localStorage.getItem(AUTO_REFRESH_KEY)!=='off';}catch{}
