@@ -35,17 +35,21 @@ function projectRow(repo,projectUrl){
     placement.basis==='repository-archive'?'Historical / archive':
     placement.basis==='suggested-needs-review'?'Suggested · review needed':
     'Review needed';
-  return '<li><a href="'+escape(projectUrl(repo))+'">'+escape(repo.name)+'</a>'+
-    '<span>'+escape(note)+'</span></li>';
+  return '<li class="intel-project-row"><details class="project-node" data-project-id="'+escape(repo.id)+'">'+
+    '<summary><strong>'+escape(repo.name)+'</strong> <small>'+escape(note)+' · inspect</small></summary>'+
+    '<div class="project-intelligence">Open to inspect public evidence.</div></details></li>';
 }
 
 /** Preserve user-expanded branches through searches and inventory refreshes. */
-export function renderHierarchy(container,repositories,visible,projectUrl,filtered=false){
+export function renderHierarchy(container,repositories,visible,projectUrl,filtered=false,onInspect=null){
   const model=buildHierarchy(repositories,visible);
   const initialized=container.dataset.initialized==='true';
   const expanded=new Set(Array.from(container.querySelectorAll('details[open]'),element=>element.dataset.role));
+  const expandedProjects=new Set(Array.from(container.querySelectorAll('details.project-node[open]'),element=>element.dataset.projectId));
   const platformMarkup=model.platform.map(surface=>
-    '<li><a href="'+escape(projectUrl(surface.repo))+'"><strong>'+escape(surface.label)+'</strong></a>'+
+    '<li><details class="project-node" data-project-id="'+escape(surface.repo.id)+'">'+
+    '<summary><strong>'+escape(surface.label)+'</strong><small>Inspect public project evidence</small></summary>'+
+    '<div class="project-intelligence">Open to inspect public evidence.</div></details>'+
     '<span>'+escape(surface.note)+'</span></li>'
   ).join('');
   const groups=model.groups.filter(item=>!filtered||item.repos.length).map(item=>{
@@ -67,4 +71,14 @@ export function renderHierarchy(container,repositories,visible,projectUrl,filter
     (groups||'<p class="tree-empty">No matching branch projects. Clear your filters.</p>')+'</div>'+
     '<p class="tree-disclaimer">Public inventory only. Each repository appears once in this hierarchy. Placement does not verify a dependency, shared runtime, working installation or deployment. Unreviewed projects remain visibly provisional.</p>';
   container.dataset.initialized='true';
+  const byId=new Map(repositories.map(repo=>[String(repo.id),repo]));
+  for(const element of container.querySelectorAll('details.project-node')){
+    const id=element.dataset.projectId,repo=byId.get(id);
+    if(!repo)continue;
+    if(expandedProjects.has(id))element.open=true;
+    const display=()=>{if(element.open&&typeof onInspect==='function')
+      onInspect(repo,element.querySelector('.project-intelligence'));};
+    element.addEventListener('toggle',display);
+    if(element.open)display();
+  }
 }

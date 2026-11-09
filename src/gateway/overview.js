@@ -2,10 +2,12 @@ import {parseSnapshot,newerPublicCache,fetchPublicInventory,CACHE_KEY,AUTO_REFRE
 import {ARCHITECTURE_GROUPS,architectureFor,architectureCounts} from '../architecture-taxonomy.js';
 import {sortRepositoryList} from '../sort.js';
 import {renderHierarchy} from './hierarchy.js';
+import {validateRepoNerveHandoff,loadProjectEvidence,renderProjectIntelligence} from './intelligence.js';
 
 const $=id=>document.getElementById(id);
 const escape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let snapshot=null,category='',query='',sort='name',refreshing=false;
+let evidence={relationships:null,deployments:null},handoff=null;
 const overviewUrl=repo=>'../index.html?repo=github:'+encodeURIComponent(repo.id);
 const groupName=new Map(ARCHITECTURE_GROUPS.map(g=>[g.id,g.name]));
 
@@ -25,7 +27,8 @@ function render(){
     const placement=architectureFor(repo),haystack=[repo.name,repo.description,...(repo.topics||[]),placement.id].join(' ').toLowerCase();
     return (!category||category===placement.id)&&(!query||haystack.includes(query));
   }),sort);
-  renderHierarchy($('gatewayHierarchy'),repos,visible,overviewUrl,Boolean(category||query));
+  renderHierarchy($('gatewayHierarchy'),repos,visible,overviewUrl,Boolean(category||query),
+    (repo,panel)=>{panel.innerHTML=renderProjectIntelligence(repo,{snapshotAt:snapshot.fetchedAt,...evidence,handoff});});
   $('gatewayShown').textContent=visible.length+' of '+repos.length+' public repositories';
   const byGroup=new Map(ARCHITECTURE_GROUPS.map(g=>[g.id,[]]));
   for(const repo of visible)byGroup.get(architectureFor(repo).id).push(repo);
@@ -40,6 +43,31 @@ function render(){
   $('gatewayReset').hidden=!category&&!query;
 }
 function status(message){$('gatewayInventoryStatus').textContent=message;}
+async function loadEvidenceFor(currentSnapshot){
+  const observed=await loadProjectEvidence(currentSnapshot.repos);
+  if(snapshot===currentSnapshot){evidence=observed;render();}
+}
+function clearHandoff(message='No local handoff loaded.'){
+  handoff=null;
+  $('gatewayRepoNerveFile').value='';
+  $('gatewayRepoNerveClear').hidden=true;
+  $('gatewayRepoNerveStatus').textContent=message;
+}
+async function importHandoff(file){
+  try{
+    if(!snapshot||!file||file.size>1048576)throw Error('Unsupported file');
+    const payload=validateRepoNerveHandoff(JSON.parse(await file.text()),snapshot.repos);
+    handoff=payload;
+    $('gatewayRepoNerveStatus').textContent=
+      'Local file accepted: '+payload.rows.size+' public IDs, scan '+new Date(payload.observedAt).toLocaleString()+
+      '. Browser memory only; no upload or CI claim.';
+    $('gatewayRepoNerveClear').hidden=false;
+    render();
+  }catch{
+    clearHandoff('Handoff rejected. Only the exact public-only RepoNerve export, with known public GitHub IDs and no extra fields, is accepted.');
+    render();
+  }finally{$('gatewayRepoNerveFile').value='';}
+}
 async function refreshPublic(manual=false){
   if(refreshing||!snapshot)return;
   refreshing=true;$('gatewayRefresh').disabled=true;
@@ -49,8 +77,11 @@ async function refreshPublic(manual=false){
     const repos=await fetchPublicInventory();
     const next=parseSnapshot({...snapshot,scope:'public',complete:true,source:'Fully paginated anonymous GitHub REST public owner listing',fetchedAt:new Date().toISOString(),repos});
     snapshot=next;
+    evidence={relationships:null,deployments:null};
+    clearHandoff('Public snapshot refreshed. Previous local observations cleared; import a newly reviewed public handoff if needed.');
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(next));}catch{}
     render();
+    void loadEvidenceFor(next);
     status('Public catalog refreshed from GitHub. All pages validated; private repositories excluded.');
   }catch(error){
     status('GitHub refresh unavailable. Showing last complete public snapshot ('+snapshot.repos.length+' projects).');
@@ -62,6 +93,8 @@ async function boot(){
   $('gatewaySort').addEventListener('change',event=>{sort=event.target.value;render();});
   $('gatewayReset').onclick=()=>{category='';query='';$('gatewaySearch').value='';render();};
   $('gatewayRefresh').onclick=()=>void refreshPublic(true);
+  $('gatewayRepoNerveFile').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)void importHandoff(file);});
+  $('gatewayRepoNerveClear').onclick=()=>{clearHandoff();render();};
   try{
     const response=await fetch('../repos.json',{signal:AbortSignal.timeout(15000)});
     if(!response.ok)throw Error('Bundled catalog unavailable');
@@ -69,6 +102,7 @@ async function boot(){
     let saved=null;try{saved=localStorage.getItem(CACHE_KEY);}catch{}
     snapshot=newerPublicCache(saved,bundled)||bundled;
     render();
+    void loadEvidenceFor(snapshot);
     status('Complete public snapshot loaded. Browser checks GitHub at most daily when stale.');
     let lastAttempt=null,enabled=true;
     try{lastAttempt=localStorage.getItem(AUTO_CHECK_KEY);enabled=localStorage.getItem(AUTO_REFRESH_KEY)!=='off';}catch{}

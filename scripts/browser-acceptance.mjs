@@ -327,6 +327,35 @@ try{
   await gatewayPage.waitForFunction(()=>Number(document.getElementById('gatewayCount')?.textContent)>0,{timeout:12000});
   assert.equal(await gatewayPage.locator('#gatewayCategories .system-filter').count(),10);
   assert(Number(await gatewayPage.locator('#gatewayCount').textContent())>=200,'Gateway has a real public inventory count');
+
+  log('gateway intelligence: project drilldowns, source evidence and private-safe local handoff');
+  const platformNode=gatewayPage.locator('.tree-platform details.project-node').first();
+  await platformNode.locator('summary').click();
+  await gatewayPage.waitForFunction(()=>document.querySelector('.tree-platform details.project-node .project-intelligence')?.textContent?.includes('PUBLIC PROJECT INTELLIGENCE'),{timeout:12000});
+  assert.match(await platformNode.locator('.project-intelligence').textContent(),/Not verified by this public intelligence view/);
+  assert.equal(await gatewayPage.locator('.tree-platform details.project-node').count(),4);
+  // A raw private API response must not enter the public inspector.
+  await gatewayPage.locator('#gatewayRepoNerveFile').setInputFiles({
+    name:'raw-private-dump.json',mimeType:'application/json',
+    buffer:Buffer.from(JSON.stringify({items:[{private:1,full_name:'secret/private-repo'}]}))
+  });
+  await gatewayPage.waitForFunction(()=>document.getElementById('gatewayRepoNerveStatus')?.textContent.includes('Handoff rejected'));
+  assert.match(await gatewayPage.locator('#gatewayRepoNerveStatus').textContent(),/Handoff rejected/);
+  const phios=inventory.find(r=>r.name==='PhiOS');
+  await gatewayPage.locator('#gatewayRepoNerveFile').setInputFiles({
+    name:'reviewed-public-handoff.json',mimeType:'application/json',
+    buffer:Buffer.from(JSON.stringify({
+      schemaVersion:1,source:'PhiRepoNerve',scope:'public-ids-only',owner:'MichaelWave369',
+      observedAt:new Date().toISOString(),
+      repositories:[{id:String(phios.id),pushedAt:null,archived:false}]
+    }))
+  });
+  await gatewayPage.waitForFunction(()=>document.getElementById('gatewayRepoNerveStatus')?.textContent.includes('Local file accepted: 1 public IDs'));
+  assert.match(await gatewayPage.locator('#gatewayRepoNerveStatus').textContent(),/Local file accepted: 1 public IDs/);
+  assert.match(await gatewayPage.locator('.tree-platform details.project-node').first().locator('.project-intelligence').textContent(),/RepoNerve complete scan observed/);
+  await gatewayPage.locator('#gatewayRepoNerveClear').click();
+  assert.match(await gatewayPage.locator('#gatewayRepoNerveStatus').textContent(),/No local handoff loaded/);
+
   await gatewayPage.locator('[data-category="CORE_OS"]').click();
   assert.equal(await gatewayPage.locator('[data-category="CORE_OS"]').getAttribute('aria-pressed'),'true');
   await gatewayPage.locator('#gatewaySearch').fill('PhiOS');
