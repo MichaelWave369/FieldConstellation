@@ -91,3 +91,41 @@ body { background: #060d20; }
 .tree-disclaimer{font-size:11px;color:#a7c1d5;line-height:1.7;margin:13px 0 0}
 @media(max-width:920px){.tree-platform ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.tree-branches{grid-template-columns:1fr}.tree-platform ul{grid-template-columns:1fr}.tree-root{display:block}.tree-root span{display:block;margin-top:3px}.tree-branches li{display:block}.tree-branches li span{display:block;text-align:left;margin-top:3px}}
+
+/* Edition R1: project intelligence is opt-in, read-only and source bounded. */
+.tree-branches li.intel-project-row{display:block;padding:0;border-bottom:1px solid #49647b65}
+.tree-branches li.intel-project-row:last-child{border-bottom:0}
+.tree-platform .project-node,.tree-branches .project-node{width:100%;min-width:0}
+.tree-platform .project-node > summary,.tree-branches .project-node > summary{cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;min-width:0;margin:0;padding:10px 7px;border:0;background:transparent;color:#dcf0ff;font-size:12px}
+.tree-platform .project-node > summary{font-size:14px;padding:0 0 9px}
+.tree-platform .project-node > summary:hover,.tree-branches .project-node > summary:hover{background:#38527166;border-radius:6px}
+.tree-platform .project-node > summary strong,.tree-branches .project-node > summary strong{overflow-wrap:anywhere}
+.tree-platform .project-node > summary small,.tree-branches .project-node > summary small{font-size:10px;color:#b1d0e2;font-weight:400;flex:1}
+.project-intelligence{padding:8px 10px 16px;border-top:1px solid #5e8ba266;overflow-wrap:anywhere}
+.tree-platform .project-intelligence{padding:12px 0 0}
+.intel-content{font-size:12px;color:#cbdfef;line-height:1.65}
+.intel-content p{margin:7px 0 12px}
+.intel-content a{color:#d2f0ff;text-underline-offset:3px}
+.intel-kicker{font-size:10px;letter-spacing:.1em;color:#9bd4e9;font-weight:700}
+.intel-facts{display:grid;gap:9px;margin:13px 0}
+.intel-facts div{border-left:2px solid #78a8c4;padding:0 0 0 9px}
+.intel-facts dt{font-size:10px;color:#a9c6d7;font-weight:650}
+.intel-facts dd{margin:2px 0;color:#e2f2ff}
+.intel-facts dd small{color:#a7c5d9;font-size:10px}
+.intel-content h5{font-size:12px;margin:14px 0 6px;color:#d9eeff}
+.intel-relations{list-style:none;padding:0!important;margin:0!important;max-height:340px;overflow:auto}
+.intel-relations li{display:block!important;border:0!important;border-bottom:1px solid #5e778b55!important;padding:8px 0!important}
+.intel-relations li small{font-size:10px;color:#a3bcd4}
+.intel-relations li p{margin:3px 0 5px;color:#cae0eb;font-size:11px}
+.intel-relations details{border:0;background:transparent}
+.intel-relations details > summary{padding:2px 0;font-size:11px;font-weight:500;cursor:pointer}
+.intel-scope{font-size:11px;color:#a5bfd2}
+.intelligence-handoff{margin-top:23px;padding:20px 18px;background:#101f35b8;border:1px solid #59728e;border-radius:12px}
+.intelligence-handoff h4{margin:0 0 7px;font-size:16px}
+.intelligence-handoff p{font-size:12px;color:#b4cfdf;max-width:830px}
+.handoff-tools{display:flex;gap:11px;flex-wrap:wrap;align-items:center}
+.handoff-tools label{font-size:12px;font-weight:650}
+.handoff-tools input{max-width:100%;color:#cce8f2;font-size:11px}
+.handoff-tools button{background:#23445d;color:#e2f5ff;border:1px solid #9cc6de;border-radius:8px;cursor:pointer;padding:9px}
+.handoff-tools button[hidden]{display:none}
+.handoff-status{font-size:11px;min-height:17px;margin-bottom:0}
