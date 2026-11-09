@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "owner": "MichaelWave369",
+  "scope": "public-reviewed-observations",
+  "reviewedAt": "2026-11-09T02:40:22.253Z",
+  "ci": [
+    {
+      "repositoryId": "1428952721",
+      "repository": "FieldConstellation",
+      "prNumber": 33,
+      "headSha": "7fc8f493af807db4533fa4740c123fbef5111e8b",
+      "runId": 42548364659,
+      "workflow": "Validate and deploy Field Constellation",
+      "event": "pull_request",
+      "conclusion": "success",
+      "observedAt": "2026-11-09T02:40:22.254Z"
+    },
+    {
+      "repositoryId": "1449565268",
+      "repository": "PhiRepoNerve",
+      "prNumber": 11,
+      "headSha": "355eb452955bf6a7387d799d1ee7b3cb88ef75c7",
+      "runId": 42548039047,
+      "workflow": "Rung 1 checks",
+      "event": "pull_request",
+      "conclusion": "success",
+      "observedAt": "2026-11-09T02:40:22.254Z"
+    }
+  ],
+  "publication": {
+    "site": "www.enterthefield.org",
+    "deployAt": "2026-11-05T19:02:08.744Z",
+    "deployState": "ready",
+    "mergedAt": "2026-11-09T02:11:25Z",
+    "observedAt": "2026-11-09T02:40:22.254Z",
+    "productionHasHierarchy": false,
+    "githubPagesHasHierarchy": true,
+    "productionUrl": "https://www.enterthefield.org/",
+    "pagesUrl": "https://michaelwave369.github.io/FieldConstellation/gateway/index.html",
+    "detail": "Netlify production served the older gateway without the PhiOS hierarchy while GitHub Pages served the merged hierarchy and project intelligence. A ready Netlify deploy proves only that its own deploy completed."
+  }
+}
