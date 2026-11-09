@@ -328,6 +328,30 @@ try{
   assert.equal(await gatewayPage.locator('#gatewayCategories .system-filter').count(),10);
   assert(Number(await gatewayPage.locator('#gatewayCount').textContent())>=200,'Gateway has a real public inventory count');
 
+  log('gateway health: evidence-scoped counts and click-only public CI inspection');
+  await gatewayPage.waitForFunction(()=>document.getElementById('gatewayHealth')?.textContent.includes('Release parity'),{timeout:12000});
+  assert.equal(await gatewayPage.locator('.health-stat').count(),4);
+  assert.match(await gatewayPage.locator('#gatewayHealth').textContent(),/CI coverage unknown/);
+  assert.match(await gatewayPage.locator('#gatewayHealth').textContent(),/not.*production|CI coverage unknown/i);
+  assert(await gatewayPage.locator('#gatewayHealthRepo option').count()>200);
+  const projectCI=inventory.find(repo=>repo.name==='FieldConstellation');
+  let explicitCiRequests=0;
+  await gatewayPage.route(url=>url.href.includes('/repos/MichaelWave369/FieldConstellation/actions/runs?'),async route=>{
+    explicitCiRequests++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({workflow_runs:[{
+      id:91001,name:'CI fixture',status:'completed',conclusion:'success',head_branch:'main',
+      head_sha:'a'.repeat(40),event:'pull_request',
+      repository:{full_name:'MichaelWave369/FieldConstellation'}
+    }]})});
+  });
+  assert.equal(explicitCiRequests,0,'No automatic Actions API scan on gateway load');
+  await gatewayPage.locator('#gatewayHealthRepo').selectOption(String(projectCI.id));
+  await gatewayPage.locator('#gatewayHealthCheck').click();
+  await gatewayPage.waitForFunction(()=>document.getElementById('gatewayHealthResult')?.textContent.includes('CI fixture'),{timeout:12000});
+  assert.equal(explicitCiRequests,1,'One chosen repository triggers one public-only request');
+  assert.match(await gatewayPage.locator('#gatewayHealthResult').textContent(),/This run alone does not certify current HEAD/);
+
+
   log('gateway intelligence: project drilldowns, source evidence and private-safe local handoff');
   const platformNode=gatewayPage.locator('.tree-platform details.project-node').first();
   await platformNode.locator('summary').click();
