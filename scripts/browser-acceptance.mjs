@@ -339,6 +339,7 @@ try{
     name:'raw-private-dump.json',mimeType:'application/json',
     buffer:Buffer.from(JSON.stringify({items:[{private:1,full_name:'secret/private-repo'}]}))
   });
+  await gatewayPage.waitForFunction(()=>document.getElementById('gatewayRepoNerveStatus')?.textContent.includes('Handoff rejected'));
   assert.match(await gatewayPage.locator('#gatewayRepoNerveStatus').textContent(),/Handoff rejected/);
   const phios=inventory.find(r=>r.name==='PhiOS');
   await gatewayPage.locator('#gatewayRepoNerveFile').setInputFiles({
@@ -349,6 +350,7 @@ try{
       repositories:[{id:String(phios.id),pushedAt:null,archived:false}]
     }))
   });
+  await gatewayPage.waitForFunction(()=>document.getElementById('gatewayRepoNerveStatus')?.textContent.includes('Local file accepted: 1 public IDs'));
   assert.match(await gatewayPage.locator('#gatewayRepoNerveStatus').textContent(),/Local file accepted: 1 public IDs/);
   assert.match(await gatewayPage.locator('.tree-platform details.project-node').first().locator('.project-intelligence').textContent(),/RepoNerve complete scan observed/);
   await gatewayPage.locator('#gatewayRepoNerveClear').click();
