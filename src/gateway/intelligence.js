@@ -116,8 +116,8 @@ export function renderProjectIntelligence(repo,context={}){
         ' · Updated '+escape(dateText(repo.updated))+'</dd></div>'+
       '<div><dt>Inventory observation</dt><dd>'+escape(dateText(snapshotAt))+' · Public GitHub snapshot; not a build report</dd></div>'+
       '<div><dt>Public destination</dt><dd>'+destinationLabel+'</dd></div>'+
-      '<div><dt>CI / installed application</dt><dd>Not verified by this public intelligence view</dd></div>+
-      '<div><dt>Sample CI evidence</dt><dd>'+scopedCi+'</dd></div>''+
+      '<div><dt>CI / installed application</dt><dd>Not verified by this public intelligence view</dd></div>'+
+      '<div><dt>Sample CI evidence</dt><dd>'+scopedCi+'</dd></div>'+
     '</dl>'+
     '<h5>Source-reviewed connections</h5>'+found+
     '<h5>Optional local fleet observation</h5>'+localSection+
