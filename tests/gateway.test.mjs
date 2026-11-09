@@ -11,6 +11,11 @@ const app=await read('app.js');
 const houses=await read('other-fields/index.html');
 const inventory=JSON.parse(await read('repos.json')).repos;
 const repoIds=new Map(inventory.map(r=>[String(r.id),r.name]));
+const launchPaths=[
+  ['https://phi-field.com/os/','Browser desktop preview'],
+  ['https://michaelwave369.github.io/PhiOS-Mobile/','Touch-first PWA preview'],
+  ['https://michaelwave369.github.io/PhiOS-XR/','Desktop 3D and optional WebXR']
+];
 
 test('Field Gateway offers three working internal entrance routes',()=>{
   for(const link of ['../index.html','../index.html?directory=1','../other-fields/index.html'])
@@ -29,12 +34,26 @@ test('PhiOS and both ecosystem neighbors use verified public GitHub IDs',()=>{
   assert.equal((page.match(/class="system-card /g)||[]).length,3);
 });
 
+test('PhiOS browser launches and compatibility labels precede the project catalog',()=>{
+  const paths=page.match(/<section class="paths"[\s\S]*?<\/section>/)?.[0];
+  assert(paths);
+  assert(page.indexOf(paths)<page.indexOf('aria-labelledby="catalogHeading"'));
+  assert(page.includes('<a class="action primary" href="https://phi-field.com/os/">'));
+  for(const [url,label] of launchPaths){
+    assert(paths.includes('href="'+url+'"'),'Launch link missing: '+url);
+    assert(paths.includes('<span>'+label+'</span>'),'Platform label missing: '+label);
+  }
+});
+
 test('Static public gateway has no remote scripts or invented installations',()=>{
   assert.equal((page.match(/<script\b/gi)||[]).length,1,'Gateway must load only its own local module');
   assert(page.includes('<script type="module" src="./overview.js"></script>'),'Gateway must not load remote executable scripts');
   assert(!/<iframe\b/i.test(page));
   assert(!/<img\b/i.test(page));
-  assert(!/https?:\/\/(?!phi-field\.com\/)/i.test(page));
+  const allowed=new Set(['https://phi-field.com/',...launchPaths.map(([url])=>url)]);
+  for(const [,url] of page.matchAll(/href="(https?:\/\/[^"]+)"/gi)){
+    assert(allowed.has(url),'Unreviewed external gateway link: '+url);
+  }
   assert(page.includes('not a qualified native install'));
   assert(page.includes('Skip to gateway'));
   assert(css.includes('prefers-reduced-motion'));
