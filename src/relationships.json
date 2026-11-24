@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "owner": "MichaelWave369",
-  "reviewedAt": "2026-10-21T21:59:23.337460+00:00",
-  "coverage": "A bounded review of public creative, navigation and runtime contracts. Absence of an edge means not recorded, not no relationship.",
+  "reviewedAt": "2026-11-24T02:37:00Z",
+  "coverage": "A bounded review of public creative, navigation and runtime contracts. Absence of an edge means not recorded, not no relationship. R2 adds five pinned README-level computational and XR contracts; these are documented, not verified runtime paths.",
   "relationships": [
     {
       "id": "domistika-auralith",
@@ -143,7 +143,7 @@
       "evidence": [
         {
           "url": "https://github.com/MichaelWave369/Auralith369/blob/e21a0eb85172daf1ae02b0bb1913973e85963617/README.md#L21-L40",
-          "claim": "Names the candidate Domistika \u2192 Auralith \u2192 ParaCut \u2192 WaveForge chain and profile hash."
+          "claim": "Names the candidate Domistika → Auralith → ParaCut → WaveForge chain and profile hash."
         }
       ],
       "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
@@ -164,6 +164,91 @@
         }
       ],
       "reviewedAt": "2026-10-21T21:59:23.337460+00:00"
+    },
+    {
+      "id": "agentora-phios-contract",
+      "from": "github:1167870912",
+      "to": "github:1173855223",
+      "status": "documented",
+      "kind": "documented-integration",
+      "direction": "directed",
+      "summary": "Agentora documents its optional PhiOS identity, context and writeback bridge.",
+      "scope": "Opt-in local integration; mock mode is distinct from real connectivity. No live session or authorization established.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/Agentora/blob/bd42d4337f7f2fad674191cb3911500ea2a7d7d3/README.md#L110-L131",
+          "claim": "Declares roles and disabled-by-default integration configuration."
+        }
+      ],
+      "reviewedAt": "2026-11-24T02:37:00Z"
+    },
+    {
+      "id": "nbg-altermath-research",
+      "from": "github:1402596344",
+      "to": "github:1444899374",
+      "status": "documented",
+      "kind": "documented-integration",
+      "direction": "directed",
+      "summary": "NBG references Altermath implementations of controlled graph experiments.",
+      "scope": "Research implementation handoff only; synthetic graph experiments do not prove model or routing advantage.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/NestedBubbleGear/blob/48e9f26d32bcfd99286468f840ef93fc8c9dfbee/README.md#L5-L21",
+          "claim": "Links the POLY-03 through POLY-05 research implementation PRs and states their limits."
+        }
+      ],
+      "reviewedAt": "2026-11-24T02:37:00Z"
+    },
+    {
+      "id": "altermath-pocketmesh-interop",
+      "from": "github:1444899374",
+      "to": "github:1418188341",
+      "status": "documented",
+      "kind": "documented-integration",
+      "direction": "directed",
+      "summary": "Altermath documents a pinned local PocketMesh E0 interop test.",
+      "scope": "Documented source-checkout integration with synthetic scalar signals; no production adapter or live routing authority.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/Altermath/blob/dbc4fcdab427242b2f628e826ad51ae3a199e9c3/README.md#L161-L167",
+          "claim": "Describes actual E0 function imports and pinned checkout qualification."
+        }
+      ],
+      "reviewedAt": "2026-11-24T02:37:00Z"
+    },
+    {
+      "id": "btm-genewrist-contract",
+      "from": "github:1436160383",
+      "to": "github:1437657810",
+      "status": "documented",
+      "kind": "documented-integration",
+      "direction": "directed",
+      "summary": "BTM documents two pinned, offline-bundled GenEWrist modules.",
+      "scope": "Documented bundling contract; no physical headset acceptance or current runtime verification in this review.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/BTM/blob/fe1cd4770137c1d5ab78146edcc7543d6a80050e/README.md#L44-L50",
+          "claim": "Identifies GenEWrist v0.2.0 and two bundled modules."
+        }
+      ],
+      "reviewedAt": "2026-11-24T02:37:00Z"
+    },
+    {
+      "id": "phiserve-phistream-research",
+      "from": "github:1440433109",
+      "to": "github:1413805853",
+      "status": "documented",
+      "kind": "documented-integration",
+      "direction": "directed",
+      "summary": "PhiServe documents an optional PhiStream research lane.",
+      "scope": "Research-only, explicitly authorized local lane; CI uses a fake backend and real checkpoint execution is not established.",
+      "evidence": [
+        {
+          "url": "https://github.com/MichaelWave369/PhiServe/blob/9c341cdb9dc24a590e78ca0e51a44a958b2844f7/README.md#L5-L7",
+          "claim": "Describes the optional research lane and its limits."
+        }
+      ],
+      "reviewedAt": "2026-11-24T02:37:00Z"
     }
   ]
 }
