@@ -63,3 +63,16 @@ test('deterministic graph search remains bounded with 650 additional public repo
   assert.deepEqual(first.steps.map(step=>step.relation.id),again.steps.map(step=>step.relation.id));
   assert.equal(first.steps.length,4);
 });
+
+test('R2 core evidence journeys preserve documented-only scope',()=>{
+  const route=findEvidenceJourney(index,id('NestedBubbleGear'),id('NBGPocketMesh'));
+  assert(route);
+  assert.deepEqual(route.steps.map(s=>s.relation.id),['nbg-altermath-research','altermath-pocketmesh-interop']);
+  assert(route.steps.every(s=>s.relation.status==='documented'&&!s.reversed));
+  assert.equal(findEvidenceJourney(index,id('NestedBubbleGear'),id('NBGPocketMesh'),{grade:'verified'}),null);
+  for(const [a,b] of [['Agentora','PhiOS'],['BTM','GenEWrist'],['PhiServe','PhiStream']]){
+    const path=findEvidenceJourney(index,id(a),id(b));
+    assert.equal(path?.steps.length,1);
+    assert.equal(path.steps[0].relation.status,'documented');
+  }
+});
