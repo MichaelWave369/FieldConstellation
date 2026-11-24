@@ -23,12 +23,12 @@ test('dated health observations include only source-scoped public GitHub PR runs
 test('stale HTML checks never become fresh verified uptime or current broken apps',()=>{
   const data=summarizeHealth(snapshot.repos,{
     deployments:checks,relationships,observations:validateHealthObservations(source,now),
-    snapshotAt:snapshot.fetchedAt
+    snapshotAt:new Date(now-5*86400000).toISOString()
   },now);
   assert(data.destination.stale>0,'old destination evidence must age into recheck');
   assert.equal(data.destination.reachable,0);
   assert.equal(data.destination.unavailable,0,'old HTTP failure must not be a current breakage');
-  assert.equal(data.inventoryFresh,false,'public catalog from Nov 4 needs refresh');
+  assert.equal(data.inventoryFresh,false,'a five-day-old public inventory needs refresh');
   assert.equal(data.observedGap,true);
   assert.equal(data.publicationFresh,true);
   assert(data.relationshipCount>0);
